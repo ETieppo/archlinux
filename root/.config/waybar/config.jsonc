@@ -1,180 +1,42 @@
 {
-  "layer": "top",
-  "position": "top",
-  "height": 36,
-  "spacing": 0,
-  "modules-left": [
-    "custom/separator",
-    "hyprland/workspaces",
-    "cpu#text",
-    "memory#text",
-    "temperature",
-    "hyprland/window",
-    "custom/cava",
-  ],
-  "modules-center": ["custom/logo"],
+  "spacing": 8,
+  "modules-left": ["hyprland/workspaces", "cpu", "memory", "temperature", "disk"],
+  "modules-center": ["custom/arch"],
   "modules-right": [
-    "custom/left-arrow-dark",
-    "custom/updates#icon",
-    "custom/updates#text",
-    "custom/left-arrow-light",
-    "custom/left-arrow-dark",
-    "network#text",
-    "bluetooth#icon",
-    "battery#text",
-    "pulseaudio#text",
+    "custom/swaync",
+    "custom/updates",
+    "network",
+    "bluetooth",
+    "pulseaudio",
     "backlight",
-    "clock#text",
+    "battery",
+    "clock",
     "tray",
+    "custom/power",
   ],
+  "temperature": {
+    "format": "{icon}{temperatureC}°C",
+    "format-icons": [""],
+  },
+  "hyprland/workspaces": {
+    "disable-scroll": true,
+    "active-only": false,
+    "all-outputs": true,
+    "on-click": "activate",
+    "format": "{id}",
+
+    "persistent-workspaces": {
+      "*": 4,
+      "HDMI-A-1": [11, 12],
+      "DP-1": [11, 12],
+    },
+  },
+
   "backlight": {
-    // "device": "acpi_video1",
     "format": "{percent}% {icon}",
     "format-icons": ["", "", "", "", "", "", "", "", ""],
   },
-  "custom/left-arrow-dark": {
-    "format": "",
-    "tooltip": false,
-  },
-  "custom/left-arrow-light": {
-    "format": "",
-    "tooltip": false,
-  },
-  "custom/right-arrow-dark": {
-    "format": "",
-    "tooltip": false,
-  },
-  "custom/right-arrow-light": {
-    "format": "",
-    "tooltip": false,
-  },
-
-  "custom/separator": {
-    "format": "  ",
-    "tooltip": false,
-  },
-
-  "custom/logo": {
-    "format": "󰣇",
-    "on-click": "zeditor $HOME/.config/",
-    "interval": "once",
-  },
-  "temperature": {
-    // "thermal-zone": 2,
-    // "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
-    "critical-threshold": 80,
-    // "format-critical": "{temperatureC}°C {icon}",
-    "format": "{temperatureC}°C {icon}",
-    "format-icons": ["" ],
-  },
-  "hyprland/workspaces": {
-    "format": "{icon}",
-    "format-icons": {
-      "1": "⬤",
-      "2": "⬤",
-      "3": "⬤",
-      "4": "⬤",
-      "5": "⬤",
-      "6": "⬤",
-      "7": "⬤",
-      "8": "⬤",
-      "9": "⬤",
-      "10": "⬤",
-    },
-    "on-scroll-up": "hyprctl dispatch workspace +1",
-    "on-scroll-down": "hyprctl dispatch workspace -1",
-    "on-click": "activate",
-    "persistent-workspaces": {
-      "eDP-1": [1, 2, 3, 9, 10],
-    },
-  },
-
-  "custom/cava": {
-    "exec": "~/.config/waybar/scripts/cava.sh waybar",
-    "hide-empty": true,
-    "interval": "once",
-    "tooltip": true,
-    "return-type": "json",
-    "on-click": "bash -c 'if playerctl status | grep -q Playing; then playerctl pause; else playerctl play; fi'",
-    "on-scroll-up": "playerctl next",
-    "on-scroll-down": "playerctl previous",
-  },
-
-  "cpu#text": {
-    "interval": 1,
-    "format": " {max_frequency}GHz <span color=\"darkgray\">| {usage}%</span>",
-    "signal": 1,
-    "on-click": "pkill -SIGRTMIN+1 waybar",
-    "tooltip": true,
-    "tooltip-format": "CPU Usage: {usage}%",
-  },
-
-  "memory#text": {
-    "interval": 3,
-    "format": "   {used:0.2f} / {total:0.0f} GB",
-    "signal": 2,
-    "on-click": "pkill -SIGRTMIN+2 waybar",
-    "tooltip": true,
-    "tooltip-format": "RAM: {used:0.1f}GB / {total:0.1f}GB",
-  },
-
-  "custom/updates#icon": {},
-
-  "custom/updates#text": {
-    "exec": "~/.config/waybar/scripts/updator.sh text",
-    "signal": 10,
-    "interval": 1800,
-    "on-click": "~/.config/waybar/scripts/updator.sh up",
-    "return-type": "json",
-    "format": "󰮯  {}",
-    "tooltip": false,
-  },
-
-  "hyprland/window": {
-    "format": "",
-    "icon": true,
-    "on-click": "$HOME/.config/eww/scripts/toggle-music.sh",
-    "tooltip": false,
-    "rewrite": {
-      "brave-browser": "Brave Browser",
-      "discord": "Discord",
-      "vesktop": "Discord",
-      "org.telegram.desktop": "Telegram",
-      "org.kde.kate": "Kate",
-      "btrfs-assistant": "BTRFS Assistant",
-      "org.gnome.baobab": "Disk Usage Analyzer",
-      "org.gnome.World.PikaBackup": "Pika Backup",
-      "pika-backup": "Pika Backup - Settings",
-      "org.gnome.Lollypop": "Lollypop",
-      "dev.zed.Zed": "Zed Editor",
-      "kitty": "Kitty",
-      "librewolf": "LibreWolf",
-      "thunar": "Thunar",
-      "polkit-gnome-authentication-agent-1": "Authentication",
-      "^$": "~@",
-    },
-    "max-length": 50,
-  },
-
-  "network#text": {
-    "format": "{icon} {essid}",
-    "format-ethernet": "Wired",
-    "format-disconnected": "Disconnected",
-    "format-alt": "Wifi",
-    "on-click-right": "wl-copy $(ip address show up scope global | grep inet6 | head -n1 | cut -d/ -f 1 | tr -d [:space:] | cut -c6-)",
-    "tooltip-format": " {bandwidthUpBits}  {bandwidthDownBits}\n{ifname}\n{ipaddr}/{cidr}\n",
-    "tooltip-format-wifi": "Frequency: {frequency}MHz\nStrength: {signaldBm}dBm ({signalStrength}%)\nIP: {ipaddr}/{cidr}\n {bandwidthUpBits}  {bandwidthDownBits}",
-    "format-icons": {
-      "wifi": "",
-      "ethernet": "󰈀",
-      "linked": "",
-      "disconnected": "󰖪",
-    },
-    "tooltip": false,
-    "on-click": "$HOME/.config/eww/scripts/toggle-wifi.sh",
-  },
-
-  "bluetooth#icon": {
+  "bluetooth": {
     "format": "󰂯",
     "format-disabled": "󰂲",
     "format-connected": "󰂱",
@@ -185,21 +47,62 @@
     "on-click-right": "$HOME/.config/eww/scripts/toggle-bt.sh",
   },
 
-  "battery#text": {
+  "cpu": {
     "interval": 2,
-    "states": {
-      "good": 90,
-      "warning": 30,
-      "critical": 15,
-    },
-    "format": "{icon} {capacity}%",
-    "format-charging": " {capacity}%",
-    "format-plugged": " {capacity}%",
-    "tooltip-format": "Battery: {capacity}%\nTime remaining: {time}",
-    "format-icons": ["", "", "", "", ""],
+    "format": " {usage}%",
+    "format-alt": " {load}",
+    "tooltip": false,
   },
 
-  "pulseaudio#text": {
+  "memory": {
+    "interval": 2,
+    "format": " {percentage}%",
+    "format-alt": "󰒋 {used:0.1f}G",
+    "tooltip": false,
+  },
+
+  "disk": {
+    "interval": 30,
+    "path": "/",
+    "format": "󰋊 {percentage_used}%",
+    "tooltip": false,
+  },
+
+  "custom/arch": {
+    "format": "󰣇",
+    "on-click": "zeditor $HOME/.config/",
+    "interval": "once",
+    "tooltip": false,
+  },
+
+  "custom/updates": {
+    "exec": "~/.config/waybar/scripts/updator.sh text",
+    "signal": 10,
+    "interval": 1800,
+    "on-click": "~/.config/waybar/scripts/updator.sh up",
+    "return-type": "json",
+    "format": "󰮯  {}",
+    "tooltip": false,
+  },
+
+  "network": {
+    "format-wifi": " {signalStrength}%",
+    "format-ethernet": "",
+    "format-linked": "",
+    "format-disconnected": "󰌙",
+    "tooltip-format": "{ifname}: via {gwaddr}\n<small>down  {bandwidthDownBytes}  up  {bandwidthUpBytes}</small>",
+    "interval": 2,
+    "on-click-right": "wezterm -e nmtui",
+  },
+
+  "custom/power": {
+    "format": "{icon}",
+    "format-icons": ["⏻"],
+    "on-click": "rofi -show dmenu",
+    "tooltip": false,
+  },
+
+  "pulseaudio": {
     "format": "{icon} {volume}%",
     "format-muted": "󰝟 {volume}%",
     "on-click": "pavucontrol",
@@ -217,16 +120,17 @@
     "tooltip": false,
   },
 
-  "clock#text": {
-    "format": "{:%H:%M}",
-    "format-alt": "{:%a, %d %b}",
-    "signal": 3,
-    "tooltip": false,
-  },
-
-  "tray": {
-    "icon-size": 18,
-    "spacing": 8,
-    "show-passive-items": true,
+  "battery": {
+    "interval": 2,
+    "states": {
+      "good": 90,
+      "warning": 30,
+      "critical": 15,
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": " {capacity}%",
+    "format-plugged": " {capacity}%",
+    "tooltip-format": "Battery: {capacity}%\nTime remaining: {time}",
+    "format-icons": ["", "", "", "", ""],
   },
 }

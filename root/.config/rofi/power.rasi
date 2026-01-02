@@ -1,0 +1,64 @@
+* {
+    primary-bg:          #0A1E2E;
+    foreground:          #EAFBFF;
+    urgent:              #FF5C5C;
+    decoration:          #083091;
+    font: "JetBrainsMono Nerd Font SemiBold 14";
+}
+
+configuration {
+    show-icons: false;
+}
+
+window {
+    transparency:        "real";
+    location:            northeast;
+    anchor:              northeast;
+    fullscreen:          false;
+    width:               75px;
+    height:              75px;
+    x-offset:            -20px;
+    y-offset:            20px;
+    margin:              0px;
+    padding:             0px;
+    border:              1px solid;
+    border-radius:       20px;
+    border-color:        @decoration;
+    background-color:    @primary-bg;
+}
+
+
+mainbox {
+    enabled:             true;
+    margin:              0px;
+    padding:             10px;
+    background-color:    transparent;
+    children:            [ "listview" ];
+}
+
+listview {
+    enabled:             true;
+    columns:             1;
+    lines:               1;
+    scrollbar:           false;
+    background-color:    transparent;
+}
+
+element {
+    min-width:           100%;
+    min-height:          100%;
+    enabled:             true;
+    padding:             12px;
+    border-radius:       14px;
+    background-color:    red;
+    text-color:          @primary-bg;
+    cursor:              pointer;
+}
+
+element-text {
+    font:               "JetBrainsMono Nerd Font 16";
+    horizontal-align:   0.5;
+    vertical-align:     0.5;
+    background-color:   transparent;
+    text-color:         white;
+}

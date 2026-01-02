@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -11,10 +12,12 @@ echo "== Installing packages =="
 sudo pacman -S --noconfirm \
   zsh git base-devel unzip bluez ruby lua \
   firefox-developer-edition thunar wezterm \
-  postgresql zed waybar pavucontrol wofi \
+  postgresql zed waybar pavucontrol rofi \
   hyprpaper greetd adwaita-icon-theme \
   ttf-jetbrains-mono-nerd minio-client \
-  rsync nano hyprland
+  rsync nano hyprland linux-headers darkman \
+  xdg-desktop-portal-hyprland gvfs file-roller \
+  gammastep grim pulseaudio pulseaudio-alsa
 
 TMP_DIR="$(mktemp -d)"
 
@@ -32,9 +35,8 @@ sudo chsh -s /bin/zsh "$USER_NAME"
 
 echo "== Installing AUR packages =="
 yay -S --noconfirm \
-  minio \
-  steam elecwhat-bin kanata apidog-bin tuigreet
-  # beekeeper
+  minio steam elecwhat-bin kanata apidog-bin \
+  tuigreet beekeeper-studio-bin
 
 echo "== Installing CLIs =="
 RUNZSH=no CHSH=no KEEP_ZSHRC=no \
@@ -45,7 +47,7 @@ sudo -u "$USER_NAME" bash -c "curl -fsSL https://sh.rustup.rs | sh -s -- -y"
 
 echo "== Merging system configs (/etc) =="
 if [ -d "./etc" ]; then
-  sudo rsync -av --checksum etc/ /etc/
+  sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r etc/ /etc/
 fi
 
 echo "== Merging user dotfiles =="
@@ -62,11 +64,30 @@ sudo -iu postgres initdb \
   -D /var/lib/postgres/data
 
 echo "== Enabling services =="
+sudo groupadd --system uinput
+sudo usermod -aG input,uinput $USER
+sudo modprobe uinput
+sudo tee /etc/udev/rules.d/99-input.rules > /dev/null <<EOF
+KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
+EOF
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+
+systemctl --user daemon-reload
+systemctl --user enable --now kanata.service
+systemctl --user start darkman
+
 sudo systemctl enable postgresql
 sudo -u "$USER_NAME" systemctl --user enable --now kanata.service || true
+sudo dkms build nvidia/590.48.01
+sudo mkinitcpio -P
 
-echo "== Setting GTK theme =="
-sudo -u "$USER_NAME" gsettings set \
-  org.gnome.desktop.interface gtk-theme 'Adwaita-dark' || true
+gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' || true
+gdbus call --session \
+ --dest org.freedesktop.portal.Desktop \
+ --object-path /org/freedesktop/portal/desktop \
+ --method org.freedesktop.portal.Settings.ReadOne \
+ org.freedesktop.appearance color-scheme
 
 echo "==> END <=="
