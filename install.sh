@@ -13,7 +13,17 @@ sudo pacman -S --noconfirm \
   firefox-developer-edition thunar wezterm \
   postgresql zed waybar pavucontrol wofi \
   hyprpaper greetd adwaita-icon-theme \
-  ttf-jetbrains-mono-nerd minio-client yay
+  ttf-jetbrains-mono-nerd minio-client rsync
+
+TMP_DIR="$(mktemp -d)"
+
+(
+  git clone https://aur.archlinux.org/yay.git "$TMP_DIR/yay"
+  cd "$TMP_DIR/yay"
+  sudo -u "$USER_NAME" makepkg -si -noconfirm
+)
+
+rm -rf "$TMP_DIR"
 
 echo "== Setting zsh as default shell =="
 grep -qxF "/bin/zsh" /etc/shells || echo "/bin/zsh" | sudo tee -a /etc/shells
@@ -21,7 +31,7 @@ sudo chsh -s /bin/zsh "$USER_NAME"
 
 echo "== Installing AUR packages =="
 yay -S --noconfirm \
-  hyprland-git beekeeper studio minio \
+  hyprland-git beekeeper-studio minio \
   steam elecwhat-bin kanata apidog-bin tuigreet
 
 echo "== Installing CLIs =="
