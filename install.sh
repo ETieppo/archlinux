@@ -14,7 +14,7 @@ sudo pacman -S --noconfirm \
   postgresql zed waybar pavucontrol wofi \
   hyprpaper greetd adwaita-icon-theme \
   ttf-jetbrains-mono-nerd minio-client \
-  rsync nano
+  rsync nano hyprland
 
 TMP_DIR="$(mktemp -d)"
 
@@ -32,8 +32,9 @@ sudo chsh -s /bin/zsh "$USER_NAME"
 
 echo "== Installing AUR packages =="
 yay -S --noconfirm \
-  hyprland-git beekeeper-studio minio \
+  minio \
   steam elecwhat-bin kanata apidog-bin tuigreet
+  # beekeeper
 
 echo "== Installing CLIs =="
 RUNZSH=no CHSH=no KEEP_ZSHRC=no \
