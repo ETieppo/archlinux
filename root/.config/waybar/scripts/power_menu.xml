@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<menu id="power-menu">
-  <item label="Desligar" action="shutdown" />
-  <item label="Reiniciar" action="reboot" />
-  <item label="Suspender" action="suspend" />
-  <item label="Hibernar" action="hibernate" />
-</menu>
