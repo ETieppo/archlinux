@@ -8,6 +8,10 @@ echo "== Updating system =="
 sudo pacman -Syu --noconfirm
 
 echo "== Installing packages =="
+sudo pacman -S --needed --noconfirm \
+  dkms linux-headers nvidia-dkms nvidia-utils \
+  libglvnd vulkan-icd-loader
+
 sudo pacman -S --noconfirm \
   zsh git base-devel unzip bluez ruby lua \
   firefox-developer-edition thunar wezterm \
@@ -17,7 +21,7 @@ sudo pacman -S --noconfirm \
   rsync nano hyprland linux-headers darkman \
   xdg-desktop-portal-hyprland gvfs file-roller \
   gammastep grim pulseaudio pulseaudio-alsa \
-  xfconf libxfce4ui xfce4-settings
+  xfconf libxfce4ui xfce4-settings openssh
 
 TMP_DIR="$(mktemp -d)"
 
