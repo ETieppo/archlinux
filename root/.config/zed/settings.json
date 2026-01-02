@@ -140,6 +140,7 @@
     "ini": true,
     "mustache": true,
     "comment": true,
+    "basher": true,
   },
   "terminal": {
     "font_family": "JetBrainsMono Nerd Font Mono",

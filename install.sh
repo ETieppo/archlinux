@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -17,7 +16,8 @@ sudo pacman -S --noconfirm \
   ttf-jetbrains-mono-nerd minio-client \
   rsync nano hyprland linux-headers darkman \
   xdg-desktop-portal-hyprland gvfs file-roller \
-  gammastep grim pulseaudio pulseaudio-alsa
+  gammastep grim pulseaudio pulseaudio-alsa \
+  xfconf libxfce4ui xfce4-settings
 
 TMP_DIR="$(mktemp -d)"
 
@@ -82,8 +82,9 @@ sudo systemctl enable postgresql
 sudo -u "$USER_NAME" systemctl --user enable --now kanata.service || true
 sudo dkms build nvidia/590.48.01
 sudo mkinitcpio -P
-
+xfsettingsd &
 gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' || true
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 gdbus call --session \
  --dest org.freedesktop.portal.Desktop \
  --object-path /org/freedesktop/portal/desktop \
@@ -91,3 +92,4 @@ gdbus call --session \
  org.freedesktop.appearance color-scheme
 
 echo "==> END <=="
+ssh-keygen
