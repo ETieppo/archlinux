@@ -46,8 +46,8 @@ echo "== Installing CLIs =="
 RUNZSH=no CHSH=no KEEP_ZSHRC=no \
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-sudo -u "$USER_NAME" bash -c "curl -fsSL https://bun.sh/install | bash"
 sudo -u "$USER_NAME" bash -c "curl -fsSL https://sh.rustup.rs | sh -s -- -y"
+sudo -u "$USER_NAME" bash -c "curl -fsSL https://bun.sh/install | bash"
 
 echo "== Merging system configs (/etc) =="
 if [ -d "./etc" ]; then
