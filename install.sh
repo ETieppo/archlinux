@@ -44,8 +44,8 @@ yay -S --noconfirm \
   tuigreet beekeeper-studio-bin
 
 echo "== Installing CLIs =="
-RUNZSH=no CHSH=no KEEP_ZSHRC=no \
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+RUNZSH=no CHSH=no KEEP_ZSHRC=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
 sudo -u "$USER_NAME" bash -c "curl -fsSL https://sh.rustup.rs | sh -s -- -y"
 sudo -u "$USER_NAME" bash -c "curl -fsSL https://bun.sh/install | bash"
