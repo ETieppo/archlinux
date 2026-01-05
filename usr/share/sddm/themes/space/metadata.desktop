@@ -1,0 +1,6 @@
+Name=Space
+Description=Space sddm theme
+Type=sddm-theme
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-API=2.11

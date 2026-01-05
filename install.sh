@@ -21,7 +21,8 @@ sudo pacman -S --noconfirm \
   rsync nano hyprland linux-headers darkman \
   xdg-desktop-portal-hyprland gvfs file-roller \
   gammastep grim pulseaudio pulseaudio-alsa \
-  xfconf libxfce4ui xfce4-settings openssh
+  xfconf libxfce4ui xfce4-settings openssh \
+  sddm
 
 TMP_DIR="$(mktemp -d)"
 
@@ -49,15 +50,18 @@ RUNZSH=no CHSH=no KEEP_ZSHRC=no \
 sudo -u "$USER_NAME" bash -c "curl -fsSL https://sh.rustup.rs | sh -s -- -y"
 sudo -u "$USER_NAME" bash -c "curl -fsSL https://bun.sh/install | bash"
 
-echo "== Merging system configs (/etc) =="
+echo "== Merging system configs =="
 if [ -d "./etc" ]; then
   sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r etc/ /etc/
 fi
 
-echo "== Merging user dotfiles =="
 if [ -d "./root" ]; then
   sudo rsync -av --checksum root/ "$USER_HOME/"
   sudo chown -R "$USER_NAME:$USER_NAME" "$USER_HOME"
+fi
+
+if [ -d "./usr" ]; then
+  sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r usr/ /usr/
 fi
 
 echo "== Initializing PostgreSQL =="
