@@ -24,7 +24,8 @@ sudo pacman -S --noconfirm \
   xdg-desktop-portal-hyprland gvfs file-roller \
   gammastep grim pulseaudio pulseaudio-alsa \
   xfconf libxfce4ui xfce4-settings openssh \
-  sddm btop brightnessctl fastfetch plymouth
+  sddm btop brightnessctl fastfetch plymouth \
+  hyprpicker
 
 TMP_DIR="$(mktemp -d)"
 
@@ -68,6 +69,7 @@ fi
 
 sudo mv $BOOT_LOADER_DIR/* "$BOOT_LOADER_FILE"
 sudo sed -i '$ s/$/ quiet splash/' "$BOOT_LOADER_DIR/$BOOT_LOADER_FILE"
+sudo find /usr/share/plymouth/themes -mindepth 1 -maxdepth 1 ! -name arch-logo-symbol -exec rm -rf {} +
 
 echo "== Enabling services - setting up configs =="
 
