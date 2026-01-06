@@ -100,4 +100,3 @@ gdbus call --session \
  org.freedesktop.appearance color-scheme
 
 echo "==> END <=="
-ssh-keygen

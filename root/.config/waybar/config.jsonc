@@ -70,8 +70,7 @@
 
   "custom/arch": {
     "format": "󰣇",
-    "on-click": "zeditor $HOME/.config/",
-    "interval": "once",
+    "on-click": "/home/tieppo/.local/bin/zed ~/.config",
     "tooltip": false,
   },
 
