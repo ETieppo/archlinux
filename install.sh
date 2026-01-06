@@ -22,7 +22,7 @@ sudo pacman -S --noconfirm \
   xdg-desktop-portal-hyprland gvfs file-roller \
   gammastep grim pulseaudio pulseaudio-alsa \
   xfconf libxfce4ui xfce4-settings openssh \
-  sddm btop
+  sddm btop brightnessctl
 
 TMP_DIR="$(mktemp -d)"
 
