@@ -16,9 +16,8 @@ sudo pacman -S --needed --noconfirm \
 
 sudo pacman -S --noconfirm \
   zsh git base-devel unzip bluez ruby lua \
-  firefox-developer-edition thunar wezterm \
-  postgresql zed waybar pavucontrol rofi \
-  hyprpaper greetd adwaita-icon-theme \
+  thunar wezterm postgresql zed waybar \
+  pavucontrol rofi hyprpaper greetd adwaita-icon-theme \
   ttf-jetbrains-mono-nerd minio-client \
   rsync nano hyprland linux-headers darkman \
   xdg-desktop-portal-hyprland gvfs file-roller \
@@ -52,7 +51,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
 sudo -u "$USER_NAME" bash -c "curl -fsSL https://sh.rustup.rs | sh -s -- -y"
 sudo -u "$USER_NAME" bash -c "curl -fsSL https://bun.sh/install | bash"
-
+sudo -u "$USER_NAME" bash -c "curl -fsS https://dl.brave.com/install.sh | sh"
 echo "== Merging system configs =="
 if [ -d "./etc" ]; then
   sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r etc/ /etc/
