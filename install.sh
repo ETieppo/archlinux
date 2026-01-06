@@ -3,6 +3,8 @@ set -euo pipefail
 
 USER_NAME="${SUDO_USER:-$USER}"
 USER_HOME="/home/$USER_NAME"
+BOOT_LOADER_DIR="/boot/loader/entries"
+BOOT_LOADER_FILE="arch.conf"
 
 echo "== Updating system =="
 sudo pacman -Syu --noconfirm
@@ -10,7 +12,7 @@ sudo pacman -Syu --noconfirm
 echo "== Installing packages =="
 sudo pacman -S --needed --noconfirm \
   dkms linux-headers nvidia-dkms nvidia-utils \
-  libglvnd vulkan-icd-loader
+  libglvnd vulkan-icd-loader 
 
 sudo pacman -S --noconfirm \
   zsh git base-devel unzip bluez ruby lua \
@@ -22,7 +24,7 @@ sudo pacman -S --noconfirm \
   xdg-desktop-portal-hyprland gvfs file-roller \
   gammastep grim pulseaudio pulseaudio-alsa \
   xfconf libxfce4ui xfce4-settings openssh \
-  sddm btop brightnessctl fastfetch
+  sddm btop brightnessctl fastfetch plymouth
 
 TMP_DIR="$(mktemp -d)"
 
@@ -41,7 +43,7 @@ sudo chsh -s /bin/zsh "$USER_NAME"
 echo "== Installing AUR packages =="
 yay -S --noconfirm \
   minio steam elecwhat-bin kanata apidog-bin \
-  tuigreet beekeeper-studio-bin
+  tuigreet beekeeper-studio-bin plymouth-theme-arch-logo-symbol
 
 echo "== Installing CLIs =="
 RUNZSH=no CHSH=no KEEP_ZSHRC=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -64,14 +66,11 @@ if [ -d "./usr" ]; then
   sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r usr/ /usr/
 fi
 
-echo "== Initializing PostgreSQL =="
-sudo systemctl stop postgresql || true
-sudo -iu postgres initdb \
-  --locale=C.UTF-8 \
-  --encoding=UTF8 \
-  -D /var/lib/postgres/data
+sudo mv $BOOT_LOADER_DIR/* "$BOOT_LOADER_FILE"
+sudo sed -i '$ s/$/ quiet splash/' "$BOOT_LOADER_DIR/$BOOT_LOADER_FILE"
 
-echo "== Enabling services =="
+echo "== Enabling services - setting up configs =="
+
 sudo groupadd --system uinput
 sudo usermod -aG input,uinput $USER
 sudo modprobe uinput
@@ -86,10 +85,10 @@ systemctl --user daemon-reload
 systemctl --user enable --now kanata.service
 systemctl --user start darkman
 
-sudo systemctl enable postgresql
 sudo -u "$USER_NAME" systemctl --user enable --now kanata.service || true
 sudo dkms build nvidia/590.48.01
 sudo mkinitcpio -P
+sudo plymouth-set-default-theme -R arch-logo-symbol
 xfsettingsd &
 gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' || true
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
@@ -99,4 +98,10 @@ gdbus call --session \
  --method org.freedesktop.portal.Settings.ReadOne \
  org.freedesktop.appearance color-scheme
 
+sudo -iu postgres initdb \
+  --locale=C.UTF-8 \
+  --encoding=UTF8 \
+  -D /var/lib/postgres/data
+
+sudo systemctl enable postgresql
 echo "==> END <=="
