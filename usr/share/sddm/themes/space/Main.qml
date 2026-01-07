@@ -113,7 +113,7 @@ Item {
 
                 Text {
                     id: usernameText
-                    text: typeof userModel !== "undefined" ? userModel.lastUser : "User"
+                    text: (typeof userModel !== "undefined" && userModel.lastUser) ? userModel.lastUser.charAt(0).toUpperCase() + userModel.lastUser.slice(1).toLowerCase() : "User"
                     font.pixelSize: 18
                     color: "#fff"
                     font.bold: true
