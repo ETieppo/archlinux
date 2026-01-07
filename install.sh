@@ -42,8 +42,9 @@ sudo chsh -s /bin/zsh "$USER_NAME"
 
 echo "== Installing AUR packages =="
 yay -S --noconfirm \
-  minio steam elecwhat-bin kanata apidog-bin \
-  tuigreet beekeeper-studio-bin plymouth-theme-arch-logo-symbol
+  minio steam elecwhat-bin apidog-bin tuigreet \
+  beekeeper-studio-bin plymouth-theme-arch-logo-symbol
+  # kanata
 
 echo "== Installing CLIs =="
 RUNZSH=no CHSH=no KEEP_ZSHRC=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -85,7 +86,7 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 
 systemctl --user daemon-reload
-systemctl --user enable --now kanata.service
+# systemctl --user enable --now kanata.service
 systemctl --user start darkman
 
 sudo -u "$USER_NAME" systemctl --user enable --now kanata.service || true
