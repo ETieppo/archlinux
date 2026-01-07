@@ -52,6 +52,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 sudo -u "$USER_NAME" bash -c "curl -fsSL https://sh.rustup.rs | sh -s -- -y"
 sudo -u "$USER_NAME" bash -c "curl -fsSL https://bun.sh/install | bash"
 sudo -u "$USER_NAME" bash -c "curl -fsS https://dl.brave.com/install.sh | sh"
+
 echo "== Merging system configs =="
 if [ -d "./etc" ]; then
   sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r etc/ /etc/
@@ -70,10 +71,11 @@ sudo mv $BOOT_LOADER_DIR/* "$BOOT_LOADER_FILE"
 sudo sed -i '$ s/$/ quiet splash/' "$BOOT_LOADER_DIR/$BOOT_LOADER_FILE"
 sudo find /usr/share/plymouth/themes -mindepth 1 -maxdepth 1 ! -name arch-logo-symbol -exec rm -rf {} +
 
-echo "== Enabling services - setting up configs =="
+echo "== Enabling services - setting up configs & permissions =="
 
 sudo groupadd --system uinput
 sudo usermod -aG input,uinput $USER
+sudo chmod +x ~/.local/bin/zed-sudoedit
 sudo modprobe uinput
 sudo tee /etc/udev/rules.d/99-input.rules > /dev/null <<EOF
 KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
