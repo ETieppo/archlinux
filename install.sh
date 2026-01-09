@@ -24,7 +24,7 @@ sudo pacman -S --noconfirm \
   gammastep grim pulseaudio pulseaudio-alsa \
   xfconf libxfce4ui xfce4-settings openssh \
   sddm btop brightnessctl fastfetch plymouth \
-  hyprpicker
+  hyprpicker swaync
 
 TMP_DIR="$(mktemp -d)"
 
