@@ -12,7 +12,7 @@ sudo pacman -Syu --noconfirm
 echo "== Installing packages =="
 sudo pacman -S --needed --noconfirm \
   dkms linux-headers nvidia-dkms nvidia-utils \
-  libglvnd vulkan-icd-loader 
+  libglvnd vulkan-icd-loader
 
 sudo pacman -S --noconfirm \
   zsh git base-devel unzip bluez ruby lua \
@@ -24,7 +24,7 @@ sudo pacman -S --noconfirm \
   gammastep grim pulseaudio pulseaudio-alsa \
   xfconf libxfce4ui xfce4-settings openssh \
   sddm btop brightnessctl fastfetch plymouth \
-  hyprpicker swaync
+  hyprpicker swaync ffmpegthumbnailer tumbler
 
 TMP_DIR="$(mktemp -d)"
 
@@ -43,8 +43,9 @@ sudo chsh -s /bin/zsh "$USER_NAME"
 echo "== Installing AUR packages =="
 yay -S --noconfirm \
   minio steam elecwhat-bin apidog-bin tuigreet \
-  beekeeper-studio-bin plymouth-theme-arch-logo-symbol
-  # kanata
+  beekeeper-studio-bin plymouth-theme-arch-logo-symbol \
+  candy-icons-git ant-theme-git
+  # kanata nwg-look
 
 echo "== Installing CLIs =="
 RUNZSH=no CHSH=no KEEP_ZSHRC=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -94,8 +95,9 @@ sudo dkms build nvidia/590.48.01
 sudo mkinitcpio -P
 sudo plymouth-set-default-theme -R arch-logo-symbol
 xfsettingsd &
-gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark' || true
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
+gsettings set org.gnome.desktop.interface gtk-theme 'Ant' || true
+gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' || true
+gsettings set org.gnome.desktop.interface icon-theme "candy-icons" || true
 gdbus call --session \
  --dest org.freedesktop.portal.Desktop \
  --object-path /org/freedesktop/portal/desktop \
