@@ -3,198 +3,214 @@
     "context": "Terminal",
     "bindings": {
       "ctrl-c": "terminal::Copy",
-      "super-c": ["terminal::SendKeystroke", "ctrl-c"],
       "ctrl-v": "terminal::Paste",
+      "super-c": ["terminal::SendKeystroke", "ctrl-c"],
       "super-v": ["terminal::SendKeystroke", "ctrl-v"],
       "super-o": ["terminal::SendKeystroke", "ctrl-o"],
-      "super-x": ["terminal::SendKeystroke", "ctrl-x"]
-    }
+      "super-x": ["terminal::SendKeystroke", "ctrl-x"],
+    },
   },
   {
     "bindings": {
-      "ctrl-alt-,": "project_panel::CollapseAllEntries"
-    }
+      "ctrl-alt-,": "project_panel::CollapseAllEntries",
+    },
   },
   {
     "context": "Workspace",
     "bindings": {
       // "shift shift": "file_finder::Toggle"
-    }
+    },
   },
   {
     "context": "Editor && vim_mode == insert",
     "bindings": {
       // "j k": "vim::NormalBefore"
-    }
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "alt-shift-f": "editor::Format"
-    }
+      "alt-shift-f": "editor::Format",
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "ctrl-shift-i": null
-    }
+      "ctrl-shift-i": null,
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "ctrl-enter": "editor::GoToDefinition"
-    }
+      "ctrl-enter": "editor::GoToDefinition",
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "f12": null
-    }
+      "f12": null,
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "ctrl-shift-enter": "editor::GoToDeclaration"
-    }
+      "ctrl-shift-enter": "editor::GoToDeclaration",
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "ctrl-f12": null
-    }
+      "ctrl-f12": null,
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "alt-ctrl-enter": "editor::GoToDefinitionSplit"
-    }
+      "alt-ctrl-enter": "editor::GoToDefinitionSplit",
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "alt-f12": null
-    }
+      "alt-f12": null,
+    },
   },
   {
     "context": "Workspace",
     "bindings": {
-      "ctrl-r": null
-    }
+      "ctrl-r": null,
+    },
   },
   {
     "context": "Terminal",
     "bindings": {
-      "alt-ctrl-r": null
-    }
+      "alt-ctrl-r": null,
+    },
   },
   {
     "context": "(Workspace && !Terminal)",
     "bindings": {
-      "ctrl-shift-r": null
-    }
+      "ctrl-shift-r": null,
+    },
   },
   {
     "context": "(Workspace && !Terminal)",
     "bindings": {
-      "alt-ctrl-r": null
-    }
+      "alt-ctrl-r": null,
+    },
   },
   {
     "context": "ProjectPanel",
     "bindings": {
-      "alt-ctrl-r": null
-    }
+      "alt-ctrl-r": null,
+    },
   },
   {
     "context": "(OutlinePanel && not_editing)",
     "bindings": {
-      "alt-ctrl-r": null
-    }
+      "alt-ctrl-r": null,
+    },
   },
   {
     "bindings": {
-      "ctrl-r": "debugger::Start"
-    }
+      "ctrl-r": "debugger::Start",
+    },
   },
   {
     "bindings": {
-      "f4": null
-    }
+      "f4": null,
+    },
   },
   {
     "context": "Workspace",
     "bindings": {
-      "ctrl-shift-b": null
-    }
+      "ctrl-shift-b": null,
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "ctrl-shift-b": "editor::ToggleBreakpoint"
-    }
+      "ctrl-shift-b": "editor::ToggleBreakpoint",
+    },
   },
   {
     "context": "Workspace",
     "bindings": {
-      "ctrl-e": null
-    }
+      "ctrl-e": null,
+    },
   },
   {
     "context": "Workspace",
     "bindings": {
-      "ctrl-e": "project_panel::Rename"
-    }
+      "ctrl-e": "project_panel::Rename",
+    },
   },
   {
     "context": "Workspace",
     "bindings": {
-      "ctrl-w": null
-    }
-  },
-  {
-    "context": "SettingsWindow",
-    "bindings": {
-      "ctrl-alt-right": "settings_editor::FocusNextFile"
-    }
-  },
-  {
-    "context": "SettingsWindow",
-    "bindings": {
-      "ctrl-alt-left": "settings_editor::FocusPreviousFile"
-    }
+      "ctrl-w": null,
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "ctrl-alt-end": [
+      "alt-pagedown": [
         "editor::AddSelectionBelow",
         {
           "skip_soft_wrap": true
         }
-      ]
-    }
+      ],
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "ctrl-alt-home": [
+      "alt-pageup": [
         "editor::AddSelectionAbove",
         {
           "skip_soft_wrap": true
         }
-      ]
-    }
+      ],
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "alt-shift-down": null
-    }
+      "alt-shift-down": null,
+    },
   },
   {
     "context": "Editor",
     "bindings": {
-      "alt-shift-up": null
+      "alt-shift-up": null,
+    },
+  },
+  {
+    "bindings": {
+      "ctrl-o": null,
+    },
+  },
+  {
+    "bindings": {
+      "ctrl-o": "workspace::Open",
+    },
+  },
+  {
+    "context": "SettingsWindow",
+    "bindings": {
+      "ctrl-pageup": null
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "super-`": "workspace::NewTerminal"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-~": null
     }
   }
 ]

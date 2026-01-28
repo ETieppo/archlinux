@@ -1,5 +1,9 @@
 {
   // AGENT --------------------------------------------------
+  "session": {
+    "trust_all_worktrees": true,
+  },
+  "buffer_font_weight": 450.0,
   "agent": {
     //   "expand_terminal_card": false,
     //   "expand_edit_card": false,
@@ -10,7 +14,7 @@
     "default_profile": "write",
     "default_model": {
       "provider": "zed.dev",
-      "model": "claude-sonnet-4-5",
+      "model": "claude-opus-4-5-thinking",
     },
     "always_allow_tool_actions": true,
     //   "enabled": false
@@ -25,7 +29,8 @@
   },
 
   // EDITOR --------------------------------------------------
-
+  "icon_theme": "Material Icon Theme",
+  "ui_font_weight": 600,
   "inlay_hints": {
     "enabled": false,
   },
@@ -61,14 +66,18 @@
   "cursor_shape": "bar",
   "base_keymap": "VSCode",
   "soft_wrap": "editor_width",
-  "icon_theme": "Material Icon Theme",
   "file_scan_exclusions": ["**/.git", ".DS_Store"],
   "search": {
     "regex": false,
   },
   "expand_excerpt_lines": 20,
   "tab_size": 2,
-  "file_finder": { "modal_max_width": "small", "file_icons": true },
+  "file_finder": {
+    "skip_focus_for_active_in_search": true,
+    "include_ignored": "smart",
+    "modal_max_width": "small",
+    "file_icons": true,
+  },
   "preferred_line_length": 130,
   "extend_comment_on_newline": false,
   "fast_scroll_sensitivity": 1.0,
@@ -146,7 +155,7 @@
   },
   "ui_font_family": "JetBrainsMono Nerd Font Mono",
   "buffer_font_family": "JetBrainsMono Nerd Font Mono",
-  "buffer_line_height": "standard",
+  "buffer_line_height": "comfortable",
   "remove_trailing_whitespace_on_save": true,
   "minimap": {
     "show": "always",
@@ -171,12 +180,12 @@
   "experimental.theme_overrides": {
     "editor.document_highlight.read_background": "#410003",
   },
-  "ui_font_size": 14,
-  "buffer_font_size": 14,
+  "ui_font_size": 16.0,
+  "buffer_font_size": 16.0,
   "theme": {
     "mode": "system",
     "light": "One Light",
-    "dark": "Tokyo Night",
+    "dark": "Tokyo Night Dark",
   },
   "auto_indent_on_paste": true,
   "autosave": {
@@ -189,14 +198,26 @@
 
   // LSP ---------------------------------------------------------------
   "lsp": {
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "updateImportsOnFileMove": {
+            "enabled": "always"
+          }
+        },
+        "javascript": {
+          "updateImportsOnFileMove": {
+            "enabled": "always"
+          }
+        }
+      },
+      "enable_lsp_tasks": true
+    },
     "dart": {
       "settings": {
         "lineLength": 130,
       },
-      "binary": {
-        "path": "/Users/tieppo/fvm/default/bin/dart",
-        "arguments": ["language-server", "--protocol=lsp", "--client-id=/Users/tieppo/Applications/Zed.app"],
-      },
+      "binary": {},
     },
   },
 
@@ -234,6 +255,7 @@
   },
 
   "file_types": {
+    "json": [".prettierrc"],
     "css": ["*.rasi"],
   },
 }
