@@ -86,8 +86,8 @@
 
   "network": {
     "format-wifi": " {signalStrength}%",
-    "format-ethernet": "",
-    "format-linked": "",
+    "format-ethernet": "󰈀",
+    "format-linked": "󰈀",
     "format-disconnected": "󰌙",
     "tooltip-format": "{ifname}: via {gwaddr}\n<small>down  {bandwidthDownBytes}  up  {bandwidthUpBytes}</small>",
     "interval": 2,
@@ -127,7 +127,7 @@
       "critical": 15,
     },
     "format": "{icon} {capacity}%",
-    "format-charging": " {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
     "format-plugged": " {capacity}%",
     "tooltip-format": "Battery: {capacity}%\nTime remaining: {time}",
     "format-icons": ["", "", "", "", ""],
