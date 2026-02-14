@@ -5,19 +5,12 @@
   },
   "buffer_font_weight": 450.0,
   "agent": {
-    //   "expand_terminal_card": false,
-    //   "expand_edit_card": false,
-    //   "notify_when_agent_waiting": "never",
-    //   "enable_feedback": false,
-    //   "single_file_review": false,
-    //   "model_parameters": [],
-    "default_profile": "write",
-    "default_model": {
-      "provider": "zed.dev",
-      "model": "claude-opus-4-5-thinking",
-    },
-    "always_allow_tool_actions": true,
-    //   "enabled": false
+    "expand_terminal_card": false,
+    "expand_edit_card": false,
+    "notify_when_agent_waiting": "never",
+    "enable_feedback": false,
+    "always_allow_tool_actions": false,
+    "enabled": false,
   },
   "agent_servers": {
     "your_agent": {
@@ -127,28 +120,21 @@
   "auto_indent": true,
   "use_auto_surround": true,
   "auto_install_extensions": {
+    "angular": true,
     "html": true,
-    "dockerfile": true,
-    "docker-compose": false,
-    "caddyfile": true,
     "hyprlang": true,
-    "lua": true,
     "git-firefly": true,
-    "tokyo-night": true,
     "material-icon-theme": true,
-    "ruby": true,
     "tombi": true,
-    "sql": true,
     "make": true,
-    "scss": true,
     "dart": true,
     "emmet": true,
     "log": true,
     "rainbow-csv": true,
     "ini": true,
-    "mustache": true,
     "comment": true,
     "basher": true,
+    "cyberpunk-scarlet": true,
   },
   "terminal": {
     "font_family": "JetBrainsMono Nerd Font Mono",
@@ -184,8 +170,8 @@
   "buffer_font_size": 16.0,
   "theme": {
     "mode": "system",
-    "light": "One Light",
-    "dark": "Tokyo Night Dark",
+    "light": "Cyberpunk Scarlet Protocol",
+    "dark": "Cyberpunk Scarlet Protocol",
   },
   "auto_indent_on_paste": true,
   "autosave": {
@@ -202,22 +188,48 @@
       "settings": {
         "typescript": {
           "updateImportsOnFileMove": {
-            "enabled": "always"
-          }
+            "enabled": "always",
+          },
         },
         "javascript": {
           "updateImportsOnFileMove": {
-            "enabled": "always"
-          }
-        }
+            "enabled": "always",
+          },
+        },
       },
-      "enable_lsp_tasks": true
+      "enable_lsp_tasks": true,
     },
     "dart": {
       "settings": {
         "lineLength": 130,
       },
       "binary": {},
+    },
+    "rust-analyzer": {
+      "binary": { "path": "/home/tieppo/.cargo/bin/rust-analyzer" },
+      "initialization_options": {
+        "checkOnSave": true,
+
+        "check": {
+          "command": "clippy",
+          "workspace": true,
+        },
+
+        "cargo": {
+          "allTargets": true,
+          "features": "all",
+        },
+
+        "procMacro": {
+          "enable": true,
+        },
+
+        "diagnostics": {
+          "experimental": {
+            "enable": false,
+          },
+        },
+      },
     },
   },
 
