@@ -1,12 +1,11 @@
+cat .config/wezterm/wezterm.lua
 local wezterm         = require 'wezterm'
 local config          = wezterm.config_builder()
 local act             = wezterm.action
 
 config.enable_wayland = false
-config.font           = wezterm.font("JetBrainsMono Nerd Font")
-
+config.font           = wezterm.font("Iosevka Custom")
 config.keys           = config.keys or {
-  -- você pode ter outros binds aqui
 }
 
 -- command + c
@@ -48,19 +47,30 @@ table.insert(config.keys, {
   action = act.SendKey { key = 'n', mods = 'CTRL' },
 })
 
--- command + o -> manda ctrl + o pro nano (Write Out / salvar)
+-- command + o 
 table.insert(config.keys, {
   key = 'o',
   mods = 'SUPER',
   action = act.SendKey { key = 'o', mods = 'CTRL' },
 })
 
--- command + x -> manda ctrl + x pro nano (Exit / sair)
+-- command + x
 table.insert(config.keys, {
   key = 'x',
   mods = 'SUPER',
   action = act.SendKey { key = 'x', mods = 'CTRL' },
 })
-
+config.enable_tab_bar = false
+config.font = wezterm.font("Iosevka Custom")
+config.font_size = 14
+config.window_padding = {
+  left = 0,
+  right = 0,
+  top = 0,
+  bottom = 0,
+}
+config.window_decorations = "RESIZE"
+config.adjust_window_size_when_changing_font_size = false
+config.window_close_confirmation = "NeverPrompt"
 
 return config
