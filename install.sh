@@ -60,8 +60,8 @@ if [ -d "./etc" ]; then
   sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r etc/ /etc/
 fi
 
-if [ -d "./root" ]; then
-  sudo rsync -av --checksum root/ "$USER_HOME/"
+if [ -d "./tieppo" ]; then
+  sudo rsync -av --checksum tieppo/ "$USER_HOME/"
   sudo chown -R "$USER_NAME:$USER_NAME" "$USER_HOME"
 fi
 
