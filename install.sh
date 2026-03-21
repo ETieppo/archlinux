@@ -45,7 +45,6 @@ yay -S --noconfirm \
   minio steam elecwhat-bin apidog-bin tuigreet \
   beekeeper-studio-bin plymouth-theme-arch-logo-symbol \
   candy-icons-git ant-theme-git
-  # kanata nwg-look
 
 echo "== Installing CLIs =="
 RUNZSH=no CHSH=no KEEP_ZSHRC=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -87,10 +86,8 @@ sudo udevadm control --reload-rules
 sudo udevadm trigger
 
 systemctl --user daemon-reload
-# systemctl --user enable --now kanata.service
 systemctl --user start darkman
 
-sudo -u "$USER_NAME" systemctl --user enable --now kanata.service || true
 sudo dkms build nvidia/590.48.01
 sudo mkinitcpio -P
 sudo plymouth-set-default-theme -R arch-logo-symbol
