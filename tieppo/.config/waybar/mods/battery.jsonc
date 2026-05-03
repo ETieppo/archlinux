@@ -1,0 +1,21 @@
+{
+	"battery": {
+		"states": {
+			"warning": 20,
+			"critical": 10
+		},
+		"format": "{icon} {capacity}%",
+		"format-time": "{H}h {M}min",
+		"format-icons": [
+			"󰂎", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"
+		],
+		"format-charging": "󰉁 {capacity}%",
+		"min-length": 7,
+		"max-length": 7,
+		"events": {
+			"on-discharging-warning": "hyprctl notify -1 5000 'rgb(0, 253, 255)' 'Battery Low (20%)' -u critical -i 'battery-020' -h string:x-canonical-private-synchronous:battery",
+			"on-discharging-critical": "hyprctl notify -1 5000 'rgb(0, 253, 255)' 'Battery Critical (10%)' -u critical -i 'battery-010' -h string:x-canonical-private-synchronous:battery",
+			"on-charging-100": "hyprctl notify -1 5000 'rgb(0, 253, 255)' 'Battery Full (100%)' -i 'battery-100-charged' -h string:x-canonical-private-synchronous:battery"
+		}
+	}
+}
