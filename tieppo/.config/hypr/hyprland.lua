@@ -9,10 +9,10 @@ hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-left", sc
 hl.on("hyprland.start", function()
 	hl.exec_cmd("swaync")
 	hl.exec_cmd("waybar")
-	hl.exec_cmd("hyprpaper")
 	hl.exec_cmd("sleep 1 && darkman set dark")
 	hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
 	hl.exec_cmd("gammastep")
+  hl.exec_cmd("mpvpaper -o 'no-audio loop hwdec=auto vo=dmabuf-wayland' '*' '~/.local/share/wallpapers/totoro.mp4'")
 end)
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
@@ -172,3 +172,4 @@ hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tr
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 hl.bind(mainMod .. " + M", hl.dsp.exit())
+
