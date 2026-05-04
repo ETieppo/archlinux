@@ -12,7 +12,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("sleep 1 && darkman set dark")
 	hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
 	hl.exec_cmd("gammastep")
-  hl.exec_cmd("mpvpaper -o 'no-audio loop hwdec=auto vo=dmabuf-wayland' '*' '~/.local/share/wallpapers/totoro.mp4'")
+	hl.exec_cmd("mpvpaper -o 'no-audio loop hwdec=auto vo=dmabuf-wayland' '*' '~/.local/share/wallpapers/totoro.mp4'")
 end)
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
@@ -135,7 +135,7 @@ hl.bind(mainMod .. " + C", function()
 end)
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("sleep 0.1; wtype -M ctrl r -m ctrl"), { release = true })
 hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "SHIFT", key = "INSERT", window = "activewindow" }))
-hl.bind("CTRL + Backspace", hl.dsp.send_shortcut({ mods = "", key = "Delete", window = "activewindow" }))
+hl.bind("CTRL + Backspace", hl.dsp.exec_cmd("sleep 0.01; wtype -k delete"), { release = true })
 hl.bind("SUPER + up", hl.dsp.send_shortcut({ mods = "ALT", key = "Up", window = "activewindow" }))
 hl.bind("SUPER + down", hl.dsp.send_shortcut({ mods = "ALT", key = "Down", window = "activewindow" }))
 
@@ -143,6 +143,11 @@ for i = 1, 9 do
 	hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
 	hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = tostring(i) }))
 end
+
+hl.bind("SUPER + SHIFT + L", hl.dsp.window.move({ direction = "r" }))
+hl.bind("SUPER + SHIFT + H", hl.dsp.window.move({ direction = "l" }))
+hl.bind("SUPER + SHIFT + K", hl.dsp.window.move({ direction = "u" }))
+hl.bind("SUPER + SHIFT + J", hl.dsp.window.move({ direction = "d" }))
 
 hl.bind("SUPER + 0", hl.dsp.focus({ workspace = "10" }))
 hl.bind("SUPER + SHIFT + 0", hl.dsp.window.move({ workspace = "10" }))
@@ -172,4 +177,3 @@ hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tr
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 hl.bind(mainMod .. " + M", hl.dsp.exit())
-
