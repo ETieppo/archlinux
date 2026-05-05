@@ -1,0 +1,17 @@
+{
+	"custom/distro": {
+		"format": "󰣇",
+		"tooltip": false,
+		"min-length": 3,
+		"max-length": 3,
+		"height":10
+	},
+	"custom/left_div": {
+		"format": "  ",
+		"tooltip": false
+	},
+	"custom/right_div": {
+		"format": "  ",
+		"tooltip": false
+	}
+}
