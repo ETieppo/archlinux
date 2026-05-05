@@ -1,0 +1,20 @@
+@define-color red            #f38ba8;
+@define-color yellow         #f9e2af;
+@define-color green          #a6e3a1;
+@define-color cyan           #91ffff;
+@define-color slate2         #45475a;
+@define-color slate1         #1e1e2e;
+@define-color transparent    alpha(#000000, 0.0);
+
+@define-color mod-bg         @base-bg;
+@define-color logo-bg        @cyan;
+@define-color logo-fg        @slate1;
+@define-color mod-border     @cyan;
+@define-color mod-fg         @slate2;
+@define-color hover-bg       @slate1;
+@define-color hover-fg       alpha(@main-fg, 0.75);
+@define-color active         @cyan;
+
+@define-color warning        @yellow;
+@define-color critical       @red;
+@define-color charging       @green;
