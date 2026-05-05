@@ -107,8 +107,4 @@ sudo -iu postgres initdb \
   -D /var/lib/postgres/data
 
 sudo systemctl enable postgresql
-
-mv ~/.config/waybar{,.bak}
-git clone https://github.com/sejjy/mechabar.git ~/.config/waybar
-~/.config/waybar/install
 echo "==> END <=="
