@@ -106,5 +106,6 @@ sudo -iu postgres initdb \
 
 sudo systemctl enable postgresql
 git clone "https://github.com/$GITHUB_USER/$NVIM_REPO" "$USER_HOME/.config/nvim" 
-sudo rm -r .bashrc .bash_history .bash_profile
+sudo rm -r "$USER_HOME/.bash*"
 echo "==> END <=="
+reboot
