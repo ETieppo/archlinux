@@ -19,7 +19,7 @@ USERNAME="tieppo"
 TIMEZONE="America/Sao_Paulo"
 
 if [ -z "${PASSWORD:-}" ]; then
-    echo "Set PASSWORD env var first: PASSWORD=yourpass sudo -E ./install.sh" >&2
+    echo "Set PASSWORD env var first: PASSWORD=yourpass sudo -E ./erase_system.sh" >&2
     exit 1
 fi
 
