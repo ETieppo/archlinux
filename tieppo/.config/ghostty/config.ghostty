@@ -1,0 +1,14 @@
+font-size                         = 14
+font-family                       = "IosevkaCustom Nerd Font Extended"
+background                        = 0a0a0d
+foreground                        = 0db9d7
+
+confirm-close-surface             = false
+# macos-titlebar-style              = hidden
+window-inherit-working-directory  = true
+
+keybind                           = alt+,=text:ghostty +edit-config\n
+keybind                           = alt+super+left=unbind
+keybind                           = alt+super+right=unbind
+keybind                           = alt+super+up=unbind
+keybind                           = alt+super+down=unbind
