@@ -1,4 +1,4 @@
-local terminal = "kitty"
+local terminal = "ghostty"
 local fileManager = "thunar"
 local menu = "rofi -show drun -theme ~/.config/rofi/menu.rasi"
 local mainMod = "ALT"
@@ -129,7 +129,7 @@ hl.bind(
 	hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "End", window = "activewindow" })
 )
 
-hl.bind(mainMod .. " + C", os.execute("wl-paste --primary | wl-copy &"), { release = true })
+hl.bind(mainMod .. " + C", hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C" }), { release = true })
 hl.bind(
 	mainMod .. " + V",
 	hl.dsp.send_shortcut({ mods = "SHIFT", key = "INSERT", window = "activewindow" }),
@@ -308,16 +308,8 @@ hl.bind(
 	hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "End", window = "activewindow" })
 )
 
-hl.bind(
-	mainMod .. " + C",
-	hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C" }),
-	{ release = true }
-)
-hl.bind(
-	mainMod .. " + V",
-	hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "V" }),
-	{ release = true }
-)
+hl.bind(mainMod .. " + C", hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C" }), { release = true })
+hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "V" }), { release = true })
 hl.bind("CTRL + Backspace", hl.dsp.exec_cmd("sleep 0.01; wtype -k delete"), { release = true })
 hl.bind("SUPER + up", hl.dsp.send_shortcut({ mods = "ALT", key = "Up", window = "activewindow" }))
 hl.bind("SUPER + down", hl.dsp.send_shortcut({ mods = "ALT", key = "Down", window = "activewindow" }))
