@@ -15,16 +15,15 @@ sudo pacman -S --needed --noconfirm \
   libglvnd vulkan-icd-loader
 
 sudo pacman -S --noconfirm \
-  zsh git base-devel unzip bluez ruby lua \
-  thunar wezterm postgresql zed waybar \
-  pavucontrol rofi hyprpaper greetd adwaita-icon-theme \
-  ttf-jetbrains-mono-nerd minio-client \
-  rsync nano hyprland linux-headers darkman \
+  zsh git base-devel unzip bluez lua hyprland \
+  thunar ghostty postgresql waybar rsync \
+  pavucontrol rofi greetd adwaita-icon-theme \
+  ttf-jetbrains-mono-nerd minio-client darkman \
   xdg-desktop-portal-hyprland gvfs file-roller \
   gammastep grim pulseaudio pulseaudio-alsa \
   xfconf libxfce4ui xfce4-settings openssh \
-  sddm btop brightnessctl fastfetch plymouth \
-  hyprpicker swaync ffmpegthumbnailer tumbler
+  sddm btop brightnessctl plymouth hyprpicker \
+  ffmpegthumbnailer tumbler
 
 TMP_DIR="$(mktemp -d)"
 
@@ -40,13 +39,13 @@ echo "== Setting zsh as default shell =="
 grep -qxF "/bin/zsh" /etc/shells || echo "/bin/zsh" | sudo tee -a /etc/shells
 sudo chsh -s /bin/zsh "$USER_NAME"
 
-echo "== Installing AUR packages =="
+echo "== Installing packages =="
 yay -S --noconfirm \
-  minio steam elecwhat-bin apidog-bin tuigreet \
+  minio steam elecwhat-bin apidog-bin \
   beekeeper-studio-bin plymouth-theme-arch-logo-symbol \
-  candy-icons-git ant-theme-git
+  ant-theme-git pixterm-git mpvpaper
 
-echo "== Installing CLIs =="
+
 RUNZSH=no CHSH=no KEEP_ZSHRC=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 
@@ -68,7 +67,7 @@ if [ -d "./usr" ]; then
   sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r usr/ /usr/
 fi
 
-sudo mv $BOOT_LOADER_DIR/* "$BOOT_LOADER_FILE"
+sudo cp "$BOOT_LOADER_FILE" $BOOT_LOADER_DIR/
 sudo sed -i '$ s/$/ quiet splash/' "$BOOT_LOADER_DIR/$BOOT_LOADER_FILE"
 sudo find /usr/share/plymouth/themes -mindepth 1 -maxdepth 1 ! -name arch-logo-symbol -exec rm -rf {} +
 
@@ -76,7 +75,6 @@ echo "== Enabling services - setting up configs & permissions =="
 
 sudo groupadd --system uinput
 sudo usermod -aG input,uinput $USER
-sudo chmod +x ~/.local/bin/zed-sudoedit
 sudo modprobe uinput
 sudo tee /etc/udev/rules.d/99-input.rules > /dev/null <<EOF
 KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
@@ -84,17 +82,15 @@ EOF
 
 sudo udevadm control --reload-rules
 sudo udevadm trigger
-
 systemctl --user daemon-reload
 systemctl --user start darkman
-
-sudo dkms build nvidia/590.48.01
+sudo dkms autoinstall
 sudo mkinitcpio -P
 sudo plymouth-set-default-theme -R arch-logo-symbol
 xfsettingsd &
 gsettings set org.gnome.desktop.interface gtk-theme 'Ant' || true
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' || true
-gsettings set org.gnome.desktop.interface icon-theme "candy-icons" || true
+gsettings set org.gnome.desktop.interface icon-theme "Ant" || true
 gdbus call --session \
  --dest org.freedesktop.portal.Desktop \
  --object-path /org/freedesktop/portal/desktop \
@@ -107,4 +103,5 @@ sudo -iu postgres initdb \
   -D /var/lib/postgres/data
 
 sudo systemctl enable postgresql
+sudo rm -r .bashrc .bash_history .bash_profile
 echo "==> END <=="
