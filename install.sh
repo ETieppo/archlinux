@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+GITHUB_USER="etieppo"
+NVIM_REPO="nvim"
 USER_NAME="${SUDO_USER:-$USER}"
 USER_HOME="/home/$USER_NAME"
 BOOT_LOADER_DIR="/boot/loader/entries"
@@ -103,5 +105,6 @@ sudo -iu postgres initdb \
   -D /var/lib/postgres/data
 
 sudo systemctl enable postgresql
+git clone "https://github.com/$GITHUB_USER/$NVIM_REPO" "$USER_HOME/.config/nvim" 
 sudo rm -r .bashrc .bash_history .bash_profile
 echo "==> END <=="
