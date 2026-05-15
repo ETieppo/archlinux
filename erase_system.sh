@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ### ======================================= ###
 ###                                         ###
 ###                 HAZARD                  ###
@@ -8,7 +7,6 @@
 ###    This will delete all disk data!!     ###
 ###                                         ###
 ### ======================================= ###
-
 set -euo pipefail
 
 DISK=/dev/nvme1n1
@@ -19,7 +17,7 @@ USERNAME="tieppo"
 TIMEZONE="America/Sao_Paulo"
 
 if [ -z "${PASSWORD:-}" ]; then
-    echo "Set PASSWORD env var first: PASSWORD=yourpass sudo -E ./erase_system.sh" >&2
+    echo "Set PASSWORD env var first: PASSWORD=yourpass sudo -E ./install.sh" >&2
     exit 1
 fi
 
@@ -53,12 +51,17 @@ SFDISK
 
 sleep 1
 partprobe "$DISK" || true
+udevadm settle
+
+wipefs -af "$EFI_PART" "$ROOT_PART"
 
 mkfs.fat -F32 "$EFI_PART"
 mkfs.ext4 -F "$ROOT_PART"
 
-mount "$ROOT_PART" /mnt
-mount --mkdir "$EFI_PART" /mnt/boot
+udevadm settle
+
+mount -t ext4 "$ROOT_PART" /mnt
+mount --mkdir -t vfat "$EFI_PART" /mnt/boot
 
 mountpoint -q /mnt && mountpoint -q /mnt/boot || {
     echo "Mount failed."; exit 1;
