@@ -1,4 +1,4 @@
-#!/usr/bin/zsh
+#!/usr/bin/env bash
 set -euo pipefail
 
 GITHUB_USER="etieppo"
@@ -14,7 +14,7 @@ if [ "$EUID" -eq 0 ]; then
   exit 1
 fi
 
-cd "${0:A:h}"
+cd "$(dirname "$(readlink -f "$0")")"
 
 sudo -v
 
@@ -150,51 +150,5 @@ if [ ! -d "$USER_HOME/.config/nvim" ]; then
   git clone "https://github.com/$GITHUB_USER/$NVIM_REPO" "$USER_HOME/.config/nvim"
 fi
 
-echo "==> END <=="
-reboot  sudo chown -R "$USER_NAME:$USER_NAME" "$USER_HOME"
-fi
-
-if [ -d "./usr" ]; then
-  sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r usr/ /usr/
-fi
-
-sudo cp "$BOOT_LOADER_FILE" $BOOT_LOADER_DIR/
-sudo sed -i '$ s/$/ quiet splash/' "$BOOT_LOADER_DIR/$BOOT_LOADER_FILE"
-sudo find /usr/share/plymouth/themes -mindepth 1 -maxdepth 1 ! -name arch-logo-symbol -exec rm -rf {} +
-
-echo "== Enabling services - setting up configs & permissions =="
-
-sudo groupadd --system uinput
-sudo usermod -aG input,uinput $USER
-sudo modprobe uinput
-sudo tee /etc/udev/rules.d/99-input.rules > /dev/null <<EOF
-KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
-EOF
-
-sudo udevadm control --reload-rules
-sudo udevadm trigger
-systemctl --user daemon-reload
-systemctl --user start darkman
-sudo dkms autoinstall
-sudo mkinitcpio -P
-sudo plymouth-set-default-theme -R arch-logo-symbol
-xfsettingsd &
-gsettings set org.gnome.desktop.interface gtk-theme 'Ant' || true
-gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' || true
-gsettings set org.gnome.desktop.interface icon-theme "Ant" || true
-gdbus call --session \
- --dest org.freedesktop.portal.Desktop \
- --object-path /org/freedesktop/portal/desktop \
- --method org.freedesktop.portal.Settings.ReadOne \
- org.freedesktop.appearance color-scheme
-
-sudo -iu postgres initdb \
-  --locale=C.UTF-8 \
-  --encoding=UTF8 \
-  -D /var/lib/postgres/data
-
-sudo systemctl enable postgresql
-git clone "https://github.com/$GITHUB_USER/$NVIM_REPO" "$USER_HOME/.config/nvim" 
-sudo rm -r "$USER_HOME/.bash*"
 echo "==> END <=="
 reboot
