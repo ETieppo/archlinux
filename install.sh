@@ -8,6 +8,7 @@ USER_HOME="$HOME"
 BOOT_LOADER_DIR="/boot/loader/entries"
 BOOT_LOADER_FILE="arch.conf"
 ZSH_BIN="/usr/bin/zsh"
+ROOT_UUID=$(findmnt -no UUID /)
 
 if [ "$EUID" -eq 0 ]; then
   echo "Rode como seu usuário comum, sem sudo. O script chama sudo internamente."
@@ -15,6 +16,15 @@ if [ "$EUID" -eq 0 ]; then
 fi
 
 cd "$(dirname "$(readlink -f "$0")")"
+
+sudo mkdir -p "$BOOT_LOADER_DIR"
+sudo tee "$BOOT_LOADER_DIR/$BOOT_LOADER_FILE" > /dev/null <<EOF
+title   Arch Linux
+linux   /vmlinuz-linux
+initrd  /intel-ucode.img
+initrd  /initramfs-linux.img
+options root=UUID=$ROOT_UUID rw quiet splash
+EOF
 
 sudo -v
 
@@ -42,7 +52,9 @@ sudo pacman -S --needed --noconfirm \
   gammastep grim pulseaudio pulseaudio-alsa \
   xfconf libxfce4ui xfce4-settings openssh \
   sddm btop brightnessctl plymouth hyprpicker \
-  ffmpegthumbnailer tumbler wl-clipboard
+  ffmpegthumbnailer tumbler wl-clipboard \
+  qt5-declarative qt5-graphicaleffects qt5-quickcontrols \
+  qt5-quickcontrols2
 
 echo "== Installing yay (AUR helper) =="
 if ! command -v yay >/dev/null 2>&1; then
@@ -102,10 +114,6 @@ if [ -d "./usr" ]; then
   sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r usr/ /usr/
 fi
 
-echo "== Boot loader =="
-sudo cp "$BOOT_LOADER_FILE" "$BOOT_LOADER_DIR/"
-sudo sed -i '$ s/$/ quiet splash/' "$BOOT_LOADER_DIR/$BOOT_LOADER_FILE"
-
 echo "== Plymouth themes cleanup =="
 sudo find /usr/share/plymouth/themes -mindepth 1 -maxdepth 1 ! -name arch-logo-symbol -exec rm -rf {} +
 
@@ -144,6 +152,9 @@ if ! sudo test -d /var/lib/postgres/data/base; then
     -D /var/lib/postgres/data
 fi
 sudo systemctl enable postgresql
+sudo systemctl enable sddm
+sudo systemctl enable bluetooth
+sudo systemctl enable NetworkManager
 
 echo "== Neovim config =="
 if [ ! -d "$USER_HOME/.config/nvim" ]; then
