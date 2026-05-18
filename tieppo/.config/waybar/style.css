@@ -128,7 +128,7 @@ tooltip > box {
 }
 
 #custom-distro {
-  padding: 0 6px 0 1px;
+  padding: 0 0px 0 6px;
   background-color: @logo-bg;
   color: @logo-fg;
 }
