@@ -1,6 +1,6 @@
 {
 	"custom/distro": {
-		"format": "󰣇",
+		"format": "󰣇 ",
 		"tooltip": false,
 		"min-length": 3,
 		"max-length": 3,
