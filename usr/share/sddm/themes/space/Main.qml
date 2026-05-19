@@ -10,6 +10,14 @@ Item {
     height: 1080
 
     property bool loginFailed: false
+    property string currentUser: {
+        if (typeof userModel === "undefined") return "";
+        if (userModel.lastUser && userModel.lastUser.length > 0)
+            return userModel.lastUser;
+        if (userModel.count > 0)
+            return userModel.data(userModel.index(0, 0), Qt.UserRole + 1);
+        return "";
+    }
 
     Image {
         id: background
@@ -113,7 +121,9 @@ Item {
 
                 Text {
                     id: usernameText
-                    text: (typeof userModel !== "undefined" && userModel.lastUser) ? userModel.lastUser.charAt(0).toUpperCase() + userModel.lastUser.slice(1).toLowerCase() : "User"
+                    text: root.currentUser.length > 0
+                        ? root.currentUser.charAt(0).toUpperCase() + root.currentUser.slice(1).toLowerCase()
+                        : "User"
                     font.pixelSize: 18
                     color: "#fff"
                     font.bold: true
@@ -248,7 +258,7 @@ Item {
                     if (typeof sddm === "undefined") {
                         return;
                     }
-                    sddm.login(userModel.lastUser, passwordField.text, sessionModel.lastIndex);
+                    sddm.login(root.currentUser, passwordField.text, sessionModel.lastIndex)
                 }
                 Keys.onReturnPressed: clicked()
                 Keys.onEnterPressed: clicked()
