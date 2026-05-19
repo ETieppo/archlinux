@@ -54,7 +54,7 @@ sudo pacman -S --needed --noconfirm \
   sddm btop brightnessctl plymouth hyprpicker \
   ffmpegthumbnailer tumbler wl-clipboard \
   qt5-declarative qt5-graphicaleffects qt5-quickcontrols \
-  qt5-quickcontrols2
+  qt5-quickcontrols2 geoclue2
 
 echo "== Installing yay (AUR helper) =="
 if ! command -v yay >/dev/null 2>&1; then
