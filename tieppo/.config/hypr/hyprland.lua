@@ -12,7 +12,9 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("sleep 1 && darkman set dark")
 	hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
 	hl.exec_cmd("pkill -x gammastep; gammastep")
-	hl.exec_cmd("pkill -x mpvpaper; mpvpaper -o 'no-audio loop hwdec=auto vo=dmabuf-wayland' '*' '~/.local/share/wallpapers/totoro.mp4'")
+	hl.exec_cmd(
+		"pkill -x mpvpaper; mpvpaper -o 'no-audio loop hwdec=auto vo=dmabuf-wayland' '*' '~/.local/share/wallpapers/totoro.mp4'"
+	)
 end)
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
@@ -113,6 +115,7 @@ hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 
 hl.bind(mainMod .. " + A", hl.dsp.send_shortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
+hl.bind(mainMod .. " + R", hl.dsp.send_shortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
 hl.bind(mainMod .. " + C", hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
 hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
 hl.bind(mainMod .. " + X", hl.dsp.send_shortcut({ mods = "CTRL", key = "X", window = "activewindow" }))

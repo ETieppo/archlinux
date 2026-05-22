@@ -18,7 +18,7 @@
     decoration:          #083091;
     background:          #0A1E2E;
     background-alt:      #0F2F4A;
-    font: "JetBrainsMono Nerd Font SemiBold 12";
+    font: "IosevkaCustom Nerd Font Extended 14";
 }
 
 configuration {
