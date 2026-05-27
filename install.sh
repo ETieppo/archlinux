@@ -44,8 +44,8 @@ sudo pacman -S --needed --noconfirm \
 
 echo "== Installing base packages =="
 sudo pacman -S --needed --noconfirm \
-  zsh git base-devel unzip bluez lua hyprland \
-  thunar ghostty postgresql waybar rsync \
+  zsh git base-devel unzip bluez bluez-utils lua \ 
+  hyprland thunar ghostty postgresql waybar rsync \
   pavucontrol rofi greetd adwaita-icon-theme \
   ttf-jetbrains-mono-nerd minio-client darkman \
   xdg-desktop-portal-hyprland gvfs file-roller \
@@ -54,7 +54,7 @@ sudo pacman -S --needed --noconfirm \
   sddm btop brightnessctl plymouth hyprpicker \
   ffmpegthumbnailer tumbler wl-clipboard \
   qt5-declarative qt5-graphicaleffects qt5-quickcontrols \
-  qt5-quickcontrols2 geoclue2
+  qt5-quickcontrols2 geoclue2 pipewire-pulse wireplumber
 
 echo "== Installing yay (AUR helper) =="
 if ! command -v yay >/dev/null 2>&1; then
