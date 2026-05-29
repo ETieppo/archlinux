@@ -155,6 +155,7 @@ sudo systemctl enable postgresql
 sudo systemctl enable sddm
 sudo systemctl enable bluetooth
 sudo systemctl enable NetworkManager
+systemctl --user enable --now gammastep.service
 
 echo "== Neovim config =="
 if [ ! -d "$USER_HOME/.config/nvim" ]; then
