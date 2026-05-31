@@ -25,12 +25,12 @@ hl.config({
 	dwindle = { preserve_split = true },
 	master = { new_status = "master" },
 	general = {
-		gaps_in = 6,
+		gaps_in = 2,
 		gaps_out = 6,
 		border_size = 1,
 		col = {
 			active_border = { colors = { "rgba(33ccffee)", 0x33CC, "rgba(33ccffee)" }, angle = 45 },
-			inactive_border = "rgba(1a1a1a60)",
+			inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
 		},
 		resize_on_border = true,
 		allow_tearing = false,
@@ -47,7 +47,7 @@ hl.config({
 			enabled = true,
 			range = 4,
 			render_power = 3,
-			color = 0x1a1a1aee,
+			color = "#00000000",
 		},
 
 		blur = {
@@ -113,17 +113,22 @@ hl.window_rule({
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
-
 hl.bind(mainMod .. " + A", hl.dsp.send_shortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
 hl.bind(mainMod .. " + R", hl.dsp.send_shortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
 hl.bind(mainMod .. " + C", hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
+hl.bind(mainMod .. " + C", function()
+	local w = hl.get_active_window()
+	if w ~= nil and w.class == "brave-browser" then
+		hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
+	else
+		hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
+	end
+end)
 hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
 hl.bind(mainMod .. " + X", hl.dsp.send_shortcut({ mods = "CTRL", key = "X", window = "activewindow" }))
 hl.bind(mainMod .. " + Z", hl.dsp.send_shortcut({ mods = "CTRL", key = "Z", window = "activewindow" }))
-
 hl.bind(mainMod .. " + W", hl.dsp.send_shortcut({ mods = "CTRL", key = "W", window = "activewindow" }))
 hl.bind(mainMod .. " + N", hl.dsp.send_shortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
-
 hl.bind(mainMod .. " + right", hl.dsp.send_shortcut({ mods = "", key = "End", window = "activewindow" }))
 hl.bind(mainMod .. " + left", hl.dsp.send_shortcut({ mods = "", key = "Home", window = "activewindow" }))
 hl.bind(mainMod .. " + SHIFT + right", hl.dsp.send_shortcut({ mods = "SHIFT", key = "End", window = "activewindow" }))
@@ -152,14 +157,16 @@ for i = 1, 9 do
 	hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
 	hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = tostring(i) }))
 end
+hl.bind("SUPER + 0", hl.dsp.focus({ workspace = "10" }))
+hl.bind("SUPER + SHIFT + 0", hl.dsp.window.move({ workspace = "10" }))
 
 hl.bind("SUPER + SHIFT + L", hl.dsp.window.move({ direction = "r" }))
 hl.bind("SUPER + SHIFT + H", hl.dsp.window.move({ direction = "l" }))
 hl.bind("SUPER + SHIFT + K", hl.dsp.window.move({ direction = "u" }))
 hl.bind("SUPER + SHIFT + J", hl.dsp.window.move({ direction = "d" }))
+hl.bind("SUPER + L", hl.dsp.focus({ direction = "r" }))
+hl.bind("SUPER + H", hl.dsp.focus({ direction = "l" }))
 
-hl.bind("SUPER + 0", hl.dsp.focus({ workspace = "10" }))
-hl.bind("SUPER + SHIFT + 0", hl.dsp.window.move({ workspace = "10" }))
 hl.bind("SUPER + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 hl.bind("SUPER + SHIFT + F", hl.dsp.window.fullscreen())
 hl.bind("SUPER + S", hl.dsp.workspace.toggle_special("magic"))
