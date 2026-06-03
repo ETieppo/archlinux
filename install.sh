@@ -75,7 +75,7 @@ echo "== Installing AUR packages =="
 yay -S --needed --noconfirm \
   minio steam elecwhat-bin apidog-bin \
   beekeeper-studio-bin plymouth-theme-arch-logo-symbol \
-  ant-theme-git pixterm-git mpvpaper
+  ant-theme-git pixterm-git hyprpaper
 
 echo "== Installing oh-my-zsh =="
 if [ ! -d "$USER_HOME/.oh-my-zsh" ]; then
