@@ -12,9 +12,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("sleep 1 && darkman set dark")
 	hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
 	hl.exec_cmd("pkill -x gammastep; gammastep")
-	hl.exec_cmd(
-		"pkill -x mpvpaper; mpvpaper -o 'no-audio loop hwdec=auto vo=dmabuf-wayland' '*' '~/.local/share/wallpapers/totoro.mp4'"
-	)
+	hl.exec_cmd("hyprpaper")
 end)
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
