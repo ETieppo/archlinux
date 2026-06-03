@@ -115,7 +115,6 @@ hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + A", hl.dsp.send_shortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
 hl.bind(mainMod .. " + R", hl.dsp.send_shortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
-hl.bind(mainMod .. " + C", hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
 hl.bind(mainMod .. " + C", function()
 	local w = hl.get_active_window()
 	if w ~= nil and w.class == "brave-browser" then
