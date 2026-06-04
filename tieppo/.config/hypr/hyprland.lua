@@ -108,47 +108,52 @@ hl.window_rule({
 	size = { 900, 500 },
 })
 
+function SendShortcut(params)
+	local timer = function()
+		local args = params
+		args.state = "up"
+		hl.dispatch(hl.dsp.send_key_state(args))
+	end
+	return function()
+		local args = params
+		args.state = "down"
+		hl.dispatch(hl.dsp.send_key_state(args))
+		hl.timer(timer, { timeout = 20, type = "oneshot" })
+	end
+end
+
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
-hl.bind(mainMod .. " + A", hl.dsp.send_shortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
-hl.bind(mainMod .. " + R", hl.dsp.send_shortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
+hl.bind(mainMod .. " + A", SendShortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
+hl.bind(mainMod .. " + R", SendShortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
 hl.bind(mainMod .. " + C", function()
 	local w = hl.get_active_window()
 	if w ~= nil and w.class == "brave-browser" then
-		hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
+		hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
 	else
-		hl.dispatch(hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
+		hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
 	end
 end)
-hl.bind(mainMod .. " + V", hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
-hl.bind(mainMod .. " + X", hl.dsp.send_shortcut({ mods = "CTRL", key = "X", window = "activewindow" }))
-hl.bind(mainMod .. " + Z", hl.dsp.send_shortcut({ mods = "CTRL", key = "Z", window = "activewindow" }))
-hl.bind(mainMod .. " + W", hl.dsp.send_shortcut({ mods = "CTRL", key = "W", window = "activewindow" }))
-hl.bind(mainMod .. " + N", hl.dsp.send_shortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
-hl.bind(mainMod .. " + right", hl.dsp.send_shortcut({ mods = "", key = "End", window = "activewindow" }))
-hl.bind(mainMod .. " + left", hl.dsp.send_shortcut({ mods = "", key = "Home", window = "activewindow" }))
-hl.bind(mainMod .. " + SHIFT + right", hl.dsp.send_shortcut({ mods = "SHIFT", key = "End", window = "activewindow" }))
-hl.bind(mainMod .. " + SHIFT + left", hl.dsp.send_shortcut({ mods = "SHIFT", key = "Home", window = "activewindow" }))
-hl.bind(mainMod .. " + up", hl.dsp.send_shortcut({ mods = "CTRL", key = "Home", window = "activewindow" }))
-hl.bind(mainMod .. " + down", hl.dsp.send_shortcut({ mods = "CTRL", key = "End", window = "activewindow" }))
-hl.bind(
-	mainMod .. " + SHIFT + up",
-	hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "Home", window = "activewindow" })
-)
-hl.bind(
-	mainMod .. " + SHIFT + down",
-	hl.dsp.send_shortcut({ mods = "CTRL SHIFT", key = "End", window = "activewindow" })
-)
+hl.bind(mainMod .. " + V", SendShortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
+hl.bind(mainMod .. " + F", SendShortcut({ mods = "CTRL", key = "F", window = "activewindow" }))
+hl.bind(mainMod .. " + X", SendShortcut({ mods = "CTRL", key = "X", window = "activewindow" }))
+hl.bind(mainMod .. " + Z", SendShortcut({ mods = "CTRL", key = "Z", window = "activewindow" }))
+hl.bind(mainMod .. " + W", SendShortcut({ mods = "CTRL", key = "W", window = "activewindow" }))
+hl.bind(mainMod .. " + N", SendShortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
+hl.bind(mainMod .. " + right", SendShortcut({ mods = "", key = "End", window = "activewindow" }))
+hl.bind(mainMod .. " + left", SendShortcut({ mods = "", key = "Home", window = "activewindow" }))
+hl.bind(mainMod .. " + SHIFT + right", SendShortcut({ mods = "SHIFT", key = "End", window = "activewindow" }))
+hl.bind(mainMod .. " + SHIFT + left", SendShortcut({ mods = "SHIFT", key = "Home", window = "activewindow" }))
+hl.bind(mainMod .. " + up", SendShortcut({ mods = "CTRL", key = "Home", window = "activewindow" }))
+hl.bind(mainMod .. " + down", SendShortcut({ mods = "CTRL", key = "End", window = "activewindow" }))
+hl.bind(mainMod .. " + SHIFT + up", SendShortcut({ mods = "CTRL SHIFT", key = "Home", window = "activewindow" }))
+hl.bind(mainMod .. " + SHIFT + down", SendShortcut({ mods = "CTRL SHIFT", key = "End", window = "activewindow" }))
 
-hl.bind(
-	"CTRL + Backspace",
-	hl.dsp.send_shortcut({ mods = "", key = "Delete", window = "activewindow" }),
-	{ repeating = true }
-)
+hl.bind("CTRL + Backspace", SendShortcut({ mods = "", key = "Delete", window = "activewindow" }), { repeating = true })
 
-hl.bind("SUPER + up", hl.dsp.send_shortcut({ mods = "ALT", key = "Up", window = "activewindow" }))
-hl.bind("SUPER + down", hl.dsp.send_shortcut({ mods = "ALT", key = "Down", window = "activewindow" }))
+hl.bind("SUPER + up", SendShortcut({ mods = "ALT", key = "Up", window = "activewindow" }))
+hl.bind("SUPER + down", SendShortcut({ mods = "ALT", key = "Down", window = "activewindow" }))
 
 for i = 1, 9 do
 	hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
