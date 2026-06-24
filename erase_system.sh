@@ -1,12 +1,13 @@
 #!/bin/bash
-### ======================================= ###
-###                                         ###
-###                 HAZARD                  ###
-###                                         ###
-###                                         ###
-###    This will delete all disk data!!     ###
-###                                         ###
-### ======================================= ###
+echo "# ======================================= #"
+echo "#                                         #"
+echo "#                 HAZARD                  #"
+echo "#                                         #"
+echo "#                                         #"
+echo "#    This will delete all disk data!!     #"
+echo "#                                         #"
+echo "# ======================================= #"
+
 set -euo pipefail
 
 DISK=/dev/nvme1n1
