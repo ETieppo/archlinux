@@ -149,9 +149,7 @@ hl.bind(mainMod .. " + up", SendShortcut({ mods = "CTRL", key = "Home", window =
 hl.bind(mainMod .. " + down", SendShortcut({ mods = "CTRL", key = "End", window = "activewindow" }))
 hl.bind(mainMod .. " + SHIFT + up", SendShortcut({ mods = "CTRL SHIFT", key = "Home", window = "activewindow" }))
 hl.bind(mainMod .. " + SHIFT + down", SendShortcut({ mods = "CTRL SHIFT", key = "End", window = "activewindow" }))
-
 hl.bind("CTRL + Backspace", SendShortcut({ mods = "", key = "Delete", window = "activewindow" }), { repeating = true })
-
 hl.bind("SUPER + up", SendShortcut({ mods = "ALT", key = "Up", window = "activewindow" }))
 hl.bind("SUPER + down", SendShortcut({ mods = "ALT", key = "Down", window = "activewindow" }))
 
@@ -159,23 +157,23 @@ for i = 1, 9 do
 	hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
 	hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = tostring(i) }))
 end
+
 hl.bind("SUPER + 0", hl.dsp.focus({ workspace = "10" }))
 hl.bind("SUPER + SHIFT + 0", hl.dsp.window.move({ workspace = "10" }))
-
 hl.bind("SUPER + SHIFT + L", hl.dsp.window.move({ direction = "r" }))
 hl.bind("SUPER + SHIFT + H", hl.dsp.window.move({ direction = "l" }))
 hl.bind("SUPER + SHIFT + K", hl.dsp.window.move({ direction = "u" }))
 hl.bind("SUPER + SHIFT + J", hl.dsp.window.move({ direction = "d" }))
 hl.bind("SUPER + L", hl.dsp.focus({ direction = "r" }))
 hl.bind("SUPER + H", hl.dsp.focus({ direction = "l" }))
-
+hl.bind("SUPER + J", hl.dsp.focus({ direction = "d" }))
+hl.bind("SUPER + K", hl.dsp.focus({ direction = "u" }))
 hl.bind("SUPER + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 hl.bind("SUPER + SHIFT + F", hl.dsp.window.fullscreen())
 hl.bind("SUPER + S", hl.dsp.workspace.toggle_special("magic"))
 hl.bind("SUPER + P", hl.dsp.exec_cmd("hyprpicker"))
 hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
-
 hl.bind(
 	"XF86AudioRaiseVolume",
 	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
@@ -188,11 +186,17 @@ hl.bind(
 )
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 1%+"), { repeating = true, locked = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 1%-"), { repeating = true, locked = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { repeating = true, locked = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { repeating = true, locked = true })
 hl.bind("Print", hl.dsp.exec_cmd("grim"))
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
-hl.bind(mainMod .. " + M", hl.dsp.exit())
+hl.bind("F1", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
+hl.bind("F2", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("F3", hl.dsp.exec_cmd("playerctl next"), { locked = true })
+hl.bind("KP_Left",  hl.dsp.exec_cmd("playerctl previous"), { locked = true })
+hl.bind("KP_Begin", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("KP_Right", hl.dsp.exec_cmd("playerctl next"), { locked = true })
+-- hl.bind(mainMod .. " + M", hl.dsp.exit())
