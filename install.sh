@@ -75,7 +75,7 @@ echo "== Installing AUR packages =="
 yay -S --needed --noconfirm \
   minio steam elecwhat-bin apidog-bin \
   beekeeper-studio-bin plymouth-theme-arch-logo-symbol \
-  ant-theme-git pixterm-git hyprpaper
+  ant-theme-git pixterm-git hyprpaper glide-browser-bin
 
 echo "== Installing oh-my-zsh =="
 if [ ! -d "$USER_HOME/.oh-my-zsh" ]; then
@@ -96,11 +96,6 @@ fi
 echo "== Installing bun =="
 if [ ! -d "$USER_HOME/.bun" ]; then
   curl -fsSL https://bun.sh/install | bash
-fi
-
-echo "== Installing brave =="
-if ! command -v brave >/dev/null 2>&1; then
-  curl -fsS https://dl.brave.com/install.sh | sh
 fi
 
 echo "== Merging system configs =="
