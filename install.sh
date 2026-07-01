@@ -81,6 +81,8 @@ echo "== Installing oh-my-zsh =="
 if [ ! -d "$USER_HOME/.oh-my-zsh" ]; then
   RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c \
     "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  zstyle ':omz:update' mode auto
+  zstyle ':omz:update' frequency 7
 fi
 
 echo "== Installing nvm =="
