@@ -1,4 +1,4 @@
-local terminal = "ghostty"
+local terminal = "env GTK_IM_MODULE=simple ghostty"
 local fileManager = "thunar"
 local menu = "rofi -show drun -theme ~/.config/rofi/menu.rasi"
 local mainMod = "ALT"
@@ -122,20 +122,33 @@ function SendShortcut(params)
 	end
 end
 
+hl.bind("SUPER + E", hl.dsp.exec_cmd("wtype -k dead_acute"))
+hl.bind("SUPER + N", hl.dsp.exec_cmd("wtype -k dead_tilde"))
+hl.bind("SUPER + I", hl.dsp.exec_cmd("wtype -k dead_circumflex"))
+hl.bind("SUPER + C", hl.dsp.exec_cmd("wtype -m logo -k dead_cedilla -k c"))
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + A", SendShortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
 hl.bind(mainMod .. " + R", SendShortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
+hl.bind(mainMod .. " + L", function()
+	local w = hl.get_active_window()
+	if w ~= nil and w.class == "glide-glide" then
+		hl.dispatch(SendShortcut({ mods = "CTRL", key = "L", window = "activewindow" }))
+	else
+		hl.dispatch(SendShortcut({ mods = "ALT", key = "L", window = "activewindow" }))
+	end
+end)
 hl.bind(mainMod .. " + C", function()
 	local w = hl.get_active_window()
-	if w ~= nil and w.class == "brave-browser" then
+	if w ~= nil and w.class == "glide-glide" then
 		hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
 	else
 		hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
 	end
 end)
 hl.bind(mainMod .. " + V", SendShortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
+hl.bind(mainMod .. " + SHIFT + I", SendShortcut({ mods = "CTRL SHIFT", key = "I", window = "activewindow" }))
 hl.bind(mainMod .. " + F", SendShortcut({ mods = "CTRL", key = "F", window = "activewindow" }))
 hl.bind(mainMod .. " + X", SendShortcut({ mods = "CTRL", key = "X", window = "activewindow" }))
 hl.bind(mainMod .. " + Z", SendShortcut({ mods = "CTRL", key = "Z", window = "activewindow" }))
