@@ -14,7 +14,7 @@ DISK=/dev/nvme1n1
 EFI_PART="${DISK}p1"
 ROOT_PART="${DISK}p2"
 HOSTNAME="archlinux"
-USERNAME="tieppo"
+USERNAME="babayaga"
 TIMEZONE="America/Sao_Paulo"
 
 if [ -z "${PASSWORD:-}" ]; then
