@@ -3,6 +3,17 @@ local fileManager = "thunar"
 local menu = "rofi -show drun -theme ~/.config/rofi/menu.rasi"
 local mainMod = "ALT"
 
+hl.bind("switch:on:Lid Switch", function()
+  hl.timer(function()
+    hl.dispatch(hl.dsp.dpms({ action = "disable" }))
+  end, { timeout = 500, type = "oneshot" })
+end, { locked = true })
+
+hl.bind("switch:off:Lid Switch", function()
+  hl.timer(function()
+    hl.dispatch(hl.dsp.dpms({ action = "enable" }))
+  end, { timeout = 500, type = "oneshot" })
+end, { locked = true })
 hl.monitor({ output = "eDP-1", mode = "1920x1080@144", position = "auto", scale = 1 })
 hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-left", scale = 1 })
 
