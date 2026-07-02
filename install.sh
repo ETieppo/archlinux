@@ -54,7 +54,8 @@ sudo pacman -S --needed --noconfirm \
   sddm btop brightnessctl plymouth hyprpicker \
   ffmpegthumbnailer tumbler wl-clipboard \
   qt5-declarative qt5-graphicaleffects qt5-quickcontrols \
-  qt5-quickcontrols2 geoclue2 pipewire-pulse wireplumber
+  qt5-quickcontrols2 geoclue2 pipewire-pulse wireplumber \
+  sudo pacman -S avahi nss-mdns
 
 echo "== Installing yay (AUR helper) =="
 if ! command -v yay >/dev/null 2>&1; then
@@ -152,6 +153,7 @@ sudo systemctl enable postgresql
 sudo systemctl enable sddm
 sudo systemctl enable bluetooth
 sudo systemctl enable NetworkManager
+sudo systemctl enable --now avahi-daemon.service
 systemctl --user enable --now gammastep.service
 
 echo "== Neovim config =="
