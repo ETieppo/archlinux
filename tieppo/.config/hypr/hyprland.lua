@@ -159,7 +159,7 @@ hl.bind(mainMod .. " + C", function()
 	end
 end)
 hl.bind(mainMod .. " + V", SendShortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
-hl.bind(mainMod .. " + SHIFT + I", SendShortcut({ mods = "CTRL SHIFT", key = "I", window = "activewindow" }))
+hl.bind(mainMod .. " + SHIFT + I", SendShortcut({ mods = "CTRL SHIFT", key = "code:31", window = "activewindow" }))
 hl.bind(mainMod .. " + F", SendShortcut({ mods = "CTRL", key = "F", window = "activewindow" }))
 hl.bind(mainMod .. " + X", SendShortcut({ mods = "CTRL", key = "X", window = "activewindow" }))
 hl.bind(mainMod .. " + Z", SendShortcut({ mods = "CTRL", key = "Z", window = "activewindow" }))
