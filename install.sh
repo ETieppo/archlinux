@@ -55,7 +55,7 @@ sudo pacman -S --needed --noconfirm \
   ffmpegthumbnailer tumbler wl-clipboard \
   qt5-declarative qt5-graphicaleffects qt5-quickcontrols \
   qt5-quickcontrols2 geoclue2 pipewire-pulse wireplumber \
-  sudo pacman -S avahi nss-mdns
+  avahi nss-mdns
 
 echo "== Installing yay (AUR helper) =="
 if ! command -v yay >/dev/null 2>&1; then
@@ -76,7 +76,8 @@ echo "== Installing AUR packages =="
 yay -S --needed --noconfirm \
   minio steam elecwhat-bin apidog-bin \
   beekeeper-studio-bin plymouth-theme-arch-logo-symbol \
-  ant-theme-git pixterm-git hyprpaper glide-browser-bin
+  ant-theme-git pixterm-git hyprpaper glide-browser-bin \
+  tuxedo-drivers-dkms
 
 echo "== Installing oh-my-zsh =="
 if [ ! -d "$USER_HOME/.oh-my-zsh" ]; then
@@ -123,7 +124,17 @@ sudo tee /etc/udev/rules.d/99-input.rules > /dev/null <<EOF
 KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
 EOF
 sudo udevadm control --reload-rules
-sudo udevadm trigger
+sudo udevadm trigger --subsystem-match=leds --action=add
+
+echo "== Keyboard backlight =="
+printf "uniwill_wmi\ntuxedo_keyboard\n" | sudo tee /etc/modules-load.d/tuxedo.conf > /dev/null
+sudo tee /etc/udev/rules.d/99-kbd-backlight.rules > /dev/null <<EOF
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="rgb:kbd_backlight", RUN+="/usr/bin/chgrp input /sys/class/leds/%k/brightness /sys/class/leds/%k/multi_intensity", RUN+="/usr/bin/chmod g+w /sys/class/leds/%k/brightness /sys/class/leds/%k/multi_intensity"
+EOF
+sudo modprobe uniwill_wmi || true
+sudo modprobe tuxedo_keyboard || true
+sudo udevadm control --reload-rules
+sudo udevadm trigger --subsystem-match=leds
 
 systemctl --user daemon-reload || true
 systemctl --user start darkman || true
