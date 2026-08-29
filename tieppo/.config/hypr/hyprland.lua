@@ -24,8 +24,9 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
 	hl.exec_cmd("pkill -x gammastep; gammastep")
 	hl.exec_cmd("hyprpaper")
-	hl.exec_cmd('echo "25 0 0" | tee /sys/class/leds/rgb:kbd_backlight/multi_intensity')
-	hl.exec_cmd("echo 50 | tee /sys/class/leds/rgb:kbd_backlight/brightness")
+
+	hl.exec_cmd('echo "25 0 0" > /sys/class/leds/rgb:kbd_backlight/multi_intensity')
+	hl.exec_cmd("echo 50 > /sys/class/leds/rgb:kbd_backlight/brightness")
 end)
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")

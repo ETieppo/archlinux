@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="rgb:kbd_backlight", RUN+="/usr/bin/chgrp video /sys/class/leds/%k/brightness /sys/class/leds/%k/multi_intensity", RUN+="/usr/bin/chmod g+w /sys/class/leds/%k/brightness /sys/class/leds/%k/multi_intensity"
