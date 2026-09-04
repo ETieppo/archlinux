@@ -1,29 +1,26 @@
 * {
-    first-blue:          #0A1E2E;
-    second-blue:         #0F2F4A;
-    third-blue:          #145C7A;
-    fourth-blue:         #33CCFF;
-    fifth-blue:          #9BE7FF;
-    primary-bg:          #0A1E2E;
-    secondary-bg:        #0F2F4A;
-    surface-bg:          #145C7A;
-    foreground:          #EAFBFF;
-    secondary-foreground:#BFEFFF;
-    muted-foreground:    #7FCFE6;
-    accent-bg:           #33CCFF;
-    accent-foreground:   #00FFE1;
-    selected:            #33CCFF;
-    active:              #00FFE1;
-    urgent:              #FF5C5C;
-    decoration:          #083091;
-    background:          #0A1E2E;
-    background-alt:      #0F2F4A;
+    bg-base:             #1f020d;
+    bg-surface:          #0f2422;
+    bg-input:            #11111b;
+    text-main:           #cdd6f4;
+    text-muted:          #6c7086;
+    
+    gold-box: linear-gradient( 
+        45deg,
+        #ffee00,
+        #a16c00,
+        #ffe655,
+        #fff4a3,
+        #a16c00
+    );
+    
     font: "IosevkaCustom Nerd Font Extended 14";
 }
 
 configuration {
     show-icons:                 true;
-    display-drun:               "";
+    display-drun:               "󰣇 ";
+    display-run:                " ";
     drun-display-format:        "{name}";
 }
 
@@ -31,126 +28,94 @@ window {
     transparency:                "real";
     location:                    center;
     anchor:                      center;
-    fullscreen:                  false;
     width:                       50%;
-    height:                      50%;
-    x-offset:                    20px;
-    y-offset:                    0px;
-
     enabled:                     true;
-    padding:                     10px;
-    border:                      1px solid;
-    border-radius:               28px;
-    border-color:                @decoration;
-    cursor:                      "default";
-    background-color:            @primary-bg;
+    border-radius:               32px;
+    background-color:            @bg-base;
 }
 
 mainbox {
     enabled:                     true;
-    spacing:                     20px;
     background-color:            transparent;
-    children:                    [ "inputbar", "message", "listview" ];
+    children:                    [ "searchbox", "listview" ];
+}
+
+searchbox {
+    height:                      220px;
+    expand:                      false; 
+    enabled:                     true;
+    padding:                     80px 40px;
+    border-radius:               32px 32px 0px 0px;
+    background-color:            #243656;
+    background-image:            url("/home/tieppo/.local/share/wallpapers/boat.jpg", width);
+    children:                    [ "inputbar" ];
 }
 
 inputbar {
     enabled:                     true;
-    spacing:                     10px;
-    padding:                     10px;
-    border-radius:               8px;
-    background-color:            transparent;
-    text-color:                  @secondary-foreground;
-    children:                    [ "textbox-prompt-colon", "entry" ];
+    spacing:                     15px;
+    padding:                     15px 25px;
+    border-radius:               100px;
+    background-color:            @bg-input;
+    children:                    [ "prompt", "entry" ];
 }
 
 prompt {
     enabled:                     true;
-    background-color:            inherit;
-    text-color:                  inherit;
-}
-
-textbox-prompt-colon {
-    enabled:                     true;
-    padding:                     0px;
-    expand:                      false;
-    str:                         "  ";
-    background-color:            inherit;
-    text-color:                  inherit;
+    background-color:            transparent;
+    text-color:                  #cba6f7;
+    font:                        "IosevkaCustom Nerd Font Extended 16";
 }
 
 entry {
     enabled:                     true;
-    padding:                     0px;
-    background-color:            inherit;
-    text-color:                  inherit;
+    background-color:            transparent;
+    text-color:                  @text-main;
     cursor:                      text;
-    placeholder:                 "Search...";
-    placeholder-color:           inherit;
+    placeholder:                 "Digite para buscar ou execute sh: ...";
+    placeholder-color:           @text-muted;
+    vertical-align:              0.5;
 }
 
 listview {
     enabled:                     true;
-    columns:                     1;
-    lines:                       12;
+    columns:                     2;
+    lines:                       6;
     cycle:                       true;
     dynamic:                     true;
     scrollbar:                   false;
     layout:                      vertical;
-    reverse:                     false;
+    expand:                      true;
     fixed-height:                true;
-    fixed-columns:               true;
-    spacing:                     5px;
+    padding:                     30px;
     background-color:            transparent;
-    text-color:                  @foreground;
-    cursor:                      "default";
-}
-
-scrollbar {
-    handle-width:                5px;
-    handle-color:                @selected;
-    border-radius:               10px;
-    background-color:            @background-alt;
 }
 
 element {
     enabled:                     true;
-    spacing:                     10px;
-    padding:                     6px;
-    border-radius:               8px;
+    spacing:                     20px;
+    padding:                     12px 20px;
+    border-radius:               100px;
     background-color:            transparent;
-    text-color:                  @foreground;
+    text-color:                  @text-main;
     cursor:                      pointer;
 }
 
 element normal.normal,
 element alternate.normal {
-    background-color:            var(background);
-    text-color:                  var(foreground);
-}
-
-element normal.urgent,
-element alternate.urgent,
-element selected.active {
-    background-color:            var(urgent);
-    text-color:                  var(background);
-}
-
-element normal.active,
-element alternate.active,
-element selected.urgent {
-    background-color:            var(active);
-    text-color:                  var(background);
+    background-color:            transparent;
+    text-color:                  @text-main;
 }
 
 element selected.normal {
-    background-color:            var(selected);
-    text-color:                  var(background);
+    background-image:            @gold-box;
+    text-color:                  #11111b;
 }
 
 element-icon {
     background-color:            transparent;
     text-color:                  inherit;
-    size:                        24px;
+    size:                        32px;
     cursor:                      inherit;
 }
 
@@ -160,51 +125,5 @@ element-text {
     highlight:                   inherit;
     cursor:                      inherit;
     vertical-align:              0.5;
-    horizontal-align:            0.0;
-}
-
-mode-switcher {
-    enabled:                     true;
-    spacing:                     10px;
-    padding:                     0px;
-    background-color:            transparent;
-    text-color:                  @foreground;
-}
-
-button {
-    padding:                     10px;
-    border-radius:               8px;
-    background-color:            @background-alt;
-    text-color:                  inherit;
-    cursor:                      pointer;
-}
-
-button selected {
-    background-color:            var(urgent);
-    text-color:                  var(background);
-}
-
-message {
-    enabled:                     true;
-    padding:                     10px;
-    border-radius:               8px;
-    background-color:            @background-alt;
-    text-color:                  @foreground;
-}
-
-textbox {
-    background-color:            transparent;
-    text-color:                  @foreground;
-    vertical-align:              0.5;
-    horizontal-align:            0.0;
-    highlight:                   none;
-    placeholder-color:           @foreground;
-    blink:                       true;
-    markup:                      true;
-}
-
-error-message {
-    padding:                     20px;
-    background-color:            @background;
-    text-color:                  @foreground;
+    font:                        "IosevkaCustom Nerd Font Extended 13";
 }
