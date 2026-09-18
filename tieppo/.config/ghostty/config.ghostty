@@ -1,14 +1,38 @@
-font-size                         = 14
-font-family                       = "IosevkaCustom Nerd Font Extended"
-background                        = 0a0a0d
-foreground                        = 0db9d7
-
 confirm-close-surface             = false
-# macos-titlebar-style              = hidden
 window-inherit-working-directory  = true
+gtk-single-instance               = false
 
-keybind                           = alt+,=text:ghostty +edit-config\n
-keybind                           = alt+super+left=unbind
-keybind                           = alt+super+right=unbind
-keybind                           = alt+super+up=unbind
-keybind                           = alt+super+down=unbind
+macos-titlebar-style              = hidden
+adjust-cell-height                = 10%
+font-size                         = 12
+font-family                       = "IosevkaCustom Nerd Font Extended"
+
+palette = 0=#FFFFFF
+palette = 1=#ff0051
+palette = 2=#01dc84
+# palette = 3=#faf945
+palette = 3=#e41951
+palette = 4=#0271b6
+palette = 5=#c930c7
+palette = 6=#702ded
+palette = 7=#c7c7c7
+palette = 8=#686868
+palette = 9=#ff6e67
+palette = 10=#60fa68
+palette = 11=#fffc67
+palette = 12=#6871ff
+palette = 13=#bd35ec
+palette = 14=#60fdff
+palette = 15=#ffffff
+background = #08080b
+# background = #101116
+foreground = #686868
+# foreground = #e41951
+cursor-color = #00FF00
+cursor-text = #000000
+selection-background = #171827
+selection-foreground = #a500ff
+
+keybind                           = alt+n=new_window
+keybind                           = alt+shift+,=reload_config
+
