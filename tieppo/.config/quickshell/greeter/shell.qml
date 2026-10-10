@@ -18,7 +18,7 @@ ShellRoot {
     property int userIndex: 0
     property string hostname: ""
     readonly property string user: users[userIndex] ?? ""
-    readonly property var session: ["start-hyprland"]
+    readonly property var session: ["start-hyprland >/dev/null 2>&1"]
 
     function submit() {
         if (busy || buffer === "" || user === "")
@@ -98,8 +98,7 @@ ShellRoot {
                 lock: root
                 wallpaper: Quickshell.shellPath("wallpaper")
                 userName: root.user + (root.users.length > 1 ? "  󰁔" : "")
-                hint: "Senha"
-                status: [root.hostname, "Hyprland", root.users.length > 1 ? "Tab troca de usuário" : ""].filter(s => s).join("     ")
+                hint: "****"
             }
         }
     }

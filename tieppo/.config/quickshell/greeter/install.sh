@@ -20,6 +20,6 @@ sudo tee /etc/greetd/config.toml >/dev/null <<EOF
 vt = 1
 
 [default_session]
-command = "start-hyprland -- --config /etc/greetd/hyprland.lua"
+command = "sh -c 'exec start-hyprland -- --config /etc/greetd/hyprland.lua >/dev/null 2>&1'"
 user = "greeter"
 EOF
