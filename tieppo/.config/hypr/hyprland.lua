@@ -1,32 +1,31 @@
 local terminal = "env GTK_IM_MODULE=simple ghostty"
-local fileManager = "thunar"
-local menu = "rofi -show drun -theme ~/.config/rofi/menu.rasi"
+-- local fileManager = "thunar"
+-- local menu = "ags run ~/.config/ags/widget/app.tsx"
+local menu = "qs ipc call launcher toggle"
 local mainMod = "ALT"
 
+hl.bind("SUPER + P", hl.dsp.exec_cmd("hyprpicker"))
 hl.bind("switch:on:Lid Switch", function()
-	hl.timer(function()
-		hl.dispatch(hl.dsp.dpms({ action = "disable" }))
-	end, { timeout = 500, type = "oneshot" })
+  hl.timer(function()
+    hl.dispatch(hl.dsp.dpms({ action = "disable" }))
+  end, { timeout = 500, type = "oneshot" })
 end, { locked = true })
 
 hl.bind("switch:off:Lid Switch", function()
-	hl.timer(function()
-		hl.dispatch(hl.dsp.dpms({ action = "enable" }))
-	end, { timeout = 500, type = "oneshot" })
+  hl.timer(function()
+    hl.dispatch(hl.dsp.dpms({ action = "enable" }))
+  end, { timeout = 500, type = "oneshot" })
 end, { locked = true })
 hl.monitor({ output = "eDP-1", mode = "1920x1080@144", position = "auto", scale = 1 })
 hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-left", scale = 1 })
 
 hl.on("hyprland.start", function()
-	hl.exec_cmd("pkill -x waybar; waybar")
-	hl.exec_cmd("pkill -x swaync; swaync")
-	hl.exec_cmd("sleep 1 && darkman set dark")
-	hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
-	hl.exec_cmd("pkill -x gammastep; gammastep")
-	hl.exec_cmd("hyprpaper")
-
-	hl.exec_cmd('echo "25 0 0" > /sys/class/leds/rgb:kbd_backlight/multi_intensity')
-	hl.exec_cmd("echo 50 > /sys/class/leds/rgb:kbd_backlight/brightness")
+  hl.exec_cmd("qs kill; qs -d")
+  hl.exec_cmd("sleep 1 && darkman set dark")
+  hl.exec_cmd("wl-paste --type text --watch cliphist store")
+  hl.exec_cmd("wl-paste --type image --watch cliphist store")
+  hl.exec_cmd("pkill -x gammastep; gammastep")
+  hl.exec_cmd("hyprpaper")
 end)
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
@@ -34,62 +33,65 @@ hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencop
 hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
 hl.config({
-	dwindle = { preserve_split = true },
-	master = { new_status = "master" },
-	general = {
-		gaps_in = 2,
-		gaps_out = 6,
-		border_size = 1,
-		col = {
-			active_border = { colors = { "rgba(33ccffee)", 0x33CC, "rgba(33ccffee)" }, angle = 45 },
-			inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
-		},
-		resize_on_border = true,
-		allow_tearing = false,
-		layout = "dwindle",
-	},
+  dwindle = { preserve_split = true },
+  master = { new_status = "master" },
+  general = {
+    gaps_in = 2,
+    gaps_out = 6,
+    border_size = 1,
+    col = {
+      active_border = { colors = { "rgba(33ccffee)", 0x33CC, "rgba(33ccffee)" }, angle = 45 },
+      inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
+    },
+    resize_on_border = true,
+    allow_tearing = false,
+    layout = "dwindle",
+  },
 
-	decoration = {
-		rounding = 10,
-		rounding_power = 12,
-		active_opacity = 1.0,
-		inactive_opacity = 1.0,
+  decoration = {
+    rounding = 10,
+    rounding_power = 12,
+    active_opacity = 0.8,
+    inactive_opacity = 0.8,
 
-		shadow = {
-			enabled = true,
-			range = 4,
-			render_power = 3,
-			color = "#00000000",
-		},
+    shadow = {
+      enabled = true,
+      range = 4,
+      render_power = 3,
+      color = "#00000000",
+    },
 
-		blur = {
-			enabled = true,
-			size = 3,
-			passes = 1,
-			vibrancy = 0.1696,
-		},
-	},
+    blur = {
+      enabled = true,
+      size = 3,
+      passes = 1,
+      vibrancy = 0.1696,
+    },
+  },
 
-	animations = {
-		enabled = true,
-	},
+  animations = {
+    enabled = true,
+  },
 
-	misc = {
-		force_default_wallpaper = 0,
-		disable_hyprland_logo = true,
-	},
+  misc = {
+    force_default_wallpaper = 0,
+    disable_hyprland_logo = true,
+    allow_session_lock_restore = true,
+  },
 
-	input = {
-		kb_layout = "us",
-		kb_variant = "",
-		kb_model = "",
-		follow_mouse = 1,
-		sensitivity = 0,
+  input = {
+    kb_layout = "us",
+    kb_variant = "",
+    kb_model = "",
+    follow_mouse = 1,
+    sensitivity = 0,
+    repeat_delay = 300,
+    repeat_rate = 35,
 
-		touchpad = {
-			natural_scroll = true,
-		},
-	},
+    touchpad = {
+      natural_scroll = true,
+    },
+  },
 })
 
 hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
@@ -116,24 +118,33 @@ hl.animation({ leaf = "workspacesIn", enabled = true, speed = 1.21, bezier = "al
 hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" })
 
+hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("qs ipc call claude toggle"))
 hl.window_rule({
-	match = { class = "thunar" },
-	float = true,
-	size = { 900, 500 },
+  match = { class = "claude-panel" },
+  float = true,
+  workspace = "special:claude",
+  size = "520 970",
+  move = "1392 86",
+})
+
+hl.window_rule({
+  match = { class = "thunar" },
+  float = true,
+  size = { 900, 500 },
 })
 
 function SendShortcut(params)
-	local timer = function()
-		local args = params
-		args.state = "up"
-		hl.dispatch(hl.dsp.send_key_state(args))
-	end
-	return function()
-		local args = params
-		args.state = "down"
-		hl.dispatch(hl.dsp.send_key_state(args))
-		hl.timer(timer, { timeout = 20, type = "oneshot" })
-	end
+  local timer = function()
+    local args = params
+    args.state = "up"
+    hl.dispatch(hl.dsp.send_key_state(args))
+  end
+  return function()
+    local args = params
+    args.state = "down"
+    hl.dispatch(hl.dsp.send_key_state(args))
+    hl.timer(timer, { timeout = 20, type = "oneshot" })
+  end
 end
 
 hl.bind("SUPER + E", hl.dsp.exec_cmd("wtype -k dead_acute"))
@@ -146,20 +157,20 @@ hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + A", SendShortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
 hl.bind(mainMod .. " + R", SendShortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
 hl.bind(mainMod .. " + L", function()
-	local w = hl.get_active_window()
-	if w ~= nil and w.class == "glide-glide" then
-		hl.dispatch(SendShortcut({ mods = "CTRL", key = "L", window = "activewindow" }))
-	else
-		hl.dispatch(SendShortcut({ mods = "ALT", key = "L", window = "activewindow" }))
-	end
+  local w = hl.get_active_window()
+  if w ~= nil and w.class == "glide-glide" then
+    hl.dispatch(SendShortcut({ mods = "CTRL", key = "L", window = "activewindow" }))
+  else
+    hl.dispatch(SendShortcut({ mods = "ALT", key = "L", window = "activewindow" }))
+  end
 end)
 hl.bind(mainMod .. " + C", function()
-	local w = hl.get_active_window()
-	if w ~= nil and w.class == "glide-glide" then
-		hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
-	else
-		hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
-	end
+  local w = hl.get_active_window()
+  if w ~= nil and w.class == "glide-glide" then
+    hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
+  else
+    hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
+  end
 end)
 hl.bind(mainMod .. " + V", SendShortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
 hl.bind(mainMod .. " + SHIFT + I", SendShortcut({ mods = "CTRL SHIFT", key = "code:31", window = "activewindow" }))
@@ -181,8 +192,8 @@ hl.bind("SUPER + up", SendShortcut({ mods = "ALT", key = "Up", window = "activew
 hl.bind("SUPER + down", SendShortcut({ mods = "ALT", key = "Down", window = "activewindow" }))
 
 for i = 1, 9 do
-	hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
-	hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = tostring(i) }))
+  hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
+  hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = tostring(i) }))
 end
 
 hl.bind("SUPER + 0", hl.dsp.focus({ workspace = "10" }))
@@ -198,24 +209,37 @@ hl.bind("SUPER + K", hl.dsp.focus({ direction = "u" }))
 hl.bind("SUPER + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 hl.bind("SUPER + SHIFT + F", hl.dsp.window.fullscreen())
 hl.bind("SUPER + S", hl.dsp.workspace.toggle_special("magic"))
-hl.bind("SUPER + P", hl.dsp.exec_cmd("hyprpicker"))
 hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
 hl.bind(
-	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
-	{ repeating = true, locked = true }
+  "XF86AudioRaiseVolume",
+  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
+  { repeating = true, locked = true }
 )
 hl.bind(
-	"XF86AudioLowerVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
-	{ repeating = true, locked = true }
+  "XF86AudioLowerVolume",
+  hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+  { repeating = true, locked = true }
 )
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { repeating = true, locked = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { repeating = true, locked = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc call sys brightness"), { repeating = true, locked = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc call sys brightness"), { repeating = true, locked = true })
+hl.bind("XF86KbdBrightnessUp", hl.dsp.exec_cmd("qs ipc call kbd up"), { repeating = true, locked = true })
+hl.bind("XF86KbdBrightnessDown", hl.dsp.exec_cmd("qs ipc call kbd down"), { repeating = true, locked = true })
 hl.bind("Print", hl.dsp.exec_cmd("grim"))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd("qs ipc call screenshot region"))
+hl.bind(mainMod .. " + SHIFT + 3", hl.dsp.exec_cmd("qs ipc call screenshot full"))
+hl.bind(mainMod .. " + SHIFT + 4", hl.dsp.exec_cmd("qs ipc call screenshot region"))
+hl.bind(mainMod .. " + SHIFT + 5", hl.dsp.exec_cmd("qs ipc call screenshot region"))
+hl.bind("SUPER + V", hl.dsp.exec_cmd("qs ipc call launcher clipboard"))
+hl.bind("XF86PowerOff", hl.dsp.exec_cmd("qs ipc call lock lock"))
+hl.bind("SUPER + ALT + F6", hl.dsp.exec_cmd("qs ipc call power cycle"))
+hl.layer_rule({
+  name = "quickshell-region-no-anim",
+  match = { namespace = "^quickshell-region$" },
+  no_anim = true,
+})
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })

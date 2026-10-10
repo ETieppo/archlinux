@@ -44,9 +44,9 @@ sudo pacman -S --needed --noconfirm \
 
 echo "== Installing base packages =="
 sudo pacman -S --needed --noconfirm \
-  zsh git base-devel unzip bluez bluez-utils lua \ 
-  hyprland thunar ghostty postgresql waybar rsync \
-  pavucontrol rofi greetd adwaita-icon-theme \
+  zsh git base-devel unzip bluez bluez-utils lua \
+  hyprland thunar ghostty postgresql quickshell rsync \
+  pavucontrol greetd adwaita-icon-theme \
   ttf-jetbrains-mono-nerd minio-client darkman \
   xdg-desktop-portal-hyprland gvfs file-roller \
   gammastep grim pulseaudio pulseaudio-alsa \
@@ -55,7 +55,8 @@ sudo pacman -S --needed --noconfirm \
   ffmpegthumbnailer tumbler wl-clipboard \
   qt5-declarative qt5-graphicaleffects qt5-quickcontrols \
   qt5-quickcontrols2 geoclue2 pipewire-pulse wireplumber \
-  avahi nss-mdns
+  avahi nss-mdns pacman-contrib chromium \
+  power-profiles-daemon cliphist
 
 echo "== Installing yay (AUR helper) =="
 if ! command -v yay >/dev/null 2>&1; then
@@ -112,6 +113,7 @@ fi
 if [ -d "./usr" ]; then
   sudo rsync -av --no-owner --no-group --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r usr/ /usr/
 fi
+"$USER_HOME/.config/quickshell/greeter/install.sh"
 
 echo "== Plymouth themes cleanup =="
 sudo find /usr/share/plymouth/themes -mindepth 1 -maxdepth 1 ! -name arch-logo-symbol -exec rm -rf {} +
@@ -161,8 +163,10 @@ if ! sudo test -d /var/lib/postgres/data/base; then
     -D /var/lib/postgres/data
 fi
 sudo systemctl enable postgresql
-sudo systemctl enable sddm
+sudo systemctl disable sddm || true
+sudo systemctl enable greetd
 sudo systemctl enable bluetooth
+sudo systemctl enable power-profiles-daemon
 sudo systemctl enable NetworkManager
 sudo systemctl enable --now avahi-daemon.service
 systemctl --user enable --now gammastep.service
