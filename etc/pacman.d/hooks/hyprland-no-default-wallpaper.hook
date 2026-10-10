@@ -1,0 +1,10 @@
+[Trigger]
+Type = Package
+Operation = Install
+Operation = Upgrade
+Target = hyprland
+
+[Action]
+Description = Replacing Hyprland default wallpapers with black...
+When = PostTransaction
+Exec = /usr/bin/sh -c 'for f in /usr/share/hypr/wall0.png /usr/share/hypr/wall1.png /usr/share/hypr/wall2.png; do [ -f "$f" ] && cp /usr/local/share/hypr/black.png "$f"; done'
