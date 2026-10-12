@@ -147,10 +147,42 @@ function SendShortcut(params)
   end
 end
 
-hl.bind("SUPER + E", hl.dsp.exec_cmd("wtype -k dead_acute"))
-hl.bind("SUPER + N", hl.dsp.exec_cmd("wtype -k dead_tilde"))
-hl.bind("SUPER + I", hl.dsp.exec_cmd("wtype -k dead_circumflex"))
-hl.bind("SUPER + C", hl.dsp.exec_cmd("wtype -m logo -k dead_cedilla -k c"))
+local function TypeText(text)
+  return hl.dsp.exec_cmd(os.getenv("HOME") .. "/.local/bin/wtype '" .. text .. "'")
+end
+
+local deadKeys = {
+  { trigger = "E",     name = "acute",      symbol = "´", letters = { a = { "á", "Á" }, e = { "é", "É" }, i = { "í", "Í" }, o = { "ó", "Ó" }, u = { "ú", "Ú" } } },
+  { trigger = "grave", name = "grave",      symbol = "`", letters = { a = { "à", "À" }, e = { "è", "È" }, i = { "ì", "Ì" }, o = { "ò", "Ò" }, u = { "ù", "Ù" } } },
+  { trigger = "I",     name = "circumflex", symbol = "^", letters = { a = { "â", "Â" }, e = { "ê", "Ê" }, i = { "î", "Î" }, o = { "ô", "Ô" }, u = { "û", "Û" } } },
+  { trigger = "N",     name = "tilde",      symbol = "~", letters = { a = { "ã", "Ã" }, o = { "õ", "Õ" }, n = { "ñ", "Ñ" } } },
+  { trigger = "U",     name = "diaeresis",  symbol = "¨", letters = { a = { "ä", "Ä" }, e = { "ë", "Ë" }, i = { "ï", "Ï" }, o = { "ö", "Ö" }, u = { "ü", "Ü" } } },
+  { trigger = "C",     name = "seila",      symbol = "¨", letters = { a = { "ä", "Ä" }, e = { "ë", "Ë" }, i = { "ï", "Ï" }, o = { "ö", "Ö" }, u = { "ü", "Ü" } } },
+  { trigger = "C",     name = "cedilla",    symbol = "¸", letters = { c = { "ç", "Ç" } } },
+}
+
+local function TypeAndReset(text)
+  return function()
+    hl.dispatch(TypeText(text))
+    hl.dispatch(hl.dsp.submap("reset"))
+  end
+end
+
+for _, dead in ipairs(deadKeys) do
+  hl.define_submap(dead.name, function()
+    for letter, chars in pairs(dead.letters) do
+      hl.bind(letter, TypeAndReset(chars[1]))
+      hl.bind("SHIFT + " .. letter, TypeAndReset(chars[2]))
+    end
+    hl.bind("SPACE", TypeAndReset(dead.symbol))
+    hl.bind("Shift_L", hl.dsp.no_op(), { ignore_mods = true, non_consuming = true })
+    hl.bind("Shift_R", hl.dsp.no_op(), { ignore_mods = true, non_consuming = true })
+    hl.bind("Escape", hl.dsp.submap("reset"))
+    hl.bind("catchall", hl.dsp.submap("reset"))
+  end)
+  hl.bind("SUPER + " .. dead.trigger, hl.dsp.submap(dead.name))
+end
+
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
@@ -178,7 +210,14 @@ hl.bind(mainMod .. " + F", SendShortcut({ mods = "CTRL", key = "F", window = "ac
 hl.bind(mainMod .. " + X", SendShortcut({ mods = "CTRL", key = "X", window = "activewindow" }))
 hl.bind(mainMod .. " + Z", SendShortcut({ mods = "CTRL", key = "Z", window = "activewindow" }))
 hl.bind(mainMod .. " + W", SendShortcut({ mods = "CTRL", key = "W", window = "activewindow" }))
-hl.bind(mainMod .. " + N", SendShortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
+hl.bind(mainMod .. " + N", function()
+  local w = hl.get_active_window()
+  if w ~= nil and w.class == "com.mitchellh.ghostty" then
+    hl.dispatch(SendShortcut({ mods = "ALT", key = "N", window = "activewindow" }))
+  else
+    hl.dispatch(SendShortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
+  end
+end)
 hl.bind(mainMod .. " + right", SendShortcut({ mods = "", key = "End", window = "activewindow" }))
 hl.bind(mainMod .. " + left", SendShortcut({ mods = "", key = "Home", window = "activewindow" }))
 hl.bind(mainMod .. " + SHIFT + right", SendShortcut({ mods = "SHIFT", key = "End", window = "activewindow" }))
@@ -223,8 +262,10 @@ hl.bind(
 )
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc call sys brightness"), { repeating = true, locked = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc call sys brightness"), { repeating = true, locked = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc call sys brightness"),
+  { repeating = true, locked = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc call sys brightness"),
+  { repeating = true, locked = true })
 hl.bind("XF86KbdBrightnessUp", hl.dsp.exec_cmd("qs ipc call kbd up"), { repeating = true, locked = true })
 hl.bind("XF86KbdBrightnessDown", hl.dsp.exec_cmd("qs ipc call kbd down"), { repeating = true, locked = true })
 hl.bind("Print", hl.dsp.exec_cmd("grim"))

@@ -12,7 +12,6 @@ Singleton {
     property bool nightLight: false
     property bool locked: false
     property bool launcherOpen: false
-    property string launcherMode: "apps"
     property string wallpaper: Quickshell.env("HOME") + "/.local/share/wallpapers/alone.png"
 
     FileView {
@@ -26,11 +25,6 @@ Singleton {
 
     function lock() {
         locked = true;
-    }
-
-    function openLauncher(mode) {
-        launcherMode = mode;
-        launcherOpen = true;
     }
 
     function cycleProfile(back) {
@@ -58,16 +52,7 @@ Singleton {
     IpcHandler {
         target: "launcher"
         function toggle(): void {
-            if (root.launcherOpen && root.launcherMode === "apps")
-                root.launcherOpen = false;
-            else
-                root.openLauncher("apps");
-        }
-        function clipboard(): void {
-            if (root.launcherOpen && root.launcherMode === "clipboard")
-                root.launcherOpen = false;
-            else
-                root.openLauncher("clipboard");
+            root.launcherOpen = !root.launcherOpen;
         }
     }
     property string lastColor: ""
