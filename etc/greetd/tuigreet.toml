@@ -1,7 +1,0 @@
-# /etc/greetd/tuigreet.toml
-background_color = "#2E3440"
-text_color = "#ECEFF4"
-border_color = "#88C0D0"
-greeting_color = "#A3BE8C"
-error_color = "#BF616A"
-show_splash = false

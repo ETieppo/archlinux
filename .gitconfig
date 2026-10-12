@@ -1,0 +1,6 @@
+[user]
+	name = Tieppo
+	email = tieppo.emerson.a.jr@gmail.com
+
+[url "git@github.com:etieppo/"]
+	insteadOf = tieppo:
