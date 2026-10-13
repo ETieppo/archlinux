@@ -54,8 +54,8 @@ hl.config({
   decoration = {
     rounding = 10,
     rounding_power = 12,
-    active_opacity = 0.8,
-    inactive_opacity = 0.8,
+    active_opacity = 1,
+    inactive_opacity = 1,
 
     shadow = {
       enabled = true,
@@ -123,11 +123,11 @@ hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" 
 
 hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("qs ipc call claude toggle"))
 hl.window_rule({
-  match = { class = "claude-panel" },
+  match = { class = "chrome-claude.ai__-Default" },
   float = true,
   workspace = "special:claude",
-  size = "520 970",
-  move = "1392 86",
+  size = "520 938",
+  move = "1940 86",
 })
 
 hl.window_rule({
