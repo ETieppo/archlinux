@@ -13,6 +13,8 @@ ColumnLayout {
     spacing: 2
     visible: SystemTray.items.values.length > 0
 
+    Sep {}
+
     Repeater {
         model: SystemTray.items
 
@@ -41,6 +43,4 @@ ColumnLayout {
             }
         }
     }
-
-    Sep {}
 }

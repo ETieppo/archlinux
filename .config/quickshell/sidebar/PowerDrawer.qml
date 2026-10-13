@@ -9,11 +9,11 @@ ColumnLayout {
     spacing: 4
 
     readonly property var actions: [
-        { icon: "󰌾", tip: "Bloquear", color: Theme.fg, cmd: "lock" },
-        { icon: "󰍃", tip: "Sair do Hyprland", color: Theme.mauve, cmd: ["hyprctl", "dispatch", "hl.dsp.exit()"] },
-        { icon: "󰤄", tip: "Suspender", color: Theme.accent, cmd: "suspend" },
-        { icon: "󰜉", tip: "Reiniciar", color: Theme.yellow, cmd: ["systemctl", "reboot"] },
-        { icon: "󰐥", tip: "Desligar", color: Theme.red, cmd: ["systemctl", "poweroff"] }
+        { icon: "󰌾", tip: "Lock", color: Theme.fg, cmd: "lock" },
+        { icon: "󰍃", tip: "Exit Hyprland", color: Theme.mauve, cmd: ["hyprctl", "dispatch", "hl.dsp.exit()"] },
+        { icon: "󰤄", tip: "Suspend", color: Theme.accent, cmd: "suspend" },
+        { icon: "󰜉", tip: "Reboot", color: Theme.accent, cmd: ["systemctl", "reboot"] },
+        { icon: "󰐥", tip: "Power off", color: Theme.red, cmd: ["systemctl", "poweroff"] }
     ]
 
     Item {
@@ -58,7 +58,7 @@ ColumnLayout {
         icon: Ui.powerOpen ? "󰅖" : "󰐥"
         iconColor: Theme.red
         active: Ui.powerOpen
-        tip: Ui.powerOpen ? "" : "Energia"
+        tip: Ui.powerOpen ? "" : "Power"
         onClicked: Ui.powerOpen = !Ui.powerOpen
     }
 

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs
 import qs.bar
+import qs.bottom
 import qs.sidebar
 import qs.notifications
 import qs.overlays
@@ -18,6 +19,11 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         SideBar {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        BottomBar {}
     }
 
     Popups {}

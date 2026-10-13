@@ -82,7 +82,7 @@ Scope {
                     ColumnLayout {
                         spacing: 2
                         Label {
-                            text: "Autenticação necessária"
+                            text: "Authentication required"
                             color: Theme.accent
                             font.pixelSize: 16
                         }
@@ -131,7 +131,7 @@ Scope {
                         Text {
                             visible: !pass.text
                             anchors.verticalCenter: parent.verticalCenter
-                            text: (root.flow?.inputPrompt || "Senha").replace(/:\s*$/, "")
+                            text: (root.flow?.inputPrompt || "Password").replace(/:\s*$/, "")
                             color: Theme.muted
                             font: pass.font
                         }
@@ -152,8 +152,8 @@ Scope {
                     spacing: 8
                     Repeater {
                         model: [
-                            { label: "Cancelar", primary: false },
-                            { label: "Autenticar", primary: true }
+                            { label: "Cancel", primary: false },
+                            { label: "Authenticate", primary: true }
                         ]
                         Rectangle {
                             required property var modelData

@@ -10,6 +10,8 @@ Singleton {
     id: root
 
     property bool nightLight: false
+    property real nightOffAt: 0
+    property real screenManualAt: 0
     property bool locked: false
     property bool launcherOpen: false
     property string wallpaper: Quickshell.env("HOME") + "/.local/share/wallpapers/alone.png"
@@ -28,9 +30,7 @@ Singleton {
     }
 
     function cycleProfile(back) {
-        const order = PowerProfiles.hasPerformanceProfile
-            ? [PowerProfile.PowerSaver, PowerProfile.Balanced, PowerProfile.Performance]
-            : [PowerProfile.PowerSaver, PowerProfile.Balanced];
+        const order = PowerProfiles.hasPerformanceProfile ? [PowerProfile.PowerSaver, PowerProfile.Balanced, PowerProfile.Performance] : [PowerProfile.PowerSaver, PowerProfile.Balanced];
         const n = order.length;
         PowerProfiles.profile = order[(order.indexOf(PowerProfiles.profile) + (back ? n - 1 : 1)) % n];
     }
@@ -64,24 +64,50 @@ Singleton {
         else
             Quickshell.execDetached(["gammastep"]);
         nightLight = !nightLight;
+        nightOffAt = nightLight ? 0 : Date.now();
+        if (nightLight)
+            nightRevert.stop();
+        else
+            nightRevert.restart();
+    }
+
+    signal autoAll()
+
+    function restoreAuto() {
+        if (!nightLight)
+            nightRevert.triggered();
+        nightRevert.stop();
+        autoAll();
+    }
+
+    Timer {
+        id: nightRevert
+        interval: 3600000
+        onTriggered: {
+            if (!root.nightLight) {
+                Quickshell.execDetached(["sh", "-c", "pkill -x gammastep; gammastep"]);
+                root.nightLight = true;
+            }
+            root.nightOffAt = 0;
+        }
     }
 
     readonly property int claudeWidth: 520
     readonly property int claudePad: 8
     property bool claudeOpen: false
 
+    readonly property string claudeApp: "chrome-claude.ai__-Default"
+
     function toggleClaude() {
-        if (!ToplevelManager.toplevels.values.some(t => t.appId === "claude-panel"))
-            Quickshell.execDetached(["sh", "-c", "chromium --user-data-dir=$HOME/.local/share/claude-panel --class=claude-panel --app=https://claude.ai"]);
-        else
-            Quickshell.execDetached(["hyprctl", "dispatch", 'hl.dsp.workspace.toggle_special("claude")']);
+        claudeOpen = !claudeOpen;
+        Quickshell.execDetached([Quickshell.shellPath("scripts/claude-panel"), claudeOpen ? "show" : "hide"]);
     }
 
     Connections {
         target: Hyprland
         function onRawEvent(event) {
-            if (event.name === "activespecial")
-                root.claudeOpen = event.data.split(",")[0] === "special:claude";
+            if (event.name === "closewindow" && root.claudeOpen && !ToplevelManager.toplevels.values.some(t => t.appId === root.claudeApp))
+                root.claudeOpen = false;
         }
     }
 
@@ -111,7 +137,7 @@ Singleton {
             f="$dir/$(date +%F_%H-%M-%S).png"
             ${geom ? `grim -g "${geom}" "$f"` : 'sleep 0.3; grim "$f"'} || exit 1
             wl-copy < "$f"
-            notify-send -a Screenshot -i "$f" "Screenshot salvo" "Copiado para a área de transferência"
+            notify-send -a Screenshot -i "$f" "Screenshot saved" "Copied to clipboard"
         `]);
     }
 
@@ -150,7 +176,13 @@ Singleton {
         running: true
         command: ["sh", "-c", "pgrep -x gammastep >/dev/null && echo on || echo off"]
         stdout: StdioCollector {
-            onStreamFinished: root.nightLight = this.text.trim() === "on"
+            onStreamFinished: {
+                root.nightLight = this.text.trim() === "on";
+                if (!root.nightLight) {
+                    root.nightOffAt = Date.now();
+                    nightRevert.restart();
+                }
+            }
         }
     }
 

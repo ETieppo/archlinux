@@ -27,6 +27,10 @@ Singleton {
 
     readonly property int gap: 6
     readonly property int barHeight: 32
-    readonly property int sideWidth: 56
+    readonly property int sideWidth: 52
+    readonly property int sidePad: 6
+    readonly property int sideButton: sideWidth - 2 * sidePad
+    readonly property int sideRadius: 12
     readonly property int fillet: 16
+    readonly property int bottomHeight: 32
 }
