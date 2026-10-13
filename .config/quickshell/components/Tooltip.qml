@@ -9,16 +9,17 @@ LazyLoader {
     property string text: ""
     property bool shown: false
     property bool below: false
+    property bool above: false
 
     active: shown && text !== ""
 
     PopupWindow {
         anchor.item: root.target
-        anchor.rect.x: root.below ? root.target.width / 2 : root.target.width + 14
-        anchor.rect.y: root.below ? root.target.height + 8 : root.target.height / 2
+        anchor.rect.x: root.below || root.above ? root.target.width / 2 : root.target.width + 14
+        anchor.rect.y: root.below ? root.target.height + 8 : root.above ? -10 : root.target.height / 2
         anchor.rect.width: 1
         anchor.rect.height: 1
-        anchor.gravity: root.below ? Edges.Bottom : Edges.Right
+        anchor.gravity: root.below ? Edges.Bottom : root.above ? Edges.Top : Edges.Right
         visible: true
         color: "transparent"
         implicitWidth: label.implicitWidth + (root.below ? 12 : 22)

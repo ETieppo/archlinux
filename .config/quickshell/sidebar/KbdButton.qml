@@ -11,7 +11,7 @@ SideButton {
     icon: KbdLight.bright > 0 ? "󰌌" : "󰥻"
     iconColor: KbdLight.bright > 0 ? KbdLight.color : Theme.muted
     active: pop.visible
-    tip: pop.visible ? "" : `Luz do teclado · ${KbdLight.sleeping ? "modo sono (vermelho, mínimo)" : KbdLight.mode === "sky" ? "seguindo o céu" : "cor fixa"} · ${KbdLight.bright}/${KbdLight.max}\n󰒭 rolar ajusta o brilho`
+    tip: pop.visible ? "" : `Keyboard light · ${KbdLight.sleeping ? "sleep mode" : KbdLight.mode === "sky" ? "following the sky" : "fixed color"} · ${KbdLight.bright}/${KbdLight.max}\n󰒭 scroll adjusts brightness`
 
     onClicked: pop.visible = !pop.visible
     onWheel: d => KbdLight.setBright(KbdLight.bright + (d > 0 ? 1 : -1))
@@ -51,11 +51,11 @@ SideButton {
                 RowLayout {
                     Label {
                         Layout.fillWidth: true
-                        text: "Luz do teclado"
+                        text: "Keyboard light"
                         color: Theme.accent
                     }
                     Label {
-                        text: KbdLight.bright === 0 ? "desligada" : (KbdLight.sleeping ? "󰒲 modo sono · " : KbdLight.mode === "sky" ? "céu · " : "") + `${KbdLight.bright}/${KbdLight.max}`
+                        text: KbdLight.bright === 0 ? "off" : (KbdLight.sleeping ? "󰒲 sleep · " : KbdLight.mode === "sky" ? "sky · " : "") + `${KbdLight.bright}/${KbdLight.max}`
                         color: Theme.dim
                         font.pixelSize: 12
                     }
@@ -110,7 +110,7 @@ SideButton {
                         anchors.left: parent.left
                         anchors.leftMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "󰖨 Céu"
+                        text: "󰖨 Sky"
                         color: KbdLight.mode === "sky" ? Theme.accent : Theme.dim
                         font.pixelSize: 12
                     }
@@ -128,12 +128,12 @@ SideButton {
                     Repeater {
                         model: KbdLight.presets
                         Rectangle {
-                            required property string modelData
-                            readonly property bool on: KbdLight.mode === "fixed" && Qt.colorEqual(KbdLight.fixedColor, modelData)
+                            required property var modelData
+                            readonly property bool on: KbdLight.mode === "fixed" && Qt.colorEqual(KbdLight.fixedColor, modelData.c)
                             implicitWidth: 34
                             implicitHeight: 34
                             radius: 17
-                            color: modelData
+                            color: modelData.c
                             border.width: on ? 3 : 0
                             border.color: Theme.fg
                             scale: sm.containsMouse ? 1.12 : 1
@@ -143,7 +143,7 @@ SideButton {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: KbdLight.setColor(parent.modelData)
+                                onClicked: KbdLight.setColor(parent.modelData.c)
                             }
                         }
                     }

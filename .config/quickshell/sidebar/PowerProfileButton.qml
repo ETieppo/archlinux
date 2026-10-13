@@ -7,8 +7,8 @@ SideButton {
 
     icon: p === PowerProfile.PowerSaver ? "󰌪" : p === PowerProfile.Performance ? "󰓅" : "󰾅"
     iconColor: p === PowerProfile.PowerSaver ? Theme.green : p === PowerProfile.Performance ? Theme.red : Theme.fg
-    tip: "Perfil de energia: " + (p === PowerProfile.PowerSaver ? "economia" : p === PowerProfile.Performance ? "desempenho" : "equilibrado")
-        + "\n󰍽 direito volta"
+    tip: "Power profile: " + (p === PowerProfile.PowerSaver ? "power saver" : p === PowerProfile.Performance ? "performance" : "balanced")
+        + "\n󰍽 right-click goes back"
 
     onClicked: m => Ui.cycleProfile(m.button === Qt.RightButton)
 }

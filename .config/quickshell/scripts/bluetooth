@@ -1,10 +1,4 @@
 #!/usr/bin/env bash
-#
-# Scan, select, pair, and connect to Bluetooth devices
-# Passing "off" powers off Bluetooth
-#
-# Requires bluez-utils (bluetoothctl) and fzf
-#
 # Author:  Jesse Mirabel <sejjymvm@gmail.com>
 # Date:    August 19, 2025
 # License: MIT
@@ -70,7 +64,6 @@ get_devices() {
 		num=$(bluetoothctl devices | grep -c "^Device")
 		printf "\nDevices: %d" "$num"
 
-		# Move cursor 3 lines up
 		printf "\e[3F"
 
 		read -rsn 1 -t 1
@@ -151,13 +144,11 @@ main() {
 		return 0
 	fi
 
-	# Make cursor invisible
 	printf "\e[?25l"
 
 	power_on
 	get_devices
 
-	# Make cursor visible
 	printf "\e[?25h"
 
 	select_device

@@ -13,6 +13,7 @@ Canvas {
 
     onValueChanged: requestPaint()
     onColorChanged: requestPaint()
+    onTrackChanged: requestPaint()
 
     onPaint: {
         const ctx = getContext("2d");

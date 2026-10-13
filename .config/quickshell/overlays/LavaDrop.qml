@@ -1,14 +1,13 @@
 import QtQuick
 
-// one soft sprite in the launcher's metaball field
 Item {
     id: drop
 
     property real cx: 0
     property real cy: 0
-    property real r: 40 // visual radius once thresholded
-    property int hue: 0 // 0..3, palette slot
-    property real hot: 0 // 1 = selected
+    property real r: 40
+    property int hue: 0
+    property real hot: 0
 
     width: r * 3.7
     height: width

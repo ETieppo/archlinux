@@ -61,7 +61,7 @@ PopupWindow {
                 Label {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    text: Qt.locale("pt_BR").standaloneMonthName(root.shown.getMonth()) + " " + root.shown.getFullYear()
+                    text: Qt.locale("en_US").standaloneMonthName(root.shown.getMonth()) + " " + root.shown.getFullYear()
                     color: Theme.accent
                     font.capitalization: Font.Capitalize
                 }
@@ -78,7 +78,7 @@ PopupWindow {
 
             DayOfWeekRow {
                 Layout.fillWidth: true
-                locale: Qt.locale("pt_BR")
+                locale: Qt.locale("en_US")
                 delegate: Label {
                     required property string shortName
                     text: shortName.slice(0, 3)
@@ -92,7 +92,7 @@ PopupWindow {
                 Layout.fillWidth: true
                 month: root.shown.getMonth()
                 year: root.shown.getFullYear()
-                locale: Qt.locale("pt_BR")
+                locale: Qt.locale("en_US")
                 delegate: Item {
                     required property var model
                     readonly property bool today: model.today

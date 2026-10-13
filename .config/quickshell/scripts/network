@@ -1,10 +1,4 @@
 #!/usr/bin/env bash
-#
-# Scan, select, and connect to Wi-Fi networks
-# Passing "off" switches off Wi-Fi
-#
-# Requires fzf and networkmanager (nmcli)
-#
 # Author:  Jesse Mirabel <sejjymvm@gmail.com>
 # Date:    August 11, 2025
 # License: MIT
@@ -118,13 +112,11 @@ main() {
 		exit 0
 	fi
 
-	# Make cursor invisible
 	printf "\e[?25l"
 
 	switch_on
 	get_networks
 
-	# Make cursor visible
 	printf "\e[?25h"
 
 	select_network

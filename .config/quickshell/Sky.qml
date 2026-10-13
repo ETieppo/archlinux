@@ -8,19 +8,14 @@ Singleton {
 
     readonly property real lat: -23.5
     readonly property real lng: -46.6
-
     readonly property date now: clock.date
     readonly property real progress: (now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / 86400
     readonly property var sun: times(now)
     readonly property real sunrise: sun[0]
     readonly property real sunset: sun[1]
     readonly property bool isDay: progress > sunrise && progress < sunset
-
-    // janelas de transição (frações do dia) lidas do gammastep: dusk-time/dawn-time aceitam "HH:MM" ou "HH:MM-HH:MM"
     property var dusk: [21.5 / 24, 21.5 / 24]
     property var dawn: [8.5 / 24, 8.5 / 24]
-    // cores do teclado ao longo do dia: [hora, matiz em graus]; dá uma volta inteira no círculo de cores,
-    // do vermelho ao acordar até o laranja às 21:00 e o vermelho de novo no último ponto
     readonly property var hues: [
         ["07:00", 360],
         ["08:30", 330],
@@ -35,11 +30,9 @@ Singleton {
         ["21:00", 33],
         ["21:45", 0]
     ]
-    // a tela só escurece à noite: começa no último ponto (vermelho) e leva dimMin; ao amanhecer clareia em wakeMin
     readonly property real dimMin: 60
     readonly property real wakeMin: 60
     readonly property real hue: hueAt(progress)
-    // 0 = dia, 1 = noite (só controla o brilho)
     readonly property real night: nightAt(progress)
     readonly property bool rising: span(dawn[0], progress) < wakeMin / 1440
     readonly property bool sleeping: night >= 1
@@ -59,7 +52,6 @@ Singleton {
             const [ta, ha] = hues[i], [tb, hb] = hues[(i + 1) % n];
             const a = frac(ta), len = span(a, frac(tb));
             if (span(a, p) < len) {
-                // caminho mais curto no círculo (a madrugada fica parada no vermelho)
                 const d = ((hb - ha) % 360 + 540) % 360 - 180;
                 return ((ha + d * span(a, p) / len) % 360 + 360) % 360;
             }

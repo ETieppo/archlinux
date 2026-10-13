@@ -62,7 +62,12 @@ PanelWindow {
     Timer {
         id: hideTimer
         interval: 1400
-        onTriggered: root.shown = false
+        onTriggered: {
+            if (root.kind === "brightness" && Sys.fading)
+                restart();
+            else
+                root.shown = false;
+        }
     }
 
     Connections {

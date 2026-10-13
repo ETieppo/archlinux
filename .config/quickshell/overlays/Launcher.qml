@@ -13,9 +13,8 @@ PanelWindow {
     readonly property bool open: Ui.launcherOpen
     readonly property int maxBubbles: 28
     readonly property int blobR: 40
-    readonly property int surface: 64 // liquid surface height above screen bottom
+    readonly property int surface: 64
     readonly property real poolY: height - surface + 30
-    // lava palette, blended where bubbles merge
     readonly property list<color> palette: [Theme.accent, "#89b4fa", Theme.mauve, "#94e2d5"]
     readonly property real exposure: 0.5
     readonly property color liquidTop: palette[0]
@@ -135,7 +134,6 @@ PanelWindow {
         return out.concat(scored.slice(0, maxBubbles).map(x => ({ kind: "app", entry: x.e, name: x.e.name })));
     }
 
-    // apps currently floating as bubbles, by entry id -> index in results
     readonly property var rank: {
         const m = {};
         results.forEach((r, i) => {
@@ -146,7 +144,6 @@ PanelWindow {
     }
     readonly property var shown: results.filter(r => r.kind === "app").map(r => r.entry.id)
 
-    // scattered anchor points: one jittered cell each, in a shuffled order
     readonly property var slots: {
         const W = width - 160, H = height - surface - 220;
         if (W <= 0 || H <= 0)
@@ -171,7 +168,6 @@ PanelWindow {
         return out;
     }
 
-    // apps keep their slot while visible; newcomers take a free one
     function reslot() {
         const next = {}, used = new Set();
         for (const id of shown)
@@ -209,7 +205,6 @@ PanelWindow {
         close();
     }
 
-    // jump to the nearest bubble in direction (dx, dy)
     function spatial(dx, dy) {
         const from = posOf(results[current]);
         if (!from) {
@@ -268,7 +263,6 @@ PanelWindow {
         }
     }
 
-    // backdrop
     Rectangle {
         anchors.fill: parent
         opacity: root.reveal
@@ -283,12 +277,10 @@ PanelWindow {
         }
     }
 
-    // metaball field (density + hue + selection), rendered offscreen
     Item {
         id: field
         anchors.fill: parent
 
-        // the pool the bubbles rise from and drain into
         Rectangle {
             width: parent.width
             height: root.surface * 2
@@ -299,7 +291,6 @@ PanelWindow {
             }
         }
 
-        // waves on the surface
         Repeater {
             model: 14
             LavaDrop {
@@ -312,14 +303,12 @@ PanelWindow {
             }
         }
 
-        // free lava blobs rising and sinking like a lamp
         Repeater {
             model: 5
             LavaDrop {
                 required property int index
                 readonly property real ph: index * 2.371
                 readonly property real period: 26 + index * 7
-                // 0 at the pool, 1 near the top
                 readonly property real h: 0.5 - 0.5 * Math.cos((root.time / period) * 2 * Math.PI + ph)
                 cx: field.width * (0.12 + 0.19 * index) + Math.sin(root.time * 0.17 + ph) * 70
                 hue: (index * 3) % 4
@@ -351,7 +340,6 @@ PanelWindow {
         property real exposure: root.exposure
     }
 
-    // fizz: tiny bubbles climbing out of the pool
     Repeater {
         model: 22
         Rectangle {
@@ -372,7 +360,6 @@ PanelWindow {
         }
     }
 
-    // one bubble per app: its drop lives in the field, its icon on top
     Repeater {
         model: root.apps
 
@@ -432,7 +419,6 @@ PanelWindow {
                 visible: opacity > 0
             }
 
-            // name tag for the selected / hovered bubble
             Rectangle {
                 readonly property bool on: (bub.current || hover.containsMouse) && bub.lift > 0.9
                 x: bub.cx - width / 2
@@ -466,7 +452,6 @@ PanelWindow {
                 enabled: bub.live
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                // bubbles drift under a parked cursor: only a real pointer move selects
                 onPositionChanged: mouse => {
                     const g = mapToItem(null, mouse.x, mouse.y);
                     if (g.x !== root.lastPointer.x || g.y !== root.lastPointer.y) {
@@ -484,12 +469,11 @@ PanelWindow {
         y: parent.height * 0.42
         visible: root.query.trim() !== "" && root.results.length === 0
         opacity: root.reveal
-        text: "nada por aqui"
+        text: "nothing here"
         color: Theme.dim
         font.pixelSize: 18
     }
 
-    // search capsule floating on the surface
     Rectangle {
         id: capsule
         readonly property var cur: root.results[root.current]
@@ -533,7 +517,7 @@ PanelWindow {
 
                 Text {
                     visible: !input.text
-                    text: "buscar"
+                    text: "search"
                     color: Theme.muted
                     font: input.font
                 }
@@ -560,7 +544,7 @@ PanelWindow {
             Label {
                 Layout.maximumWidth: 240
                 visible: text !== ""
-                text: capsule.cur?.kind === "calc" ? "= " + capsule.cur.name : capsule.cur?.kind === "run" ? "↵ executar" : input.text ? capsule.cur?.name ?? "" : ""
+                text: capsule.cur?.kind === "calc" ? "= " + capsule.cur.name : capsule.cur?.kind === "run" ? "↵ run" : input.text ? capsule.cur?.name ?? "" : ""
                 color: capsule.cur?.kind === "calc" ? root.liquidTop : Theme.dim
                 font.pixelSize: capsule.cur?.kind === "calc" ? 16 : 13
                 elide: Text.ElideRight

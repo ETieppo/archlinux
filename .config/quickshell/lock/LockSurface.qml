@@ -12,7 +12,7 @@ Item {
     property string wallpaper: ""
     property string userName: ""
     property string status: ""
-    property string hint: "Digite sua senha"
+    property string hint: "Enter your password"
 
     anchors.fill: parent
     focus: true
@@ -85,7 +85,7 @@ Item {
         }
         Label {
             Layout.alignment: Qt.AlignHCenter
-            readonly property string d: Sky.now.toLocaleDateString(Qt.locale("pt_BR"), "dddd, d 'de' MMMM")
+            readonly property string d: Sky.now.toLocaleDateString(Qt.locale("en_US"), "dddd, MMMM d")
             text: d.charAt(0).toUpperCase() + d.slice(1)
             font.pixelSize: 20
             font.bold: false
@@ -153,7 +153,7 @@ Item {
             Label {
                 anchors.centerIn: parent
                 visible: root.lock.buffer.length === 0
-                text: root.lock.busy ? "Verificando…" : root.lock.failed ? "Senha incorreta" : root.hint
+                text: root.lock.busy ? "Checking…" : root.lock.failed ? "Wrong password" : root.hint
                 font.bold: false
                 color: root.lock.failed ? Theme.red : Theme.muted
             }

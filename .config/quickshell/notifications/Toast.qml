@@ -80,7 +80,7 @@ Rectangle {
                 Layout.fillWidth: true
                 Label {
                     Layout.fillWidth: true
-                    text: root.n.appName || "Notificação"
+                    text: root.n.appName || "Notification"
                     color: root.critical ? Theme.red : Theme.accent
                     font.pixelSize: 11
                     elide: Text.ElideRight

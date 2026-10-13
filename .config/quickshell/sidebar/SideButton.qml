@@ -16,12 +16,12 @@ Item {
     signal clicked(var mouse)
     signal wheel(int delta)
 
-    implicitWidth: 40
-    implicitHeight: 40
+    implicitWidth: Theme.sideButton
+    implicitHeight: Theme.sideButton
 
     Rectangle {
         anchors.fill: parent
-        radius: 12
+        radius: Theme.sideRadius
         color: root.active ? Qt.alpha(Theme.accent, 0.14) : Theme.surface
         opacity: root.active || ma.containsMouse ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 160 } }
@@ -32,9 +32,9 @@ Item {
         anchors.centerIn: parent
         text: root.icon
         color: root.active ? Theme.accent : root.iconColor
-        font.pixelSize: 19
-        scale: ma.pressed ? 0.82 : ma.containsMouse ? 1.1 : 1
-        Behavior on scale { NumberAnimation { duration: 140; easing.type: Easing.OutBack } }
+        font.pixelSize: 18
+        scale: ma.pressed ? 0.85 : 1
+        Behavior on scale { NumberAnimation { duration: 120 } }
         Behavior on color { ColorAnimation { duration: 160 } }
     }
 

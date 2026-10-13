@@ -9,6 +9,7 @@ Singleton {
     property alias usage: adapter.usage
     property alias kbd: adapter.kbd
     property alias nightSaved: adapter.nightSaved
+    property alias runs: adapter.runs
 
     function bump(id) {
         const u = Object.assign({}, usage);
@@ -28,8 +29,12 @@ Singleton {
         JsonAdapter {
             id: adapter
             property var usage: ({})
-            property var kbd: ({ bright: 4, mode: "sky" })
+            property var kbd: ({
+                    bright: 4,
+                    mode: "sky"
+                })
             property int nightSaved: -1
+            property var runs: ({})
         }
     }
 }
