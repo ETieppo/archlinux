@@ -12,23 +12,32 @@ Singleton {
     property string mode: Store.kbd.mode ?? "sky"
     property color fixedColor: Store.kbd.color ?? "#91ffff"
 
-    readonly property color skyColor: {
-        const c = Sky.colorAt(Sky.progress);
-        const m = Math.max(c.r, c.g, c.b, 0.01);
-        return Qt.rgba(c.r / m, c.g / m, c.b / m, 1);
-    }
+    // modo céu: segue a matiz do horário (Sky.hues); cor fixa: vai para o vermelho junto com o fim da tarde
+    readonly property color skyColor: Qt.hsva(Sky.hue / 360, 1, 1, 1)
     readonly property bool sleeping: Sky.sleeping
-    readonly property color color: sleeping ? "#ff0000" : mode === "sky" ? skyColor : fixedColor
-    readonly property int outBright: sleeping && bright > 0 ? 1 : bright
-    onSleepingChanged: apply()
+    readonly property real night: Sky.night
+    readonly property real evening: {
+        const a = Sky.frac(Sky.hues[Sky.hues.length - 2][0]), b = Sky.frac(Sky.hues[Sky.hues.length - 1][0]);
+        return night > 0 ? 1 : Math.max(0, Math.min(1, Sky.span(a, Sky.progress) / Sky.span(a, b)));
+    }
+    readonly property color color: mode === "sky" ? skyColor : mix(fixedColor, Qt.rgba(1, 0, 0, 1), evening)
+    // à noite cai para ~1/4 da intensidade junto com a tela
+    readonly property real dim: 1 - 0.75 * night
+
+    function mix(a, b, t) {
+        return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1);
+    }
 
     readonly property var presets: ["#91ffff", "#ff2020", "#ff6a00", "#ffd000", "#30ff40", "#2050ff", "#8a2be2", "#ff1493", "#ffffff"]
 
     function apply() {
-        const led = v => Math.round(Math.pow(v, 2.2) * 255);
-        const r = led(color.r), g = led(color.g), b = led(color.b);
-        Quickshell.execDetached(["sh", "-c", `echo "${r} ${g} ${b}" > ${dir}/multi_intensity; echo ${outBright} > ${dir}/brightness`]);
+        Quickshell.execDetached(["sh", "-c", `echo "${rgb()}" > ${dir}/multi_intensity; echo ${bright} > ${dir}/brightness`]);
         Store.kbd = { bright, mode, color: fixedColor.toString() };
+    }
+
+    function rgb() {
+        const led = v => Math.round(Math.pow(v, 2.2) * dim * 255);
+        return `${led(color.r)} ${led(color.g)} ${led(color.b)}`;
     }
 
     function setBright(v) {
@@ -51,15 +60,15 @@ Singleton {
         apply();
     }
 
-    property string _lastSky: ""
+    property string _last: ""
     Timer {
-        running: root.mode === "sky"
-        interval: 60000
+        running: root.bright > 0
+        interval: 5000
         repeat: true
         onTriggered: {
-            const c = root.skyColor.toString();
-            if (c !== root._lastSky) {
-                root._lastSky = c;
+            const c = root.rgb();
+            if (c !== root._last) {
+                root._last = c;
                 root.apply();
             }
         }
