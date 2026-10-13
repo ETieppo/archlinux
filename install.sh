@@ -476,8 +476,8 @@ KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
 EOF
   # Keyboard backlight from any vendor: the input group may change brightness and color.
   write_root_file /etc/udev/rules.d/99-kbd-backlight.rules <<'EOF'
-ACTION=="add", SUBSYSTEM=="leds", KERNEL=="*kbd_backlight*", RUN+="/usr/bin/chgrp input /sys/class/leds/%k/brightness", RUN+="/usr/bin/chmod g+w /sys/class/leds/%k/brightness"
-ACTION=="add", SUBSYSTEM=="leds", KERNEL=="*kbd_backlight*", TEST=="multi_intensity", RUN+="/usr/bin/chgrp input /sys/class/leds/%k/multi_intensity", RUN+="/usr/bin/chmod g+w /sys/class/leds/%k/multi_intensity"
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="*kbd_backlight*", RUN+="/usr/bin/chgrp wheel /sys/class/leds/%k/brightness", RUN+="/usr/bin/chmod g+w /sys/class/leds/%k/brightness"
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="*kbd_backlight*", TEST=="multi_intensity", RUN+="/usr/bin/chgrp wheel /sys/class/leds/%k/multi_intensity", RUN+="/usr/bin/chmod g+w /sys/class/leds/%k/multi_intensity"
 EOF
   if (( IS_TUXEDO )); then
     write_root_file /etc/modules-load.d/tuxedo.conf < <(printf '%s\n' "${TUXEDO_MODULES[@]}")

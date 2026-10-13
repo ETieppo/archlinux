@@ -16,19 +16,80 @@ Singleton {
     readonly property real sunset: sun[1]
     readonly property bool isDay: progress > sunrise && progress < sunset
 
-    property real sleepStart: 22.5 / 24
-    property real sleepEnd: 8.5 / 24
-    readonly property bool sleeping: sleepStart > sleepEnd ? (progress >= sleepStart || progress < sleepEnd) : (progress >= sleepStart && progress < sleepEnd)
+    // janelas de transição (frações do dia) lidas do gammastep: dusk-time/dawn-time aceitam "HH:MM" ou "HH:MM-HH:MM"
+    property var dusk: [21.5 / 24, 21.5 / 24]
+    property var dawn: [8.5 / 24, 8.5 / 24]
+    // cores do teclado ao longo do dia: [hora, matiz em graus]; dá uma volta inteira no círculo de cores,
+    // do vermelho ao acordar até o laranja às 21:00 e o vermelho de novo no último ponto
+    readonly property var hues: [
+        ["07:00", 360],
+        ["08:30", 330],
+        ["10:00", 295],
+        ["11:30", 265],
+        ["13:00", 225],
+        ["14:30", 190],
+        ["16:00", 160],
+        ["17:30", 120],
+        ["19:00", 75],
+        ["20:00", 50],
+        ["21:00", 33],
+        ["21:45", 0]
+    ]
+    // a tela só escurece à noite: começa no último ponto (vermelho) e leva dimMin; ao amanhecer clareia em wakeMin
+    readonly property real dimMin: 60
+    readonly property real wakeMin: 60
+    readonly property real hue: hueAt(progress)
+    // 0 = dia, 1 = noite (só controla o brilho)
+    readonly property real night: nightAt(progress)
+    readonly property bool rising: span(dawn[0], progress) < wakeMin / 1440
+    readonly property bool sleeping: night >= 1
+
+    function span(a, b) {
+        return ((b - a) % 1 + 1) % 1;
+    }
+
+    function frac(hm) {
+        const [h, m] = hm.split(":").map(Number);
+        return (h * 60 + m) / 1440;
+    }
+
+    function hueAt(p) {
+        const n = hues.length;
+        for (let i = 0; i < n; i++) {
+            const [ta, ha] = hues[i], [tb, hb] = hues[(i + 1) % n];
+            const a = frac(ta), len = span(a, frac(tb));
+            if (span(a, p) < len) {
+                // caminho mais curto no círculo (a madrugada fica parada no vermelho)
+                const d = ((hb - ha) % 360 + 540) % 360 - 180;
+                return ((ha + d * span(a, p) / len) % 360 + 360) % 360;
+            }
+        }
+        return hues[0][1] % 360;
+    }
+
+    function nightAt(p) {
+        const r = frac(hues[hues.length - 1][0]), d = dimMin / 1440, w = wakeMin / 1440;
+        if (span(r, p) < d)
+            return span(r, p) / d;
+        if (span(dawn[0], p) < w)
+            return 1 - span(dawn[0], p) / w;
+        return span(r, p) < span(r, dawn[0]) ? 1 : 0;
+    }
 
     FileView {
         path: Quickshell.env("HOME") + "/.config/gammastep/config.ini"
+        watchChanges: true
+        onFileChanged: reload()
         onLoaded: {
             const t = k => {
-                const m = text().match(new RegExp(`^${k}=(\\d+):(\\d+)`, "m"));
-                return m ? (Number(m[1]) * 60 + Number(m[2])) / 1440 : null;
+                const m = text().match(new RegExp(`^${k}=\\s*(\\d+):(\\d+)(?:\\s*-\\s*(\\d+):(\\d+))?`, "m"));
+                if (!m)
+                    return null;
+                const a = (Number(m[1]) * 60 + Number(m[2])) / 1440;
+                return [a, m[3] !== undefined ? (Number(m[3]) * 60 + Number(m[4])) / 1440 : a];
             };
-            root.sleepStart = t("dusk-time") ?? root.sleepStart;
-            root.sleepEnd = t("dawn-time") ?? root.sleepEnd;
+            root.dusk = t("dusk-time") ?? root.dusk;
+            root.dawn = t("dawn-time") ?? root.dawn;
         }
     }
 

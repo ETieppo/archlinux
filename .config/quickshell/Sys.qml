@@ -16,6 +16,8 @@ Singleton {
     property string diskInfo: ""
     property int gpu: 0
     property real brightness: 0
+    property int brightnessRaw: 0
+    property int brightnessMax: 0
     property string netType: "none"
     property bool wifiEnabled: true
     property string netName: ""
@@ -134,6 +136,11 @@ Singleton {
         onLoaded: root.temp = Math.round(Number(text()) / 1000)
     }
 
+    function setBrightnessRaw(v) {
+        brightnessRaw = v;
+        Quickshell.execDetached(["brightnessctl", "-q", "set", String(v)]);
+    }
+
     FileView {
         id: blMax
         path: root._bl + "/max_brightness"
@@ -144,8 +151,11 @@ Singleton {
         path: root._bl + "/brightness"
         onLoaded: {
             const max = Number(blMax.text());
-            if (max > 0)
-                root.brightness = Math.round(100 * Number(text()) / max);
+            if (max > 0) {
+                root.brightnessMax = max;
+                root.brightnessRaw = Number(text());
+                root.brightness = Math.round(100 * root.brightnessRaw / max);
+            }
         }
     }
 
