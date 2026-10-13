@@ -104,7 +104,7 @@ Item {
             Layout.preferredWidth: 420
             Label { text: "00h"; font.pixelSize: 11; color: Theme.muted }
             Item { Layout.fillWidth: true }
-            Label { text: `󰖜 ${Sky.fmt(Sky.sunrise)}  ·  ${Math.floor(Sky.progress * 100)}% do dia  ·  󰖛 ${Sky.fmt(Sky.sunset)}`; font.pixelSize: 11; color: Theme.dim }
+            Label { text: `󰖜 ${Sky.fmt(Sky.sunrise)}  ·  ${Math.floor(Sky.progress * 100)}% of day  ·  󰖛 ${Sky.fmt(Sky.sunset)}`; font.pixelSize: 11; color: Theme.dim }
             Item { Layout.fillWidth: true }
             Label { text: "24h"; font.pixelSize: 11; color: Theme.muted }
         }

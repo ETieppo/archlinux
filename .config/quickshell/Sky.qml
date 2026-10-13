@@ -27,13 +27,24 @@ Singleton {
         ["17:30", 120],
         ["19:00", 75],
         ["20:00", 50],
+        ["20:30", 41.5],
         ["21:00", 33],
+        ["21:30", 11],
         ["21:45", 0]
     ]
+    readonly property var dimming: [
+        ["20:00", 1],
+        ["20:30", 0.85],
+        ["21:00", 0.75],
+        ["21:30", 0.65],
+        ["21:45", 0.6]
+    ]
+    readonly property real bedtime: frac(dimming[dimming.length - 1][0])
     readonly property real dimMin: 60
     readonly property real wakeMin: 60
     readonly property real hue: hueAt(progress)
     readonly property real night: nightAt(progress)
+    readonly property real screen: screenAt(progress)
     readonly property bool rising: span(dawn[0], progress) < wakeMin / 1440
     readonly property bool sleeping: night >= 1
 
@@ -59,13 +70,26 @@ Singleton {
         return hues[0][1] % 360;
     }
 
+    function screenAt(p) {
+        const start = frac(dimming[0][0]);
+        if (span(start, p) > span(start, bedtime))
+            return span(bedtime, p) < span(bedtime, dawn[0]) ? dimming[dimming.length - 1][1] : 1;
+        for (let i = 1; i < dimming.length; i++) {
+            const [ta, va] = dimming[i - 1], [tb, vb] = dimming[i];
+            const a = frac(ta), len = span(a, frac(tb));
+            if (span(a, p) <= len)
+                return va + (vb - va) * span(a, p) / len;
+        }
+        return 1;
+    }
+
     function nightAt(p) {
-        const r = frac(hues[hues.length - 1][0]), d = dimMin / 1440, w = wakeMin / 1440;
-        if (span(r, p) < d)
-            return span(r, p) / d;
+        const d = dimMin / 1440, w = wakeMin / 1440;
+        if (span(bedtime, p) < d)
+            return span(bedtime, p) / d;
         if (span(dawn[0], p) < w)
             return 1 - span(dawn[0], p) / w;
-        return span(r, p) < span(r, dawn[0]) ? 1 : 0;
+        return span(bedtime, p) < span(bedtime, dawn[0]) ? 1 : 0;
     }
 
     FileView {

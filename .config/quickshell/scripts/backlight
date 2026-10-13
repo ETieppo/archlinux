@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 
+usage() {
+    echo "Usage: backlight <up|down> [percent]"
+}
+
 main() {
     local action=$1
     local value=${2:-1}
 
     if ((value < 1)); then
-        echo "[ERROR]: value need to be more than 0." >&2
+        echo "[ERROR]: value must be greater than 0." >&2
         exit 1
     fi
     

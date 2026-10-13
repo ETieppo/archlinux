@@ -14,6 +14,7 @@ Singleton {
 
     readonly property int max: 4
     readonly property int hold: 3600000
+    readonly property string warmFrom: "21:00"
     readonly property string dir: "/sys/class/leds/rgb:kbd_backlight"
     readonly property color skyColor: Qt.hsva(Sky.hue / 360, 1, 1, 1)
     readonly property bool sleeping: Sky.sleeping
@@ -36,8 +37,7 @@ Singleton {
     readonly property var preset: presets.find(p => Qt.colorEqual(p.c, fixedColor)) ?? null
     readonly property color color: mode === "sky" ? skyColor : mix(fixedColor, Qt.rgba(1, 0, 0, 1), evening)
     readonly property real evening: {
-        const a = Sky.frac(Sky.hues[Sky.hues.length - 2][0]), b = Sky.frac(Sky.hues[Sky.hues.length - 1][0]);
-        const s = Sky.span(a, Sky.progress), len = Sky.span(a, b);
+        const a = Sky.frac(warmFrom), s = Sky.span(a, Sky.progress), len = Sky.span(a, Sky.bedtime);
         return night > 0 ? 1 : s < len ? s / len : 0;
     }
     readonly property real dim: {
