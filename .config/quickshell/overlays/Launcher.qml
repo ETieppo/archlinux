@@ -15,16 +15,21 @@ PanelWindow {
     readonly property int blobR: 40
     readonly property int surface: 64
     readonly property real poolY: height - surface + 30
-    readonly property list<color> palette: [Theme.accent, "#89b4fa", Theme.mauve, "#94e2d5"]
-    readonly property real exposure: 0.5
+    readonly property list<color> palette: ["#00e5ff", "#ff2bc2", "#7b2cff", "#1f5bff"]
+    readonly property real exposure: 0.62
     readonly property color liquidTop: palette[0]
-    readonly property color liquidRim: "#d4fbff"
+    readonly property color liquidRim: "#8ff3ff"
     property real reveal: open ? 1 : 0
     property real time: 0
     property string query: ""
     property int current: 0
     property var slotOf: ({})
     property point lastPointer: Qt.point(-1, -1)
+    property point pointer: Qt.point(-1, -1)
+    property real kick: 0
+    property real crownX: width / 2
+    property real crownY: height / 2
+    readonly property bool crownOn: open && results[current]?.kind === "app"
 
     screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     anchors.top: true
@@ -55,8 +60,47 @@ PanelWindow {
         current = 0;
         input.forceActiveFocus();
     }
-    onQueryChanged: current = 0
+    onQueryChanged: {
+        current = 0;
+        kickAnim.restart();
+    }
+
+    NumberAnimation {
+        id: kickAnim
+        target: root
+        property: "kick"
+        from: 1
+        to: 0
+        duration: 700
+        easing.type: Easing.OutCubic
+    }
     onShownChanged: reslot()
+
+    readonly property var magnets: {
+        const out = [];
+        if (pointer.y >= 0)
+            out.push({ x: pointer.x, s: Math.exp(-Math.max(0, poolY - pointer.y) / 380), w: 105, h: 210 });
+        if (crownOn)
+            out.push({ x: crownX, s: 0.8 * Math.exp(-Math.max(0, poolY - crownY) / 520), w: 85, h: 560 });
+        for (let k = 0; k < 3; k++)
+            out.push({
+                x: width * (0.5 + 0.46 * Math.sin(time * 0.045 * (k + 1) + k * 2.3)),
+                s: Math.max(0, Math.sin(time * 0.09 * (k + 1.4) + k * 1.7)),
+                w: 70 + k * 25,
+                h: 95 + k * 20
+            });
+        return out;
+    }
+
+    function fieldAt(x) {
+        let f = 0, lean = 0;
+        for (const m of magnets) {
+            const g = m.s * m.h * Math.exp(-Math.pow((x - m.x) / m.w, 2));
+            f += g;
+            lean += g * (m.x - x) / m.w;
+        }
+        return { f, lean: f > 1 ? lean / f : 0 };
+    }
 
     function close() {
         Ui.launcherOpen = false;
@@ -67,6 +111,11 @@ PanelWindow {
         for (let i = 0; i < s.length; i++)
             h = Math.imul(h ^ s.charCodeAt(i), 16777619);
         return (h >>> 0) / 4294967296;
+    }
+
+    function rnd(i, salt) {
+        const v = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
+        return v - Math.floor(v);
     }
 
     function iconFor(name) {
@@ -273,6 +322,9 @@ PanelWindow {
 
         MouseArea {
             anchors.fill: parent
+            hoverEnabled: true
+            onPositionChanged: m => root.pointer = Qt.point(m.x, m.y)
+            onExited: root.pointer = Qt.point(-1, -1)
             onClicked: root.close()
         }
     }
@@ -292,28 +344,85 @@ PanelWindow {
         }
 
         Repeater {
-            model: 14
+            model: 22
             LavaDrop {
                 required property int index
-                readonly property real ph: index * 1.913
-                cx: (index + 0.5) / 14 * field.width + Math.sin(root.time * 0.23 + ph) * 50
-                cy: root.poolY + 6 + Math.sin(root.time * 0.4 + ph * 2.1) * 12 + (1 - root.reveal) * 120
+                readonly property real ph: root.rnd(index, 8) * 6.283
+                cx: (index + 0.5 + (root.rnd(index, 9) - 0.5) * 0.9) / 22 * field.width + Math.sin(root.time * 0.17 + ph) * 30
+                cy: root.poolY + 16 + Math.sin(root.time * 0.33 + ph * 2.1) * 6 + (1 - root.reveal) * 120
                 hue: 1 + index % 3
-                r: (34 + 18 * Math.sin(ph * 3.3)) * (0.7 + 0.3 * Math.sin(root.time * 0.3 + ph))
+                r: (24 + 20 * root.rnd(index, 10)) * (0.8 + 0.2 * Math.sin(root.time * 0.27 + ph))
             }
         }
 
         Repeater {
-            model: 5
+            model: 46
             LavaDrop {
                 required property int index
-                readonly property real ph: index * 2.371
-                readonly property real period: 26 + index * 7
+                readonly property real ph: root.rnd(index, 1) * 6.283
+                readonly property real size: Math.pow(root.rnd(index, 2), 1.6)
+                readonly property real period: 24 + root.rnd(index, 3) * 46
                 readonly property real h: 0.5 - 0.5 * Math.cos((root.time / period) * 2 * Math.PI + ph)
-                cx: field.width * (0.12 + 0.19 * index) + Math.sin(root.time * 0.17 + ph) * 70
-                hue: (index * 3) % 4
-                cy: root.poolY + 20 - h * (field.height * 0.82) + (1 - root.reveal) * 200
-                r: (46 + index * 9) * (0.55 + 0.45 * Math.min(1, h * 4)) * Math.min(1, root.reveal * 2)
+                cx: field.width * (0.03 + 0.94 * root.rnd(index, 4)) + Math.sin(root.time * (0.08 + 0.12 * (1 - size)) + ph) * 60
+                hue: index % 4
+                cy: root.poolY + 20 - h * (field.height * (0.55 + 0.35 * root.rnd(index, 5))) + (1 - root.reveal) * 200
+                r: (11 + 44 * size) * (0.55 + 0.45 * Math.min(1, h * 4)) * Math.min(1, root.reveal * 2)
+            }
+        }
+
+        Repeater {
+            model: 72
+            IronSpike {
+                required property int index
+                readonly property real rnd: root.rnd(index, 6)
+                readonly property var fld: root.fieldAt(bx)
+                bx: (index + 0.5 + (rnd - 0.5) * 0.8) / 72 * field.width
+                by: root.height - root.surface + 14 + (1 - root.reveal) * 140
+                springy: root.visible
+                target: Math.max(0, (fld.f + root.kick * fld.f * 0.6) * (0.62 + 0.38 * root.rnd(index, 7)) * (0.9 + 0.1 * Math.sin(root.time * 1.1 + rnd * 9)) - 14) * root.reveal
+                angle: Math.max(-16, Math.min(16, fld.lean * 14)) + Math.sin(root.time * 1.3 + rnd * 7) * 2.5
+                wid: 14 + len * 0.36
+            }
+        }
+
+        Item {
+            id: crown
+            property real scale2: root.crownOn ? 1 : 0
+            property real vx: 0
+            property real vy: 0
+            Behavior on scale2 { NumberAnimation { duration: 380; easing.type: Easing.OutBack } }
+
+            FrameAnimation {
+                running: root.visible
+                onTriggered: {
+                    const dt = Math.min(frameTime, 0.05);
+                    crown.vx += ((root.crownX - crown.x) * 55 - crown.vx * 11) * dt;
+                    crown.vy += ((root.crownY - crown.y) * 55 - crown.vy * 11) * dt;
+                    crown.x += crown.vx * dt;
+                    crown.y += crown.vy * dt;
+                }
+            }
+
+            LavaDrop {
+                cx: 0
+                cy: 0
+                r: 25 * crown.scale2
+                hue: 1
+                hot: 1
+            }
+
+            Repeater {
+                model: 11
+                IronSpike {
+                    required property int index
+                    bx: 0
+                    by: 0
+                    key: 1
+                    hot: 1
+                    wid: 22
+                    angle: index * 360 / 11 + root.time * 9
+                    len: (46 + 14 * Math.sin(root.time * 1.7 + index * 1.9) + root.kick * 18) * crown.scale2
+                }
             }
         }
     }
@@ -321,7 +430,7 @@ PanelWindow {
     ShaderEffect {
         anchors.fill: parent
         opacity: Math.min(1, root.reveal * 1.5)
-        fragmentShader: Qt.resolvedUrl("lava/lava.frag.qsb")
+        fragmentShader: Qt.resolvedUrl("lava/iron.frag.qsb")
         property var source: ShaderEffectSource {
             sourceItem: field
             hideSource: true
@@ -336,28 +445,8 @@ PanelWindow {
         property color c1: root.palette[1]
         property color c2: root.palette[2]
         property color c3: root.palette[3]
-        property color deep: "#07070d"
+        property color deep: "#040407"
         property real exposure: root.exposure
-    }
-
-    Repeater {
-        model: 22
-        Rectangle {
-            id: fizz
-            required property int index
-            readonly property real ph: Math.abs(Math.sin(index * 12.9898 + 78.233) * 43758.5453) % 1
-            readonly property real period: 7 + ph * 9
-            readonly property real k: ((root.time + ph * period) % period) / period
-            width: 3 + Math.round(ph * 7)
-            height: width
-            radius: width / 2
-            x: ph * root.width + Math.sin(root.time * 1.3 + index) * 8
-            y: root.poolY - 10 - k * root.height * (0.45 + ph * 0.45)
-            color: "transparent"
-            border.width: 1
-            border.color: Qt.alpha(root.liquidRim, 0.55)
-            opacity: root.reveal * Math.min(1, k * 6) * (1 - k)
-        }
     }
 
     Repeater {
@@ -376,7 +465,7 @@ PanelWindow {
             property real ax: root.hash(appId + "x") * root.width
             property real ay: root.height * 0.5
             property real lift: live ? 1 : 0
-            property real grow: current ? 1.22 : hover.containsMouse ? 1.1 : 1
+            property real grow: current ? 1.2 : hover.containsMouse ? 1.08 : 1
             readonly property real cx: ax + Math.sin(root.time * 0.31 + ph) * 9
             readonly property real cy: root.poolY + (ay + Math.sin(root.time * 0.43 + ph * 1.7) * 14 - root.poolY) * lift
             readonly property real r: root.blobR * grow * (0.3 + 0.7 * lift)
@@ -398,14 +487,17 @@ PanelWindow {
             }
             Behavior on grow { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
 
-            LavaDrop {
-                parent: field
-                cx: bub.cx
-                cy: bub.cy
-                r: bub.lift > 0.01 ? bub.r : 0
-                hue: Math.floor(root.hash(bub.appId + "hue") * 4)
-                hot: bub.current ? 1 : 0
-                Behavior on hot { NumberAnimation { duration: 260 } }
+            Binding {
+                target: root
+                property: "crownX"
+                value: bub.cx
+                when: bub.current
+            }
+            Binding {
+                target: root
+                property: "crownY"
+                value: bub.cy
+                when: bub.current
             }
 
             AppIcon {
@@ -456,6 +548,7 @@ PanelWindow {
                     const g = mapToItem(null, mouse.x, mouse.y);
                     if (g.x !== root.lastPointer.x || g.y !== root.lastPointer.y) {
                         root.lastPointer = Qt.point(g.x, g.y);
+                        root.pointer = Qt.point(g.x, g.y);
                         root.current = bub.rk;
                     }
                 }

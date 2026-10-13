@@ -70,7 +70,7 @@ void main() {
 
     col += tint * hot * (0.12 + 0.45 * (1.0 - h) * (1.0 - h));
 
-    vec3 irid = 0.5 + 0.5 * cos(6.2831 * (fres * 0.8 + key * 0.6 + time * 0.015 + vec3(0.0, 0.33, 0.67)));
+    vec3 irid = mix(c0.rgb, c1.rgb, 0.5 + 0.5 * cos(6.2831 * (fres * 0.8 + key * 0.6 + time * 0.015)));
     col += mix(tint, irid * exposure, 0.5) * fres * 0.75;
 
     float key1 = rbox(R.xy, vec2(-0.42, -0.52), vec2(0.2, 0.085), 0.11);
