@@ -121,6 +121,12 @@ hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "a
 hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" })
 
 hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("qs ipc call claude toggle"))
+hl.bind("Escape", function()
+  local w = hl.get_active_window()
+  if w ~= nil and w.class == "chrome-claude.ai__-Default" then
+    hl.dispatch(hl.dsp.exec_cmd("qs ipc call claude close"))
+  end
+end, { non_consuming = true })
 hl.window_rule({
   match = { class = "chrome-claude.ai__-Default" },
   float = true,
@@ -147,6 +153,10 @@ function SendShortcut(params)
     hl.dispatch(hl.dsp.send_key_state(args))
     hl.timer(timer, { timeout = 20, type = "oneshot" })
   end
+end
+
+local function IsBrowser(w)
+  return w ~= nil and (w.class == "glide-glide" or w.class:find("^chrome%-") ~= nil)
 end
 
 local function TypeText(text)
@@ -193,7 +203,7 @@ hl.bind(mainMod .. " + A", SendShortcut({ mods = "CTRL", key = "A", window = "ac
 hl.bind(mainMod .. " + R", SendShortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
 hl.bind(mainMod .. " + L", function()
   local w = hl.get_active_window()
-  if w ~= nil and w.class == "glide-glide" then
+  if IsBrowser(w) then
     hl.dispatch(SendShortcut({ mods = "CTRL", key = "L", window = "activewindow" }))
   else
     hl.dispatch(SendShortcut({ mods = "ALT", key = "L", window = "activewindow" }))
@@ -201,7 +211,7 @@ hl.bind(mainMod .. " + L", function()
 end)
 hl.bind(mainMod .. " + C", function()
   local w = hl.get_active_window()
-  if w ~= nil and w.class == "glide-glide" then
+  if IsBrowser(w) then
     hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
   else
     hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))

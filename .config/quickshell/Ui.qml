@@ -191,5 +191,9 @@ Singleton {
         function toggle(): void {
             root.toggleClaude();
         }
+        function close(): void {
+            root.claudeOpen = false;
+            Quickshell.execDetached([Quickshell.shellPath("scripts/claude-panel"), "hide"]);
+        }
     }
 }

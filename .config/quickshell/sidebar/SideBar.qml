@@ -14,6 +14,7 @@ PanelWindow {
   screen: modelData
   implicitWidth: Theme.sideWidth
   color: "transparent"
+  WlrLayershell.keyboardFocus: kbd.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
   required property ShellScreen modelData
 
@@ -113,7 +114,9 @@ PanelWindow {
       iconColor: Theme.accent
       onClicked: Ui.toggleNightLight()
     }
-    KbdButton {}
+    KbdButton {
+      id: kbd
+    }
     PowerProfileButton {}
     SideButton {
       icon: "󰚩"
