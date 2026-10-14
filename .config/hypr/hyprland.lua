@@ -82,8 +82,8 @@ hl.config({
   },
 
   input = {
-    kb_layout = "us",
-    kb_variant = "",
+    kb_layout = "us,ru",
+    kb_variant = ",phonetic",
     kb_model = "",
     follow_mouse = 1,
     sensitivity = 0,
@@ -185,6 +185,7 @@ for _, dead in ipairs(deadKeys) do
   hl.bind("SUPER + " .. dead.trigger, hl.dsp.submap(dead.name))
 end
 
+hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + Q", hl.dsp.window.close())
