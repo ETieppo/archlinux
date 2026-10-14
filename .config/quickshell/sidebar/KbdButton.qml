@@ -13,6 +13,9 @@ SideButton {
     active: pop.visible
     tip: pop.visible ? "" : `Keyboard light · ${KbdLight.sleeping ? "sleep mode" : KbdLight.mode === "sky" ? "following the sky" : "fixed color"} · ${KbdLight.bright}/${KbdLight.max}\n󰒭 scroll adjusts brightness`
 
+    readonly property bool open: pop.visible
+
+    Keys.onEscapePressed: pop.visible = false
     onClicked: pop.visible = !pop.visible
     onWheel: d => KbdLight.setBright(KbdLight.bright + (d > 0 ? 1 : -1))
 
@@ -27,6 +30,7 @@ SideButton {
         color: "transparent"
         implicitWidth: 236
         implicitHeight: col.implicitHeight + 28
+        onVisibleChanged: if (visible) root.forceActiveFocus()
 
         HyprlandFocusGrab {
             windows: [pop]
