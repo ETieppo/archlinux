@@ -64,7 +64,7 @@ PKGS_BASE=(
   base-devel git openssh zsh unzip tree lua pacman-contrib
   networkmanager bluez bluez-utils avahi nss-mdns power-profiles-daemon
 )
-PKGS_AUDIO=(pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber pavucontrol)
+PKGS_AUDIO=(pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber pavucontrol playerctl)
 PKGS_DESKTOP=(
   hyprland hyprpaper hyprpicker xdg-desktop-portal-hyprland quickshell greetd plymouth
   ghostty thunar gvfs tumbler ffmpegthumbnailer file-roller
