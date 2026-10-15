@@ -2,24 +2,13 @@ pcall(require, "gpu")
 
 local terminal = "env GTK_IM_MODULE=simple ghostty"
 -- local fileManager = "thunar"
--- local menu = "ags run ~/.config/ags/widget/app.tsx"
 local menu = "qs ipc call launcher toggle"
 local mainMod = "ALT"
 
--- hl.bind("SUPER + P", hl.dsp.exec_cmd("hyprpicker"))
-hl.bind("switch:on:Lid Switch", function()
-  hl.timer(function()
-    hl.dispatch(hl.dsp.dpms({ action = "disable" }))
-  end, { timeout = 500, type = "oneshot" })
-end, { locked = true })
-
-hl.bind("switch:off:Lid Switch", function()
-  hl.timer(function()
-    hl.dispatch(hl.dsp.dpms({ action = "enable" }))
-  end, { timeout = 500, type = "oneshot" })
-end, { locked = true })
+hl.env("GTK_USE_PORTAL", "1")
 hl.monitor({ output = "eDP-1", mode = "1920x1080@144", position = "auto", scale = 1 })
-hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-left", scale = 1 })
+hl.monitor({ output = "DP-1", mode = "prefered", position = "auto-left", scale = 1 })
+hl.monitor({ output = "HDMI-A-1", mode = "prefered", position = "auto-left", scale = 1 })
 
 hl.on("hyprland.start", function()
   hl.exec_cmd("qs kill; qs -d")
@@ -28,6 +17,7 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("wl-paste --type image --watch cliphist store")
   hl.exec_cmd("pkill -x gammastep; gammastep")
   hl.exec_cmd("hyprpaper")
+  hl.exec_cmd("fm1d --fm=fl-term")
 end)
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
@@ -135,12 +125,6 @@ hl.window_rule({
   move = "1940 86",
 })
 
-hl.window_rule({
-  match = { class = "thunar" },
-  float = true,
-  size = { 900, 500 },
-})
-
 function SendShortcut(params)
   local timer = function()
     local args = params
@@ -169,8 +153,6 @@ local deadKeys = {
   { trigger = "I",     name = "circumflex", symbol = "^", letters = { a = { "â", "Â" }, e = { "ê", "Ê" }, i = { "î", "Î" }, o = { "ô", "Ô" }, u = { "û", "Û" } } },
   { trigger = "N",     name = "tilde",      symbol = "~", letters = { a = { "ã", "Ã" }, o = { "õ", "Õ" }, n = { "ñ", "Ñ" } } },
   { trigger = "U",     name = "diaeresis",  symbol = "¨", letters = { a = { "ä", "Ä" }, e = { "ë", "Ë" }, i = { "ï", "Ï" }, o = { "ö", "Ö" }, u = { "ü", "Ü" } } },
-  { trigger = "C",     name = "seila",      symbol = "¨", letters = { a = { "ä", "Ä" }, e = { "ë", "Ë" }, i = { "ï", "Ï" }, o = { "ö", "Ö" }, u = { "ü", "Ü" } } },
-  { trigger = "C",     name = "cedilla",    symbol = "¸", letters = { c = { "ç", "Ç" } } },
 }
 
 local function TypeAndReset(text)
@@ -179,6 +161,19 @@ local function TypeAndReset(text)
     hl.dispatch(hl.dsp.submap("reset"))
   end
 end
+
+
+hl.bind("switch:on:Lid Switch", function()
+  hl.timer(function()
+    hl.dispatch(hl.dsp.dpms({ action = "disable" }))
+  end, { timeout = 500, type = "oneshot" })
+end, { locked = true })
+
+hl.bind("switch:off:Lid Switch", function()
+  hl.timer(function()
+    hl.dispatch(hl.dsp.dpms({ action = "enable" }))
+  end, { timeout = 500, type = "oneshot" })
+end, { locked = true })
 
 for _, dead in ipairs(deadKeys) do
   hl.define_submap(dead.name, function()
@@ -194,6 +189,13 @@ for _, dead in ipairs(deadKeys) do
   end)
   hl.bind("SUPER + " .. dead.trigger, hl.dsp.submap(dead.name))
 end
+hl.bind("SUPER + C", function()
+  hl.dispatch(TypeText("ç"))
+end)
+
+hl.bind("SUPER + SHIFT + C", function()
+  hl.dispatch(TypeText("Ç"))
+end)
 
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))
 hl.bind(mainMod .. " + T", hl.dsp.exec_cmd(terminal))

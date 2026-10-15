@@ -24,17 +24,15 @@ if [ -z "${BASH_VERSION:-}" ]; then
   echo "Run it with bash: bash install.sh" >&2
   exit 1
 fi
-set +o posix                   # `sh install.sh` lands here as bash in POSIX mode
+set +o posix
 set -Eeuo pipefail
 shopt -s nullglob
 umask 022
 
-# ══ Configuration ═════════════════════════════════════════════════════════════
-
 # ── Repositories ──────────────────────────────────────────────────────────────
 GITHUB_USER="etieppo"
 DOTFILES_REPO="archlinux"
-DOTFILES_URL="https://github.com/$GITHUB_USER/$DOTFILES_REPO.git"    # HTTPS: no SSH key needed
+DOTFILES_URL="https://github.com/$GITHUB_USER/$DOTFILES_REPO.git"
 DOTFILES_PUSH_URL="git@github.com:$GITHUB_USER/$DOTFILES_REPO.git"
 NVIM_URL="https://github.com/$GITHUB_USER/nvim.git"
 NVIM_PUSH_URL="git@github.com:$GITHUB_USER/nvim.git"
@@ -42,27 +40,28 @@ OMZ_URL="https://github.com/ohmyzsh/ohmyzsh.git"
 YAY_URL="https://aur.archlinux.org/yay.git"
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-DOTFILES_DIR="$HOME/.archlinux"                   # bare repo; must match the `dot` alias
-SYSTEM_DIR="$HOME/.system"                       # mirrors /: .system/etc/x → /etc/x
+DOTFILES_DIR="$HOME/.archlinux"
+SYSTEM_DIR="$HOME/.system"
 NVIM_DIR="$HOME/.config/nvim"
 OMZ_DIR="$HOME/.oh-my-zsh"
 GREETER_INSTALLER="$HOME/.config/quickshell/greeter/install.sh"
-HYPR_GPU_CONF="$HOME/.config/hypr/gpu.lua"       # generated; hyprland.lua loads it with require("gpu")
+HYPR_GPU_CONF="$HOME/.config/hypr/gpu.lua"
 BACKUP_DIR="$HOME/.archlinux-backup/$(date +%Y%m%d-%H%M%S)"
 
 # ── Preferences ───────────────────────────────────────────────────────────────
 LOGIN_SHELL="/usr/bin/zsh"
 PLYMOUTH_THEME="arch-logo-symbol"
-KERNEL_PARAMS=(quiet splash)                     # appended to the boot entries when missing
+KERNEL_PARAMS=(quiet splash)
 GTK_THEME="Ant"
 ICON_THEME="Ant"
 COLOR_SCHEME="prefer-dark"
-REBOOT_AFTER_INSTALL=true                        # first install only, never on re-runs
+REBOOT_AFTER_INSTALL=true
 
 # ── Official packages ─────────────────────────────────────────────────────────
 PKGS_BASE=(
   base-devel git openssh zsh unzip tree lua pacman-contrib
   networkmanager bluez bluez-utils avahi nss-mdns power-profiles-daemon
+  ffmpeg 7zip jq poppler fd ripgrep fzf zoxide resvg mpv imv fl
 )
 PKGS_AUDIO=(pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber pavucontrol playerctl)
 PKGS_DESKTOP=(
@@ -71,50 +70,49 @@ PKGS_DESKTOP=(
   grim wl-clipboard cliphist wtype brightnessctl gammastep geoclue darkman
   adwaita-icon-theme gsettings-desktop-schemas
 )
-PKGS_FONTS=(noto-fonts ttf-jetbrains-mono-nerd)  # noto-fonts: chosen provider of ttf-font
-PKGS_APPS=(chromium btop yazi steam)
-PKGS_DEV=(neovim rustup bun postgresql)
+PKGS_FONTS=(noto-fonts ttf-jetbrains-mono-nerd)
+PKGS_APPS=(chromium btop steam)
+PKGS_DEV=(neovim rustup bun postgresql httpie)
 
-# Removed when present: they conflict with the packages above, and a conflict
-# prompt makes `pacman --noconfirm` abort.
+# ── CONFLICT REPLACE ----------------------------------------------------------
 PKGS_REPLACED=(
   pulseaudio pulseaudio-alsa pulseaudio-bluetooth pulseaudio-jack jack2 pipewire-media-session rust
 )
 
-# ── AUR (a failure here is reported at the end instead of aborting) ──────────
+# ── AUR -------------------------------------------------------------──────────
 AUR_PKGS=(
   ant-theme-git plymouth-theme-arch-logo-symbol
   glide-browser-bin elecwhat-bin apidog-bin beekeeper-studio-bin pixterm-git
-  minio minio-client          # upstream unmaintained, minio already left [extra]; yay finds them
+  minio minio-client xdg-desktop-portal-termfilechooser-hunkyburrito-git
 )
 
-# ── Hardware (installed according to detection) ───────────────────────────────
+# ── Hardware according detection ─---------------──────────────────────────────
 PKGS_GPU_AMD=(mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon)
 PKGS_GPU_INTEL=(mesa lib32-mesa vulkan-intel lib32-vulkan-intel intel-media-driver)
-PKGS_GPU_NVIDIA=(nvidia-utils lib32-nvidia-utils libva-nvidia-driver)  # + nvidia-open-dkms
-PKGS_GPU_NVIDIA_CURRENT=(                                              # removed on 580xx cards
+PKGS_GPU_NVIDIA=(nvidia-utils lib32-nvidia-utils libva-nvidia-driver)
+PKGS_GPU_NVIDIA_CURRENT=(
   nvidia nvidia-dkms nvidia-lts nvidia-open nvidia-open-dkms nvidia-open-lts
   nvidia-utils lib32-nvidia-utils
 )
 AUR_GPU_NVIDIA_580XX=(nvidia-580xx-dkms nvidia-580xx-utils lib32-nvidia-580xx-utils)
 PKGS_GPU_NOUVEAU=(mesa lib32-mesa vulkan-nouveau lib32-vulkan-nouveau)
-PKGS_GPU_FALLBACK=(mesa lib32-mesa vulkan-swrast lib32-vulkan-swrast)  # VM / unknown GPU
+PKGS_GPU_FALLBACK=(mesa lib32-mesa vulkan-swrast lib32-vulkan-swrast)
 PKGS_GPU_HYBRID=(nvidia-prime)
 AUR_TUXEDO=(tuxedo-drivers-dkms)
 TUXEDO_MODULES=(uniwill_wmi tuxedo_keyboard)
-NVIDIA_TURING_ID=0x1e00     # PCI device IDs from Turing on use the current (open) driver
-NVIDIA_MAXWELL_ID=0x1340    # Maxwell–Volta need the 580xx branch; older chips only run nouveau
+NVIDIA_TURING_ID=0x1e00
+NVIDIA_MAXWELL_ID=0x1340
 
-# ── Services ──────────────────────────────────────────────────────────────────
+# ── Systemctl services ────────────────────────────────────────────────────────
 SYSTEM_SERVICES=(NetworkManager bluetooth avahi-daemon power-profiles-daemon postgresql)
 USER_SERVICES=(gammastep darkman)
 DISPLAY_MANAGER="greetd"
-NETWORK_CONFLICTS=(          # disabled: NetworkManager owns the network
+NETWORK_CONFLICTS=(
   systemd-networkd.service systemd-networkd.socket systemd-networkd-wait-online.service
   iwd.service dhcpcd.service
 )
 
-# Per-machine files (written by the Arch installer or generated here): never taken from $SYSTEM_DIR.
+# --- Sys rules ----------------------------------------------------------------
 MACHINE_FILES=(
   /etc/fstab /etc/hostname /etc/machine-id /etc/vconsole.conf
   /etc/default/grub /etc/kernel/cmdline /etc/mkinitcpio.conf /etc/locale.gen
@@ -124,11 +122,10 @@ MACHINE_FILES=(
 )
 
 # ══ Runtime state ═════════════════════════════════════════════════════════════
-
 USER_NAME=$(id -un)
 CPU_VENDOR=""
 HAS_AMD=0 HAS_INTEL=0 IS_TUXEDO=0 NEEDS_SOF=0
-NVIDIA_DRIVER=""            # open | 580xx | nouveau | empty when there is no NVIDIA GPU
+NVIDIA_DRIVER=""
 FIRST_INSTALL=0
 FAILED_AUR=()
 TMP_DIR=""
@@ -136,7 +133,6 @@ KEEPALIVE_PID=""
 YAY_FLAGS=(--needed --noconfirm --answerdiff None --answerclean None --removemake)
 
 # ══ Helpers ═══════════════════════════════════════════════════════════════════
-
 if [[ -t 1 ]]; then
   C_STEP=$'\e[1;34m' C_WARN=$'\e[33m' C_ERR=$'\e[31m' C_RST=$'\e[0m'
 else
@@ -146,8 +142,11 @@ fi
 step() { printf '\n%s==> %s%s\n' "$C_STEP" "$*" "$C_RST"; }
 info() { printf '    %s\n' "$*"; }
 warn() { printf '%s  ! %s%s\n' "$C_WARN" "$*" "$C_RST" >&2; }
-die()  { printf '%s  ✗ %s%s\n' "$C_ERR" "$*" "$C_RST" >&2; exit 1; }
-have() { command -v "$1" >/dev/null 2>&1; }
+die() {
+  printf '%s  ✗ %s%s\n' "$C_ERR" "$*" "$C_RST" >&2
+  exit 1
+}
+have() { command -v "$1" > /dev/null 2>&1; }
 
 # shellcheck disable=SC2329  # on_error and cleanup are called by traps
 on_error() {
@@ -158,14 +157,17 @@ on_error() {
 
 # shellcheck disable=SC2329
 cleanup() {
-  if [[ -n $KEEPALIVE_PID ]]; then kill "$KEEPALIVE_PID" 2>/dev/null || :; fi
-  if [[ -n $TMP_DIR ]]; then rm -rf "$TMP_DIR" 2>/dev/null || :; fi
+  if [[ -n $KEEPALIVE_PID ]]; then kill "$KEEPALIVE_PID" 2> /dev/null || :; fi
+  if [[ -n $TMP_DIR ]]; then rm -rf "$TMP_DIR" 2> /dev/null || :; fi
 }
 
 # Keeps the sudo timestamp fresh during long AUR builds (no temporary NOPASSWD).
 start_sudo_keepalive() {
   sudo -v || die "sudo is required"
-  ( trap - ERR; while kill -0 "$$" 2>/dev/null && sudo -n -v 2>/dev/null; do sleep 50; done ) &
+  (
+    trap - ERR
+    while kill -0 "$$" 2> /dev/null && sudo -n -v 2> /dev/null; do sleep 50; done
+  ) &
   KEEPALIVE_PID=$!
 }
 
@@ -177,16 +179,16 @@ dot() { git --git-dir="$DOTFILES_DIR" --work-tree="$HOME" "$@"; }
 pacman_install() {
   local missing=()
   mapfile -t missing < <(pacman -T "$@" || true)
-  (( ${#missing[@]} )) || return 0
+  ((${#missing[@]})) || return 0
   sudo pacman -S --needed --noconfirm "${missing[@]}"
-  hash -r                    # drop cached command paths after installing
+  hash -r
 }
 
 # One package at a time: a broken AUR package must not abort the whole install.
 yay_install_each() {
   local pkg
   for pkg in "$@"; do
-    pacman -T "$pkg" >/dev/null && continue
+    pacman -T "$pkg" > /dev/null && continue
     yay -S "${YAY_FLAGS[@]}" "$pkg" || FAILED_AUR+=("$pkg")
   done
   hash -r
@@ -205,7 +207,7 @@ installed_of() {
 remove_installed() {
   local pkgs=()
   mapfile -t pkgs < <(installed_of "$@")
-  (( ${#pkgs[@]} )) || return 0
+  ((${#pkgs[@]})) || return 0
   sudo pacman -Rdd --noconfirm "${pkgs[@]}"
 }
 
@@ -214,14 +216,14 @@ backup_root_file() {
   sudo test -e "$1" || return 0
   mkdir -p "$BACKUP_DIR/system$(dirname "$1")"
   # shellcheck disable=SC2024  # the redirect runs as the user on purpose: the backup is theirs
-  sudo cat "$1" >"$BACKUP_DIR/system$1"
+  sudo cat "$1" > "$BACKUP_DIR/system$1"
 }
 
 # Writes stdin to DEST as root:root, only when the content changes.
 write_root_file() {
   local dest=$1 mode=${2:-644} tmp
   tmp=$(mktemp -p "$TMP_DIR")
-  cat >"$tmp"
+  cat > "$tmp"
   if sudo cmp -s "$tmp" "$dest"; then return 0; fi
   backup_root_file "$dest"
   sudo install -D -m "$mode" -o root -g root "$tmp" "$dest"
@@ -235,9 +237,9 @@ remove_root_file() {
   info "removed $1"
 }
 
-ensure_line() {   # ensure_line FILE LINE
+ensure_line() {
   mkdir -p "$(dirname "$1")"
-  grep -qxF -- "$2" "$1" 2>/dev/null || printf '%s\n' "$2" >>"$1"
+  grep -qxF -- "$2" "$1" 2> /dev/null || printf '%s\n' "$2" >> "$1"
 }
 
 is_machine_file() {
@@ -254,12 +256,12 @@ sync_system_files() {
   local src dest prefix selected mode
   while IFS= read -r -d '' src; do
     dest=${src#"$SYSTEM_DIR"}
-    if (( $# )); then
+    if (($#)); then
       selected=0
       for prefix in "$@"; do
         if [[ $dest == "$prefix" || $dest == "$prefix"/* ]]; then selected=1; fi
       done
-      (( selected )) || continue
+      ((selected)) || continue
     fi
     if is_machine_file "$dest"; then
       warn "skipped $dest: it is per-machine, remove it from $SYSTEM_DIR"
@@ -274,32 +276,34 @@ sync_system_files() {
 }
 
 # ══ Hardware detection ════════════════════════════════════════════════════════
-
 detect_hardware() {
   step "Detecting hardware"
   local dev id nvidia_id="" yn=(no yes)
   for dev in /sys/bus/pci/devices/*; do
-    [[ $(<"$dev/class") == 0x03* ]] || continue            # display controllers only
-    case $(<"$dev/vendor") in
+    [[ $(< "$dev/class") == 0x03* ]] || continue
+    case $(< "$dev/vendor") in
       0x1002) HAS_AMD=1 ;;
       0x8086) HAS_INTEL=1 ;;
-      0x10de)                                              # the oldest card decides the driver
-        id=$(<"$dev/device")
-        if [[ -z $nvidia_id ]] || (( id < nvidia_id )); then nvidia_id=$id; fi
+      0x10de)
+        id=$(< "$dev/device")
+        if [[ -z $nvidia_id ]] || ((id < nvidia_id)); then nvidia_id=$id; fi
         ;;
     esac
   done
   if [[ -n $nvidia_id ]]; then
-    if (( nvidia_id >= NVIDIA_TURING_ID )); then NVIDIA_DRIVER=open
-    elif (( nvidia_id >= NVIDIA_MAXWELL_ID )); then NVIDIA_DRIVER=580xx
-    else NVIDIA_DRIVER=nouveau
+    if ((nvidia_id >= NVIDIA_TURING_ID)); then
+      NVIDIA_DRIVER=open
+    elif ((nvidia_id >= NVIDIA_MAXWELL_ID)); then
+      NVIDIA_DRIVER=580xx
+    else
+      NVIDIA_DRIVER=nouveau
     fi
   fi
   CPU_VENDOR=$(awk -F': ' '/^vendor_id/ { print $2; exit }' /proc/cpuinfo)
   if grep -qis tuxedo /sys/class/dmi/id/{sys_vendor,board_vendor,product_name}; then
     IS_TUXEDO=1
   fi
-  if [[ -d /sys/module/snd_sof ]]; then NEEDS_SOF=1; fi    # SOF audio DSP: silent without firmware
+  if [[ -d /sys/module/snd_sof ]]; then NEEDS_SOF=1; fi
 
   info "CPU:            ${CPU_VENDOR:-unknown}"
   info "GPU:            $(gpu_summary)"
@@ -309,8 +313,8 @@ detect_hardware() {
 
 gpu_summary() {
   local parts=() out="" part
-  if (( HAS_INTEL )); then parts+=(Intel); fi
-  if (( HAS_AMD )); then parts+=(AMD); fi
+  if ((HAS_INTEL)); then parts+=(Intel); fi
+  if ((HAS_AMD)); then parts+=(AMD); fi
   if [[ -n $NVIDIA_DRIVER ]]; then parts+=("NVIDIA ($NVIDIA_DRIVER)"); fi
   for part in "${parts[@]}"; do out+="${out:+ + }$part"; done
   echo "${out:-none recognized (VM?)}"
@@ -320,18 +324,17 @@ gpu_summary() {
 kernel_headers() {
   local file
   for file in /usr/lib/modules/*/pkgbase; do
-    printf '%s-headers\n' "$(<"$file")"
+    printf '%s-headers\n' "$(< "$file")"
   done | sort -u
 }
 
 # ══ Steps ═════════════════════════════════════════════════════════════════════
-
 preflight() {
-  (( EUID != 0 )) || die "run as your user; the script calls sudo when it needs to"
+  ((EUID != 0)) || die "run as your user; the script calls sudo when it needs to"
   [[ -f /etc/arch-release ]] || die "this script targets Arch Linux"
   have sudo || die "sudo is not installed"
   if [[ -e /var/lib/pacman/db.lck ]] &&
-     ! pgrep -x 'pacman|yay|paru|makepkg|pamac-daemon|packagekitd' >/dev/null; then
+    ! pgrep -x 'pacman|yay|paru|makepkg|pamac-daemon|packagekitd' > /dev/null; then
     warn "removing a stale pacman lock (an earlier run was interrupted)"
     sudo rm -f /var/lib/pacman/db.lck
   fi
@@ -339,7 +342,7 @@ preflight() {
 
 bootstrap() {
   step "Base system"
-  sudo pacman -Sy --needed --noconfirm archlinux-keyring    # fresh keys before anything else
+  sudo pacman -Sy --needed --noconfirm archlinux-keyring
   sudo pacman -Su --needed --noconfirm git base-devel
   hash -r
 }
@@ -370,7 +373,7 @@ setup_dotfiles() {
   dot branch --quiet --set-upstream-to="origin/$branch" "$branch"
 }
 
-multilib_enabled() { pacman-conf --repo-list | grep -x multilib >/dev/null; }
+multilib_enabled() { pacman-conf --repo-list | grep -x multilib > /dev/null; }
 
 configure_pacman() {
   step "pacman"
@@ -403,33 +406,33 @@ install_hardware_packages() {
     GenuineIntel) pkgs+=(intel-ucode) ;;
     AuthenticAMD) pkgs+=(amd-ucode) ;;
   esac
-  if (( HAS_AMD )); then pkgs+=("${PKGS_GPU_AMD[@]}"); fi
-  if (( HAS_INTEL )); then pkgs+=("${PKGS_GPU_INTEL[@]}"); fi
+  if ((HAS_AMD)); then pkgs+=("${PKGS_GPU_AMD[@]}"); fi
+  if ((HAS_INTEL)); then pkgs+=("${PKGS_GPU_INTEL[@]}"); fi
   case $NVIDIA_DRIVER in
     open)
       # Keeps a kernel module that is already installed (nvidia-open, -lts, 580xx by choice).
-      pacman -T NVIDIA-MODULE >/dev/null || pkgs+=(nvidia-open-dkms)
+      pacman -T NVIDIA-MODULE > /dev/null || pkgs+=(nvidia-open-dkms)
       pkgs+=("${PKGS_GPU_NVIDIA[@]}")
-      if (( HAS_AMD || HAS_INTEL )); then pkgs+=("${PKGS_GPU_HYBRID[@]}"); fi
+      if ((HAS_AMD || HAS_INTEL)); then pkgs+=("${PKGS_GPU_HYBRID[@]}"); fi
       ;;
     580xx)
-      remove_installed "${PKGS_GPU_NVIDIA_CURRENT[@]}"     # 590+ no longer drives these cards
+      remove_installed "${PKGS_GPU_NVIDIA_CURRENT[@]}"
       aur+=("${AUR_GPU_NVIDIA_580XX[@]}")
-      if (( HAS_AMD || HAS_INTEL )); then aur+=("${PKGS_GPU_HYBRID[@]}"); fi  # after its utils
+      if ((HAS_AMD || HAS_INTEL)); then aur+=("${PKGS_GPU_HYBRID[@]}"); fi
       ;;
     nouveau) pkgs+=("${PKGS_GPU_NOUVEAU[@]}") ;;
   esac
-  if (( !HAS_AMD && !HAS_INTEL )) && [[ -z $NVIDIA_DRIVER ]]; then
+  if ((! HAS_AMD && ! HAS_INTEL)) && [[ -z $NVIDIA_DRIVER ]]; then
     pkgs+=("${PKGS_GPU_FALLBACK[@]}")
   fi
-  if (( NEEDS_SOF )); then pkgs+=(sof-firmware); fi
-  if (( IS_TUXEDO )); then aur+=("${AUR_TUXEDO[@]}"); fi
+  if ((NEEDS_SOF)); then pkgs+=(sof-firmware); fi
+  if ((IS_TUXEDO)); then aur+=("${AUR_TUXEDO[@]}"); fi
 
   # DKMS modules only build against the headers of each installed kernel.
   for pkg in "${pkgs[@]}" "${aur[@]}"; do
     [[ $pkg == *-dkms ]] || continue
     mapfile -t headers < <(kernel_headers)
-    (( ${#headers[@]} )) || warn "no kernel package found in /usr/lib/modules; DKMS cannot build"
+    ((${#headers[@]})) || warn "no kernel package found in /usr/lib/modules; DKMS cannot build"
     break
   done
 
@@ -456,12 +459,12 @@ configure_gpu() {
   step "Hyprland GPU environment"
   local content
   content="-- Generated by install.sh for this machine: $(gpu_summary). Do not version it."
-  if [[ $NVIDIA_DRIVER == open || $NVIDIA_DRIVER == 580xx ]] && (( !HAS_AMD && !HAS_INTEL )); then
+  if [[ $NVIDIA_DRIVER == open || $NVIDIA_DRIVER == 580xx ]] && ((! HAS_AMD && ! HAS_INTEL)); then
     content+=$'\nhl.env("LIBVA_DRIVER_NAME", "nvidia")\nhl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")'
   fi
-  if [[ ! -f $HYPR_GPU_CONF || $(<"$HYPR_GPU_CONF") != "$content" ]]; then
+  if [[ ! -f $HYPR_GPU_CONF || $(< "$HYPR_GPU_CONF") != "$content" ]]; then
     mkdir -p "$(dirname "$HYPR_GPU_CONF")"
-    printf '%s\n' "$content" >"$HYPR_GPU_CONF"
+    printf '%s\n' "$content" > "$HYPR_GPU_CONF"
     info "$HYPR_GPU_CONF"
   fi
   ensure_line "$DOTFILES_DIR/info/exclude" "/${HYPR_GPU_CONF#"$HOME/"}"
@@ -471,15 +474,15 @@ configure_input() {
   step "Keyboard and input devices"
   sudo groupadd --system -f uinput
   sudo usermod -aG input,uinput "$USER_NAME"
-  write_root_file /etc/udev/rules.d/99-input.rules <<'EOF'
+  write_root_file /etc/udev/rules.d/99-input.rules << 'EOF'
 KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
 EOF
   # Keyboard backlight from any vendor: the input group may change brightness and color.
-  write_root_file /etc/udev/rules.d/99-kbd-backlight.rules <<'EOF'
+  write_root_file /etc/udev/rules.d/99-kbd-backlight.rules << 'EOF'
 ACTION=="add", SUBSYSTEM=="leds", KERNEL=="*kbd_backlight*", RUN+="/usr/bin/chgrp wheel /sys/class/leds/%k/brightness", RUN+="/usr/bin/chmod g+w /sys/class/leds/%k/brightness"
 ACTION=="add", SUBSYSTEM=="leds", KERNEL=="*kbd_backlight*", TEST=="multi_intensity", RUN+="/usr/bin/chgrp wheel /sys/class/leds/%k/multi_intensity", RUN+="/usr/bin/chmod g+w /sys/class/leds/%k/multi_intensity"
 EOF
-  if (( IS_TUXEDO )); then
+  if ((IS_TUXEDO)); then
     write_root_file /etc/modules-load.d/tuxedo.conf < <(printf '%s\n' "${TUXEDO_MODULES[@]}")
   else
     remove_root_file /etc/modules-load.d/tuxedo.conf
@@ -506,7 +509,7 @@ configure_locales() {
       warn "locale $locale is not listed in /etc/locale.gen"
     fi
   done < <(sed -nE 's/^(LANG|LC_[A-Z_]+)="?([^"]+)"?$/\2/p' /etc/locale.conf | sort -u)
-  if (( changed )); then sudo locale-gen; fi
+  if ((changed)); then sudo locale-gen; fi
 }
 
 # Appends the missing parameters to a command line, comparing keys (the part before '=').
@@ -531,9 +534,9 @@ update_boot_entry() {
     fi
     out+=("$line")
   done < <(sudo cat "$file")
-  (( changed )) || return 0
+  ((changed)) || return 0
   tmp=$(mktemp -p "$TMP_DIR")
-  printf '%s\n' "${out[@]}" >"$tmp"
+  printf '%s\n' "${out[@]}" > "$tmp"
   sudo cp "$tmp" "$file.new"
   sudo mv "$file.new" "$file"
   info "$file"
@@ -541,18 +544,18 @@ update_boot_entry() {
 
 configure_kernel_cmdline() {
   local found=0 file current new
-  if [[ -f /etc/kernel/cmdline ]]; then                          # UKI
+  if [[ -f /etc/kernel/cmdline ]]; then
     found=1
-    current=$(</etc/kernel/cmdline)
+    current=$(< /etc/kernel/cmdline)
     new=$(merge_params "$current" "${KERNEL_PARAMS[@]}")
-    if [[ $new != "$current" ]]; then write_root_file /etc/kernel/cmdline <<<"$new"; fi
+    if [[ $new != "$current" ]]; then write_root_file /etc/kernel/cmdline <<< "$new"; fi
   fi
-  while IFS= read -r -d '' file; do                              # systemd-boot, Limine
+  while IFS= read -r -d '' file; do
     found=1
     update_boot_entry "$file"
   done < <(sudo find /boot /efi -maxdepth 4 \
-             \( -path '*/loader/entries/*.conf' -o -name limine.conf \) -print0 2>/dev/null || true)
-  if [[ -f /etc/default/grub ]]; then                            # GRUB
+    \( -path '*/loader/entries/*.conf' -o -name limine.conf \) -print0 2> /dev/null || true)
+  if [[ -f /etc/default/grub ]]; then
     found=1
     current=$(sed -nE "s/^GRUB_CMDLINE_LINUX_DEFAULT=[\"']?([^\"']*)[\"']?.*/\1/p" /etc/default/grub)
     new=$(merge_params "$current" "${KERNEL_PARAMS[@]}")
@@ -563,7 +566,7 @@ configure_kernel_cmdline() {
       sudo grub-mkconfig -o /boot/grub/grub.cfg
     fi
   fi
-  (( found )) || warn "unknown bootloader; add to the kernel command line: ${KERNEL_PARAMS[*]}"
+  ((found)) || warn "unknown bootloader; add to the kernel command line: ${KERNEL_PARAMS[*]}"
 }
 
 configure_boot() {
@@ -586,7 +589,7 @@ configure_boot() {
 configure_shell() {
   step "Shell"
   if ! grep -qxF "$LOGIN_SHELL" /etc/shells; then
-    printf '%s\n' "$LOGIN_SHELL" | sudo tee -a /etc/shells >/dev/null
+    printf '%s\n' "$LOGIN_SHELL" | sudo tee -a /etc/shells > /dev/null
   fi
   if [[ $(getent passwd "$USER_NAME" | cut -d: -f7) != "$LOGIN_SHELL" ]]; then
     sudo chsh -s "$LOGIN_SHELL" "$USER_NAME"
@@ -597,13 +600,13 @@ configure_shell() {
     git clone --depth=1 -c oh-my-zsh.remote=origin -c oh-my-zsh.branch=master \
       "$OMZ_URL" "$TMP_DIR/ohmyzsh"
     mkdir -p "$OMZ_DIR"
-    cp -a --update=none "$TMP_DIR/ohmyzsh/." "$OMZ_DIR/"   # keeps a custom/ that dot brought
+    cp -a --update=none "$TMP_DIR/ohmyzsh/." "$OMZ_DIR/"
   fi
 }
 
 configure_dev() {
   step "Development tools"
-  rustup default >/dev/null 2>&1 || rustup default stable
+  rustup default > /dev/null 2>&1 || rustup default stable
   if ! sudo test -f /var/lib/postgres/data/PG_VERSION; then
     sudo install -d -o postgres -g postgres -m 700 /var/lib/postgres/data
     # Databases on btrfs should not be copy-on-write; it only applies to files created later.
@@ -620,8 +623,8 @@ configure_dev() {
 
 configure_desktop() {
   step "Appearance and greeter"
-  sudo fc-cache -s >/dev/null      # system fonts, also seen by the greeter user
-  fc-cache >/dev/null              # ~/.local/share/fonts
+  sudo fc-cache -s > /dev/null
+  fc-cache > /dev/null
   if [[ -S ${XDG_RUNTIME_DIR:-/nonexistent}/bus ]]; then
     gsettings set org.gnome.desktop.interface gtk-theme "$GTK_THEME"
     gsettings set org.gnome.desktop.interface icon-theme "$ICON_THEME"
@@ -641,7 +644,7 @@ configure_services() {
   local unit current dm_link=/etc/systemd/system/display-manager.service
 
   for unit in "${NETWORK_CONFLICTS[@]}"; do
-    if systemctl is-enabled --quiet "$unit" 2>/dev/null; then sudo systemctl disable "$unit"; fi
+    if systemctl is-enabled --quiet "$unit" 2> /dev/null; then sudo systemctl disable "$unit"; fi
   done
   # Switches display managers (sddm, gdm, ly...) without the display-manager alias conflict.
   if [[ -L $dm_link ]]; then
@@ -656,7 +659,7 @@ configure_services() {
       /etc/nsswitch.conf
   fi
 
-  if systemctl --user show-environment >/dev/null 2>&1; then
+  if systemctl --user show-environment > /dev/null 2>&1; then
     systemctl --user enable "${USER_SERVICES[@]}"
   else
     warn "no user systemd (log in on a TTY instead of using su); later: systemctl --user enable ${USER_SERVICES[*]}"
@@ -665,11 +668,11 @@ configure_services() {
 
 summary() {
   step "Done"
-  if (( ${#FAILED_AUR[@]} )); then
+  if ((${#FAILED_AUR[@]})); then
     warn "AUR packages that failed (re-run or install by hand): ${FAILED_AUR[*]}"
   fi
   if [[ -d $BACKUP_DIR ]]; then info "replaced files were backed up to $BACKUP_DIR"; fi
-  if (( FIRST_INSTALL )) && [[ $REBOOT_AFTER_INSTALL == true ]]; then
+  if ((FIRST_INSTALL)) && [[ $REBOOT_AFTER_INSTALL == true ]]; then
     info "rebooting in 10 s (Ctrl+C cancels)"
     sleep 10
     sudo systemctl reboot
@@ -679,7 +682,7 @@ summary() {
 }
 
 usage() {
-  cat <<'EOF'
+  cat << 'EOF'
 Usage: install.sh [--sync]
   (no option)  full install; safe to re-run, it only applies what is missing
   --sync       only copy ~/.system to / (after editing a system file)
@@ -693,8 +696,14 @@ main() {
   case ${1:-} in
     "") ;;
     --sync) mode=sync ;;
-    -h | --help) usage; return 0 ;;
-    *) usage >&2; return 2 ;;
+    -h | --help)
+      usage
+      return 0
+      ;;
+    *)
+      usage >&2
+      return 2
+      ;;
   esac
 
   trap 'on_error $LINENO' ERR
@@ -735,4 +744,5 @@ main() {
 
 # Same line on purpose: bash parses the whole line before running it, so the file can be
 # rewritten by the checkout (or arrive truncated through curl) without side effects.
-main "$@"; exit
+main "$@"
+exit
