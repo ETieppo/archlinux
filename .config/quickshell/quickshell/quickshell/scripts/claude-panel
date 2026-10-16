@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+import json
+import subprocess
+import sys
+import time
+
+CLASS = "chrome-claude.ai__-Default"
+LAUNCH = ["chromium", "--user-data-dir=" + __import__("os").path.expanduser("~/.local/share/claude-panel"), "--class=claude-panel", "--app=https://claude.ai"]
+
+
+def q(what):
+    return json.loads(subprocess.run(["hyprctl", what, "-j"], capture_output=True, text=True).stdout)
+
+
+def dsp(expr):
+    subprocess.run(["hyprctl", "dispatch", expr], capture_output=True)
+
+
+def client():
+    return next((c for c in q("clients") if c["class"] == CLASS), None)
+
+
+def layer():
+    for m in q("layers").values():
+        for lv in m["levels"].values():
+            for l in lv:
+                if l["namespace"] == "quickshell-claude":
+                    return l
+    return None
+
+
+def wait(fn, secs):
+    end = time.time() + secs
+    while time.time() < end:
+        v = fn()
+        if v:
+            return v
+        time.sleep(0.1)
+    return None
+
+
+def show():
+    c = client()
+    if not c:
+        subprocess.Popen(LAUNCH, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+        c = wait(client, 20)
+        if not c:
+            return
+    l = wait(layer, 2)
+    if not l:
+        return
+    a = f'address:{c["address"]}'
+    x, y, w, h = l["x"] + 8, l["y"] + 16 + 36, l["w"] - 16, l["h"] - 32 - 36 - 8
+    off = l["x"] + l["w"] + 20
+    ws = q("activeworkspace")["id"]
+    dsp(f'hl.dsp.window.resize({{ x = {w}, y = {h}, window = "{a}" }})')
+    dsp(f'hl.dsp.window.move({{ x = {off}, y = {y}, window = "{a}" }})')
+    dsp(f'hl.dsp.window.move({{ workspace = "{ws}", window = "{a}" }})')
+    if not client()["pinned"]:
+        dsp(f'hl.dsp.window.pin({{ window = "{a}" }})')
+    time.sleep(0.05)
+    dsp(f'hl.dsp.window.move({{ x = {x}, y = {y}, window = "{a}" }})')
+    dsp(f'hl.dsp.focus({{ window = "{a}" }})')
+
+
+def hide():
+    c = client()
+    if not c:
+        return
+    a = f'address:{c["address"]}'
+    mon = next(m for m in q("monitors") if m["id"] == c["monitor"])
+    dsp(f'hl.dsp.window.move({{ x = {mon["x"] + mon["width"] + 20}, y = {c["at"][1]}, window = "{a}" }})')
+    time.sleep(0.35)
+    if client()["pinned"]:
+        dsp(f'hl.dsp.window.pin({{ window = "{a}" }})')
+    dsp(f'hl.dsp.window.move({{ workspace = "special:claude", window = "{a}", follow = false }})')
+
+
+{"show": show, "hide": hide}[sys.argv[1]]()

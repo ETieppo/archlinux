@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+sync="string:x-canonical-private-synchronous:touch"
+
+main() {
+  case "$1" in
+    status)
+      [ -d /sys/module/hid_multitouch ] && echo on || echo off
+      ;;
+    toggle)
+      if [ -d /sys/module/hid_multitouch ]; then
+        sudo -n modprobe -r hid_multitouch && notify-send -h "$sync" "Touch desligado"
+      else
+        sudo -n modprobe hid_multitouch && notify-send -h "$sync" "Touch ligado"
+      fi
+      ;;
+  esac
+}
+
+main "$@"

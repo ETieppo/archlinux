@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+usage() {
+    echo "Usage: backlight <up|down> [percent]"
+}
+
+main() {
+    local action=$1
+    local value=${2:-1}
+
+    if ((value < 1)); then
+        echo "[ERROR]: value must be greater than 0." >&2
+        exit 1
+    fi
+    
+    local act_as
+    case "$action" in
+        up)   act_as='+' ;;
+        down) act_as='-' ;;
+        *)    usage >&2; exit 1 ;;
+    esac
+
+    brightnessctl -n set "${value}%${act_as}" > /dev/null
+}
+
+main "$@"
