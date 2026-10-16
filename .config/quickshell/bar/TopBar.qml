@@ -198,19 +198,6 @@ PanelWindow {
     height: parent.height
     spacing: 0
 
-    WbModule {
-      visible: bar.player !== null
-      underline: false
-      marginsOn: false
-      minWidth: 0
-      padL: 12
-      padR: 12
-      bold: false
-      text: bar.player ? (bar.player.isPlaying ? "󰐊 " : "󰏤 ") + (bar.player.trackTitle || bar.player.identity) : ""
-      tip: bar.player ? [bar.player.identity, bar.player.trackArtist, bar.player.trackTitle].filter(s => s).join(" - ") : ""
-      onClicked: bar.player?.togglePlaying()
-      onWheel: d => d > 0 ? bar.player?.next() : bar.player?.previous()
-    }
 
     Item {
       id: pulse
