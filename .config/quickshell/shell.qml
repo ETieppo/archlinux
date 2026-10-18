@@ -28,8 +28,6 @@ ShellRoot {
 
     Popups {}
 
-    ClaudePanel {}
-
     LazyLoader {
         active: Ui.selecting
         RegionSelector {}

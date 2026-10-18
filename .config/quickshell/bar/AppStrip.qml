@@ -9,7 +9,7 @@ import qs.components
 Item {
     id: root
 
-    readonly property var apps: [...new Set(ToplevelManager.toplevels.values.map(t => t.appId).filter(id => id && id !== Ui.claudeApp))]
+    readonly property var apps: [...new Set(ToplevelManager.toplevels.values.map(t => t.appId).filter(id => id))]
     readonly property string focused: ToplevelManager.activeToplevel?.appId ?? ""
 
     function entry(id) {
