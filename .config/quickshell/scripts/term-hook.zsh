@@ -2,7 +2,7 @@
 (( $+commands[qs] )) || return
 
 typeset -g _qs_job=""
-typeset -ga _qs_skip=(nvim vim vi nano less more man ssh mosh htop btop top fl tmux zellij claude lazygit fzf watch su sudoedit snvim psql mysql sqlite3)
+typeset -ga _qs_skip=(nvim vim vi nano less more man ssh mosh htop btop top vifm tmux zellij claude lazygit fzf watch su sudoedit snvim psql mysql sqlite3)
 typeset -ga _qs_repl=(python python3 node bun deno irb ghci iex lua)
 
 _qs_preexec() {
