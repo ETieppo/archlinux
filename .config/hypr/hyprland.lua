@@ -11,79 +11,91 @@ hl.monitor({ output = "DP-1", mode = "prefered", position = "auto-left", scale =
 hl.monitor({ output = "HDMI-A-1", mode = "prefered", position = "auto-left", scale = 1 })
 
 hl.on("hyprland.start", function()
-  hl.exec_cmd("qs kill; qs -d")
-  hl.exec_cmd("sleep 1 && darkman set dark")
-  hl.exec_cmd("wl-paste --type text --watch cliphist store")
-  hl.exec_cmd("wl-paste --type image --watch cliphist store")
-  hl.exec_cmd("pkill -x gammastep; gammastep")
-  hl.exec_cmd("hyprpaper")
-  hl.exec_cmd("fm1d --fm=fl-term")
+	hl.exec_cmd("qs kill; qs -d")
+	hl.exec_cmd("sleep 1 && darkman set dark")
+	hl.exec_cmd("wl-paste --type text --watch cliphist store")
+	hl.exec_cmd("wl-paste --type image --watch cliphist store")
+	hl.exec_cmd("pkill -x gammastep; gammastep")
+	hl.exec_cmd("hyprpaper")
+	hl.exec_cmd("fm1d --fm=fl-term")
 end)
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
 hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "allow")
 hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
+hl.window_rule({
+	name = "youtube-pip",
+	match = { class = "glide-glide", title = "Picture-in-Picture" },
+	float = true,
+	pin = true,
+	no_initial_focus = true,
+	size = { 640, 360 },
+	min_size = { 640, 360 },
+	max_size = { 640, 360 },
+	move = { "monitor_w-window_w-10", "40" },
+})
+
 hl.config({
-  dwindle = { preserve_split = true },
-  master = { new_status = "master" },
-  general = {
-    gaps_in = 2,
-    gaps_out = 6,
-    border_size = 1,
-    col = {
-      active_border = { colors = { "rgba(33ccffee)", 0x33CC, "rgba(33ccffee)" }, angle = 45 },
-      inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
-    },
-    resize_on_border = true,
-    allow_tearing = false,
-    layout = "dwindle",
-  },
+	dwindle = { preserve_split = true },
+	master = { new_status = "master" },
+	general = {
+		gaps_in = 2,
+		gaps_out = 6,
+		border_size = 1,
+		col = {
+			active_border = { colors = { "rgba(33ccffee)", 0x33CC, "rgba(33ccffee)" }, angle = 45 },
+			inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
+		},
+		resize_on_border = true,
+		allow_tearing = false,
+		layout = "dwindle",
+	},
 
-  decoration = {
-    rounding = 10,
-    rounding_power = 12,
-    active_opacity = 1,
-    inactive_opacity = 1,
+	decoration = {
+		rounding = 10,
+		rounding_power = 12,
+		active_opacity = 1,
+		inactive_opacity = 1,
 
-    shadow = {
-      enabled = true,
-      range = 4,
-      render_power = 3,
-      color = "#00000000",
-    },
+		shadow = {
+			enabled = true,
+			range = 4,
+			render_power = 3,
+			color = "#00000000",
+		},
 
-    blur = {
-      enabled = true,
-      size = 3,
-      passes = 1,
-      vibrancy = 0.1696,
-    },
-  },
+		blur = {
+			enabled = true,
+			size = 3,
+			passes = 1,
+			vibrancy = 0.1696,
+		},
+	},
 
-  animations = {
-    enabled = true,
-  },
+	animations = {
+		enabled = true,
+	},
 
-  misc = {
-    force_default_wallpaper = 0,
-    disable_hyprland_logo = true,
-    allow_session_lock_restore = true,
-  },
+	misc = {
+		force_default_wallpaper = 0,
+		disable_hyprland_logo = true,
+		allow_session_lock_restore = true,
+	},
 
-  input = {
-    kb_layout = "us,ru",
-    kb_variant = ",phonetic",
-    kb_model = "",
-    follow_mouse = 1,
-    sensitivity = 0,
-    repeat_delay = 300,
-    repeat_rate = 35,
+	input = {
+		kb_layout = "us,ru",
+		kb_variant = ",phonetic",
+		kb_model = "",
+		follow_mouse = 1,
+		sensitivity = 0,
+		repeat_delay = 300,
+		repeat_rate = 35,
 
-    touchpad = {
-      natural_scroll = true,
-    },
-  },
+		touchpad = {
+			natural_scroll = true,
+		},
+	},
 })
 
 hl.curve("easeOutQuint", { type = "bezier", points = { { 0.23, 1 }, { 0.32, 1 } } })
@@ -112,89 +124,106 @@ hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" 
 
 hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("qs ipc call claude toggle"))
 hl.bind("Escape", function()
-  local w = hl.get_active_window()
-  if w ~= nil and w.class == "chrome-claude.ai__-Default" then
-    hl.dispatch(hl.dsp.exec_cmd("qs ipc call claude close"))
-  end
+	local w = hl.get_active_window()
+	if w ~= nil and w.class == "chrome-claude.ai__-Default" then
+		hl.dispatch(hl.dsp.exec_cmd("qs ipc call claude close"))
+	end
 end, { non_consuming = true })
-hl.window_rule({
-  match = { class = "chrome-claude.ai__-Default" },
-  float = true,
-  workspace = "special:claude",
-  size = "520 938",
-  move = "1940 86",
-})
 
 function SendShortcut(params)
-  local timer = function()
-    local args = params
-    args.state = "up"
-    hl.dispatch(hl.dsp.send_key_state(args))
-  end
-  return function()
-    local args = params
-    args.state = "down"
-    hl.dispatch(hl.dsp.send_key_state(args))
-    hl.timer(timer, { timeout = 20, type = "oneshot" })
-  end
+	local timer = function()
+		local args = params
+		args.state = "up"
+		hl.dispatch(hl.dsp.send_key_state(args))
+	end
+	return function()
+		local args = params
+		args.state = "down"
+		hl.dispatch(hl.dsp.send_key_state(args))
+		hl.timer(timer, { timeout = 20, type = "oneshot" })
+	end
 end
 
 local function IsBrowser(w)
-  return w ~= nil and (w.class == "glide-glide" or w.class:find("^chrome%-") ~= nil)
+	return w ~= nil and (w.class == "glide-glide" or w.class:find("^chrome%-") ~= nil)
 end
 
 local function TypeText(text)
-  return hl.dsp.exec_cmd("wtype '" .. text .. "'")
+	return hl.dsp.exec_cmd("wtype '" .. text .. "'")
 end
 
 local deadKeys = {
-  { trigger = "E",     name = "acute",      symbol = "´", letters = { a = { "á", "Á" }, e = { "é", "É" }, i = { "í", "Í" }, o = { "ó", "Ó" }, u = { "ú", "Ú" } } },
-  { trigger = "grave", name = "grave",      symbol = "`", letters = { a = { "à", "À" }, e = { "è", "È" }, i = { "ì", "Ì" }, o = { "ò", "Ò" }, u = { "ù", "Ù" } } },
-  { trigger = "I",     name = "circumflex", symbol = "^", letters = { a = { "â", "Â" }, e = { "ê", "Ê" }, i = { "î", "Î" }, o = { "ô", "Ô" }, u = { "û", "Û" } } },
-  { trigger = "N",     name = "tilde",      symbol = "~", letters = { a = { "ã", "Ã" }, o = { "õ", "Õ" }, n = { "ñ", "Ñ" } } },
-  { trigger = "U",     name = "diaeresis",  symbol = "¨", letters = { a = { "ä", "Ä" }, e = { "ë", "Ë" }, i = { "ï", "Ï" }, o = { "ö", "Ö" }, u = { "ü", "Ü" } } },
+	{
+		trigger = "E",
+		name = "acute",
+		symbol = "´",
+		letters = { a = { "á", "Á" }, e = { "é", "É" }, i = { "í", "Í" }, o = { "ó", "Ó" }, u = { "ú", "Ú" } },
+	},
+	{
+		trigger = "grave",
+		name = "grave",
+		symbol = "`",
+		letters = { a = { "à", "À" }, e = { "è", "È" }, i = { "ì", "Ì" }, o = { "ò", "Ò" }, u = { "ù", "Ù" } },
+	},
+	{
+		trigger = "I",
+		name = "circumflex",
+		symbol = "^",
+		letters = { a = { "â", "Â" }, e = { "ê", "Ê" }, i = { "î", "Î" }, o = { "ô", "Ô" }, u = { "û", "Û" } },
+	},
+	{
+		trigger = "N",
+		name = "tilde",
+		symbol = "~",
+		letters = { a = { "ã", "Ã" }, o = { "õ", "Õ" }, n = { "ñ", "Ñ" } },
+	},
+	{
+		trigger = "U",
+		name = "diaeresis",
+		symbol = "¨",
+		letters = { a = { "ä", "Ä" }, e = { "ë", "Ë" }, i = { "ï", "Ï" }, o = { "ö", "Ö" }, u = { "ü", "Ü" } },
+	},
 }
 
 local function TypeAndReset(text)
-  return function()
-    hl.dispatch(TypeText(text))
-    hl.dispatch(hl.dsp.submap("reset"))
-  end
+	return function()
+		hl.dispatch(TypeText(text))
+		hl.dispatch(hl.dsp.submap("reset"))
+	end
 end
 
-
 hl.bind("switch:on:Lid Switch", function()
-  hl.timer(function()
-    hl.dispatch(hl.dsp.dpms({ action = "disable" }))
-  end, { timeout = 500, type = "oneshot" })
+	hl.timer(function()
+		hl.dispatch(hl.dsp.dpms({ action = "disable" }))
+	end, { timeout = 500, type = "oneshot" })
 end, { locked = true })
 
 hl.bind("switch:off:Lid Switch", function()
-  hl.timer(function()
-    hl.dispatch(hl.dsp.dpms({ action = "enable" }))
-  end, { timeout = 500, type = "oneshot" })
+	hl.timer(function()
+		hl.dispatch(hl.dsp.dpms({ action = "enable" }))
+	end, { timeout = 500, type = "oneshot" })
 end, { locked = true })
 
 for _, dead in ipairs(deadKeys) do
-  hl.define_submap(dead.name, function()
-    for letter, chars in pairs(dead.letters) do
-      hl.bind(letter, TypeAndReset(chars[1]))
-      hl.bind("SHIFT + " .. letter, TypeAndReset(chars[2]))
-    end
-    hl.bind("SPACE", TypeAndReset(dead.symbol))
-    hl.bind("Shift_L", hl.dsp.no_op(), { ignore_mods = true, non_consuming = true })
-    hl.bind("Shift_R", hl.dsp.no_op(), { ignore_mods = true, non_consuming = true })
-    hl.bind("Escape", hl.dsp.submap("reset"))
-    hl.bind("catchall", hl.dsp.submap("reset"))
-  end)
-  hl.bind("SUPER + " .. dead.trigger, hl.dsp.submap(dead.name))
+	hl.define_submap(dead.name, function()
+		for letter, chars in pairs(dead.letters) do
+			hl.bind(letter, TypeAndReset(chars[1]))
+			hl.bind("SHIFT + " .. letter, TypeAndReset(chars[2]))
+		end
+		hl.bind("SPACE", TypeAndReset(dead.symbol))
+		hl.bind("Shift_L", hl.dsp.no_op(), { ignore_mods = true, non_consuming = true })
+		hl.bind("Shift_R", hl.dsp.no_op(), { ignore_mods = true, non_consuming = true })
+		hl.bind("Escape", hl.dsp.submap("reset"))
+		hl.bind("catchall", hl.dsp.submap("reset"))
+	end)
+	hl.bind("SUPER + " .. dead.trigger, hl.dsp.submap(dead.name))
 end
 hl.bind("SUPER + C", function()
-  hl.dispatch(TypeText("ç"))
+	hl.dispatch(TypeText("ç"))
 end)
 
 hl.bind("SUPER + SHIFT + C", function()
-  hl.dispatch(TypeText("Ç"))
+	hl.dispatch(TypeText("Ç"))
 end)
 
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))
@@ -204,20 +233,20 @@ hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 hl.bind(mainMod .. " + A", SendShortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
 hl.bind(mainMod .. " + R", SendShortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
 hl.bind(mainMod .. " + L", function()
-  local w = hl.get_active_window()
-  if IsBrowser(w) then
-    hl.dispatch(SendShortcut({ mods = "CTRL", key = "L", window = "activewindow" }))
-  else
-    hl.dispatch(SendShortcut({ mods = "ALT", key = "L", window = "activewindow" }))
-  end
+	local w = hl.get_active_window()
+	if IsBrowser(w) then
+		hl.dispatch(SendShortcut({ mods = "CTRL", key = "L", window = "activewindow" }))
+	else
+		hl.dispatch(SendShortcut({ mods = "ALT", key = "L", window = "activewindow" }))
+	end
 end)
 hl.bind(mainMod .. " + C", function()
-  local w = hl.get_active_window()
-  if IsBrowser(w) then
-    hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
-  else
-    hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
-  end
+	local w = hl.get_active_window()
+	if IsBrowser(w) then
+		hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
+	else
+		hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
+	end
 end)
 hl.bind(mainMod .. " + V", SendShortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
 hl.bind(mainMod .. " + SHIFT + I", SendShortcut({ mods = "CTRL SHIFT", key = "code:31", window = "activewindow" }))
@@ -226,12 +255,12 @@ hl.bind(mainMod .. " + X", SendShortcut({ mods = "CTRL", key = "X", window = "ac
 hl.bind(mainMod .. " + Z", SendShortcut({ mods = "CTRL", key = "Z", window = "activewindow" }))
 hl.bind(mainMod .. " + W", SendShortcut({ mods = "CTRL", key = "W", window = "activewindow" }))
 hl.bind(mainMod .. " + N", function()
-  local w = hl.get_active_window()
-  if w ~= nil and w.class == "com.mitchellh.ghostty" then
-    hl.dispatch(SendShortcut({ mods = "ALT", key = "N", window = "activewindow" }))
-  else
-    hl.dispatch(SendShortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
-  end
+	local w = hl.get_active_window()
+	if w ~= nil and w.class == "com.mitchellh.ghostty" then
+		hl.dispatch(SendShortcut({ mods = "ALT", key = "N", window = "activewindow" }))
+	else
+		hl.dispatch(SendShortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
+	end
 end)
 hl.bind(mainMod .. " + right", SendShortcut({ mods = "", key = "End", window = "activewindow" }))
 hl.bind(mainMod .. " + left", SendShortcut({ mods = "", key = "Home", window = "activewindow" }))
@@ -246,8 +275,8 @@ hl.bind("SUPER + up", SendShortcut({ mods = "ALT", key = "Up", window = "activew
 hl.bind("SUPER + down", SendShortcut({ mods = "ALT", key = "Down", window = "activewindow" }))
 
 for i = 1, 9 do
-  hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
-  hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = tostring(i) }))
+	hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
+	hl.bind("SUPER + SHIFT + " .. i, hl.dsp.window.move({ workspace = tostring(i) }))
 end
 
 hl.bind("SUPER + 0", hl.dsp.focus({ workspace = "10" }))
@@ -262,25 +291,32 @@ hl.bind("SUPER + J", hl.dsp.focus({ direction = "d" }))
 hl.bind("SUPER + K", hl.dsp.focus({ direction = "u" }))
 hl.bind("SUPER + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
 hl.bind("SUPER + SHIFT + F", hl.dsp.window.fullscreen())
+hl.bind("SUPER + F", hl.dsp.window.float())
 hl.bind("SUPER + S", hl.dsp.workspace.toggle_special("magic"))
 hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
 hl.bind(
-  "XF86AudioRaiseVolume",
-  hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
-  { repeating = true, locked = true }
+	"XF86AudioRaiseVolume",
+	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
+	{ repeating = true, locked = true }
 )
 hl.bind(
-  "XF86AudioLowerVolume",
-  hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
-  { repeating = true, locked = true }
+	"XF86AudioLowerVolume",
+	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+	{ repeating = true, locked = true }
 )
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc call sys brightness"),
-  { repeating = true, locked = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc call sys brightness"),
-  { repeating = true, locked = true })
+hl.bind(
+	"XF86MonBrightnessUp",
+	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc call sys brightness"),
+	{ repeating = true, locked = true }
+)
+hl.bind(
+	"XF86MonBrightnessDown",
+	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc call sys brightness"),
+	{ repeating = true, locked = true }
+)
 hl.bind("XF86KbdBrightnessUp", hl.dsp.exec_cmd("qs ipc call kbd up"), { repeating = true, locked = true })
 hl.bind("XF86KbdBrightnessDown", hl.dsp.exec_cmd("qs ipc call kbd down"), { repeating = true, locked = true })
 hl.bind("Print", hl.dsp.exec_cmd("grim"))
@@ -292,9 +328,9 @@ hl.bind("SUPER + V", hl.dsp.exec_cmd("qs ipc call launcher clipboard"))
 hl.bind("XF86PowerOff", hl.dsp.exec_cmd("qs ipc call lock lock"))
 hl.bind("SUPER + ALT + F6", hl.dsp.exec_cmd("qs ipc call power cycle"))
 hl.layer_rule({
-  name = "quickshell-region-no-anim",
-  match = { namespace = "^quickshell-region$" },
-  no_anim = true,
+	name = "quickshell-region-no-anim",
+	match = { namespace = "^quickshell-region$" },
+	no_anim = true,
 })
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
