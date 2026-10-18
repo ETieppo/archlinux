@@ -17,7 +17,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
 	hl.exec_cmd("pkill -x gammastep; gammastep")
 	hl.exec_cmd("hyprpaper")
-	hl.exec_cmd("fm1d --fm=fl-term")
+	hl.exec_cmd("fm1d --fm=vifm-term")
 end)
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
