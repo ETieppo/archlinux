@@ -1,10 +1,8 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Services.UPower
-import Quickshell.Wayland
 
 Singleton {
     id: root
@@ -92,25 +90,6 @@ Singleton {
         }
     }
 
-    readonly property int claudeWidth: 520
-    readonly property int claudePad: 8
-    property bool claudeOpen: false
-
-    readonly property string claudeApp: "chrome-claude.ai__-Default"
-
-    function toggleClaude() {
-        claudeOpen = !claudeOpen;
-        Quickshell.execDetached([Quickshell.shellPath("scripts/claude-panel"), claudeOpen ? "show" : "hide"]);
-    }
-
-    Connections {
-        target: Hyprland
-        function onRawEvent(event) {
-            if (event.name === "closewindow" && root.claudeOpen && !ToplevelManager.toplevels.values.some(t => t.appId === root.claudeApp))
-                root.claudeOpen = false;
-        }
-    }
-
     function pickColor() {
         picker.running = true;
     }
@@ -183,17 +162,6 @@ Singleton {
                     nightRevert.restart();
                 }
             }
-        }
-    }
-
-    IpcHandler {
-        target: "claude"
-        function toggle(): void {
-            root.toggleClaude();
-        }
-        function close(): void {
-            root.claudeOpen = false;
-            Quickshell.execDetached([Quickshell.shellPath("scripts/claude-panel"), "hide"]);
         }
     }
 }

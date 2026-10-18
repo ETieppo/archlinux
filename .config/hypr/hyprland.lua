@@ -122,13 +122,7 @@ hl.animation({ leaf = "workspacesIn", enabled = true, speed = 1.21, bezier = "al
 hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" })
 
-hl.bind(mainMod .. " + slash", hl.dsp.exec_cmd("qs ipc call claude toggle"))
-hl.bind("Escape", function()
-	local w = hl.get_active_window()
-	if w ~= nil and w.class == "chrome-claude.ai__-Default" then
-		hl.dispatch(hl.dsp.exec_cmd("qs ipc call claude close"))
-	end
-end, { non_consuming = true })
+require("scratchpads").Setup(mainMod)
 
 function SendShortcut(params)
 	local timer = function()

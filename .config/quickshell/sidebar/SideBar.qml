@@ -183,14 +183,6 @@ PanelWindow {
       id: kbd
     }
     PowerProfileButton {}
-    SideButton {
-      icon: "󰚩"
-      tip: "Claude  (ALT + /)"
-      iconColor: "#d97757"
-      active: Ui.claudeOpen
-      onClicked: Ui.toggleClaude()
-    }
-
 
     Sep {}
 

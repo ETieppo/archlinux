@@ -20,3 +20,4 @@ export PATH="$HOME/.local/bin:$PATH"
 
 
 source ~/.config/quickshell/scripts/term-hook.zsh
+export PATH="/usr/lib/qt6/bin:$PATH"
