@@ -2,9 +2,9 @@
 #
 # install.sh — end-to-end Arch Linux + Hyprland setup. Idempotent: safe to run again.
 #
-#   New machine:  bash <(curl -fsSL https://raw.githubusercontent.com/etieppo/archlinux/main/install.sh)
-#   Re-run:       ~/install.sh
-#   System only:  ~/install.sh --sync      (re-apply ~/.system after editing a system file)
+#   New machine:  bash <(curl -fsSL https://raw.githubusercontent.com/etieppo/archlinux/main/.local/bin/install.sh)
+#   Re-run:       install.sh
+#   System only:  install.sh --sync      (re-apply ~/.system after editing a system file)
 #
 # How configs are managed:
 #   • Home: a bare repository (~/.archlinux) whose work tree is $HOME — the `dot` alias.
