@@ -44,14 +44,29 @@ local function Place(scratchpad, w)
 	hl.dispatch(hl.dsp.window.move({ x = x, y = y, window = WindowSelector(w) }))
 end
 
+local function SetPinned(w, pinned)
+	hl.dispatch(hl.dsp.window.pin({ action = pinned and "enable" or "disable", window = WindowSelector(w) }))
+end
+
+local function IsHidden(w)
+	return w.workspace == nil or w.workspace.name:find("^special:") ~= nil
+end
+
+local function IsOnActiveMonitor(w)
+	return w.monitor ~= nil and w.monitor.id == hl.get_active_monitor().id
+end
+
 local function Show(scratchpad, w)
 	local workspace = hl.get_active_workspace()
+	SetPinned(w, false)
 	hl.dispatch(hl.dsp.window.move({ workspace = tostring(workspace.id), window = WindowSelector(w), follow = false }))
 	Place(scratchpad, w)
+	SetPinned(w, true)
 	hl.dispatch(hl.dsp.focus({ window = WindowSelector(w) }))
 end
 
 local function Hide(scratchpad, w)
+	SetPinned(w, false)
 	hl.dispatch(hl.dsp.window.move({ workspace = "special:" .. scratchpad.name, window = WindowSelector(w), follow = false }))
 end
 
@@ -70,7 +85,7 @@ local function ToggleScratchpad(scratchpad)
 	local w = FindWindow(scratchpad)
 	if w == nil then
 		Launch(scratchpad)
-	elseif w.workspace == nil or w.workspace.id ~= hl.get_active_workspace().id then
+	elseif IsHidden(w) or not w.pinned or not IsOnActiveMonitor(w) then
 		Show(scratchpad, w)
 	elseif w.active then
 		Hide(scratchpad, w)
@@ -97,16 +112,9 @@ local function Setup(mod)
 		if scratchpad ~= nil and launching[scratchpad.name] then
 			launching[scratchpad.name] = false
 			Place(scratchpad, w)
+			SetPinned(w, true)
 		end
 	end)
-
-	hl.bind("Escape", function()
-		local w = hl.get_active_window()
-		local scratchpad = w ~= nil and FindScratchpad(w) or nil
-		if scratchpad ~= nil then
-			Hide(scratchpad, w)
-		end
-	end, { non_consuming = true })
 end
 
 return {
