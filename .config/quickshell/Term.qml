@@ -88,7 +88,7 @@ Singleton {
         if (status === 0)
             record(key(j.cmd, j.cwd), dur);
         if (dur >= 60000)
-            Quickshell.execDetached(["notify-send", "-a", "Terminal", status === 0 ? `Finished in ${fmt(dur)}` : status === 130 ? `Interrupted after ${fmt(dur)}` : `Failed after ${fmt(dur)} (exit ${status})`, j.cmd]);
+            Notifs.send("Terminal", status === 0 ? `Finished in ${fmt(dur)}` : status === 130 ? `Interrupted after ${fmt(dur)}` : `Failed after ${fmt(dur)} (exit ${status})`, j.cmd);
     }
 
     Timer {

@@ -80,9 +80,10 @@ Seg {
                 root.cycles++;
             root.onBreak = !root.onBreak;
             root.remaining = root.total;
-            Quickshell.execDetached(["notify-send", "-a", "Pomodoro", "-u", "critical",
+            Notifs.send("Pomodoro",
                 root.onBreak ? "Break time 󰾴" : "Back to focus 󰔟",
-                root.onBreak ? `Breathe. ${root.breakMin} minutes.` : `${root.workMin} minutes of focus.`]);
+                root.onBreak ? `Breathe. ${root.breakMin} minutes.` : `${root.workMin} minutes of focus.`,
+                "critical");
         }
     }
 
