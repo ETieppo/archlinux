@@ -1,0 +1,63 @@
+#!/bin/sh
+
+action="$1"
+file="$2"
+width="$3"
+height="$4"
+x="$5"
+y="$6"
+cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/vifm"
+
+clear_images() {
+    printf '\033_Ga=d,d=A\033\\' >/dev/tty
+}
+
+draw() {
+    [ -s "$1" ] || return 1
+    image="$(chafa --format=kitty --animate=off --passthrough=none --size="${width}x${height}" -- "$1" </dev/null \
+        | sed -e 's/\x1b\[?25[hl]//g' -e 's/a=T,/a=T,C=1,/' \
+        | tr -d '\n')"
+    [ -n "$image" ] && printf '\0337\033[%d;%dH%s\0338' "$((y + 1))" "$((x + 1))" "$image" >/dev/tty
+}
+
+thumbnail() {
+    mkdir -p "$cache_dir"
+    printf '%s/%s.png' "$cache_dir" "$(stat -Lc '%n %s %Y' -- "$file" | sha256sum | cut -d' ' -f1)"
+}
+
+case "$action" in
+    clear)
+        clear_images
+        ;;
+    image)
+        draw "$file"
+        ;;
+    video)
+        thumb="$(thumbnail)"
+        [ -f "$thumb" ] || ffmpegthumbnailer -i "$file" -o "$thumb" -s 0 -q 5 >/dev/null 2>&1
+        draw "$thumb"
+        ;;
+    audio)
+        info="$("$0" info "$file")"
+        printf '%s\n' "$info"
+        lines="$(printf '%s\n' "$info" | wc -l)"
+        thumb="$(thumbnail)"
+        [ -f "$thumb" ] || ffmpeg -v error -y -i "$file" -an -frames:v 1 -c:v png "$thumb" </dev/null >/dev/null 2>&1
+        y=$((y + lines + 1))
+        height=$((height - lines - 1))
+        [ "$height" -gt 2 ] && draw "$thumb"
+        ;;
+    pdf)
+        thumb="$(thumbnail)"
+        [ -f "$thumb" ] || pdftoppm -png -f 1 -singlefile -scale-to 1024 "$file" "${thumb%.png}" >/dev/null 2>&1
+        draw "$thumb"
+        ;;
+    info)
+        ffprobe -v error -hide_banner -pretty \
+            -show_entries format=format_long_name,duration,size,bit_rate:format_tags=title,artist,album,album_artist,date,genre,track:stream=codec_type,codec_long_name,sample_rate,channel_layout,width,height,r_frame_rate \
+            -of default=noprint_wrappers=1 -- "$file" 2>&1 \
+            | sed -e 's/^TAG://' -e 's/^\([^=]*\)=/\1: /'
+        ;;
+esac
+
+exit 0
