@@ -1,0 +1,5 @@
+[Added Associations]
+
+[Default Applications]
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop;
+inode/directory=vifm-term.desktop
