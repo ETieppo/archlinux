@@ -62,6 +62,7 @@ PKGS_BASE=(
   base-devel git openssh zsh unzip tree lua pacman-contrib
   networkmanager bluez bluez-utils avahi nss-mdns power-profiles-daemon
   ffmpeg 7zip jq poppler fd ripgrep fzf zoxide resvg mpv imv vifm chafa
+  rtkit wireless-regdb
 )
 PKGS_AUDIO=(pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber pavucontrol playerctl)
 PKGS_DESKTOP=(
