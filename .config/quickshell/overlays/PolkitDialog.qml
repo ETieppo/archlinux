@@ -141,7 +141,7 @@ Scope {
                 Label {
                     Layout.fillWidth: true
                     visible: text !== ""
-                    text: root.flow?.failed ? "Senha incorreta, tente de novo" : (root.flow?.supplementaryMessage ?? "")
+                    text: root.flow?.failed ? "Wrong password" : (root.flow?.supplementaryMessage ?? "")
                     color: root.flow?.failed || root.flow?.supplementaryIsError ? Theme.red : Theme.dim
                     font.pixelSize: 12
                     wrapMode: Text.Wrap
