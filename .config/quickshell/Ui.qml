@@ -112,7 +112,7 @@ Singleton {
 
     function _shoot(geom) {
         Quickshell.execDetached(["sh", "-c", `
-            dir="$HOME/Pictures/Screenshots"; mkdir -p "$dir"
+            dir="$HOME"; mkdir -p "$dir"
             f="$dir/$(date +%F_%H-%M-%S).png"
             ${geom ? `grim -g "${geom}" "$f"` : 'sleep 0.3; grim "$f"'} || exit 1
             wl-copy < "$f"
