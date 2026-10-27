@@ -1,10 +1,10 @@
 pcall(require, "gpu")
 require("keymaps")
 require("scratchpads").Setup("ALT")
-require('utils')
-
+require("utils")
 
 hl.env("GTK_USE_PORTAL", "1")
+
 hl.monitor({ output = "eDP-1", mode = "1920x1080@144", position = "auto", scale = 1 })
 hl.monitor({ output = "DP-1", mode = "prefered", position = "auto-left", scale = 1 })
 hl.monitor({ output = "HDMI-A-1", mode = "prefered", position = "auto-left", scale = 1 })
@@ -28,7 +28,7 @@ hl.window_rule({
 	match = { class = "glide-glide", title = "Picture-in-Picture" },
 	float = true,
 	pin = true,
-	no_initial_focus = true,
+	no_focus = true,
 	size = { 640, 360 },
 	min_size = { 640, 360 },
 	max_size = { 640, 360 },
@@ -103,6 +103,7 @@ hl.curve("linear", { type = "bezier", points = { { 0, 0 }, { 1, 1 } } })
 hl.curve("almostLinear", { type = "bezier", points = { { 0.5, 0.5 }, { 0.75, 1 } } })
 hl.curve("quick", { type = "bezier", points = { { 0.15, 0 }, { 0.1, 1 } } })
 hl.curve("easy", { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
+
 hl.animation({ leaf = "global", enabled = true, speed = 10, bezier = "default" })
 hl.animation({ leaf = "border", enabled = true, speed = 5.39, bezier = "easeOutQuint" })
 hl.animation({ leaf = "windows", enabled = true, speed = 4.79, spring = "easy" })
@@ -120,3 +121,9 @@ hl.animation({ leaf = "workspaces", enabled = true, speed = 1.94, bezier = "almo
 hl.animation({ leaf = "workspacesIn", enabled = true, speed = 1.21, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "zoomFactor", enabled = true, speed = 7, bezier = "quick" })
+
+hl.layer_rule({
+	name = "quickshell-region-no-anim",
+	match = { namespace = "^quickshell-region$" },
+	no_anim = true,
+})

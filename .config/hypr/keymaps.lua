@@ -2,7 +2,6 @@ require("utils")
 
 local terminal = "env GTK_IM_MODULE=simple ghostty"
 local menu = "qs ipc call launcher toggle"
-
 local deadKeys = {
 	{
 		trigger = "E",
@@ -36,25 +35,6 @@ local deadKeys = {
 	},
 }
 
-local function TypeAndReset(text)
-	return function()
-		hl.dispatch(TypeText(text))
-		hl.dispatch(hl.dsp.submap("reset"))
-	end
-end
-
-hl.bind("switch:on:Lid Switch", function()
-	hl.timer(function()
-		hl.dispatch(hl.dsp.dpms({ action = "disable" }))
-	end, { timeout = 500, type = "oneshot" })
-end, { locked = true })
-
-hl.bind("switch:off:Lid Switch", function()
-	hl.timer(function()
-		hl.dispatch(hl.dsp.dpms({ action = "enable" }))
-	end, { timeout = 500, type = "oneshot" })
-end, { locked = true })
-
 for _, dead in ipairs(deadKeys) do
 	hl.define_submap(dead.name, function()
 		for letter, chars in pairs(dead.letters) do
@@ -69,6 +49,7 @@ for _, dead in ipairs(deadKeys) do
 	end)
 	hl.bind("SUPER + " .. dead.trigger, hl.dsp.submap(dead.name))
 end
+
 hl.bind("SUPER + C", function()
 	hl.dispatch(TypeText("ç"))
 end)
@@ -76,54 +57,6 @@ end)
 hl.bind("SUPER + SHIFT + C", function()
 	hl.dispatch(TypeText("Ç"))
 end)
-
-hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))
-hl.bind("ALT + T", hl.dsp.exec_cmd(terminal))
-hl.bind("ALT + SPACE", hl.dsp.exec_cmd(menu))
-hl.bind("ALT + Q", hl.dsp.window.close())
-hl.bind("ALT + A", SendShortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
-hl.bind("ALT + R", SendShortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
-hl.bind("ALT + L", function()
-	local w = hl.get_active_window()
-	if IsBrowser(w) then
-		hl.dispatch(SendShortcut({ mods = "CTRL", key = "L", window = "activewindow" }))
-	else
-		hl.dispatch(SendShortcut({ mods = "ALT", key = "L", window = "activewindow" }))
-	end
-end)
-hl.bind("ALT + C", function()
-	local w = hl.get_active_window()
-	if IsBrowser(w) then
-		hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
-	else
-		hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
-	end
-end)
-hl.bind("ALT + V", SendShortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
-hl.bind("ALT + SHIFT + I", SendShortcut({ mods = "CTRL SHIFT", key = "code:31", window = "activewindow" }))
-hl.bind("ALT + F", SendShortcut({ mods = "CTRL", key = "F", window = "activewindow" }))
-hl.bind("ALT + X", SendShortcut({ mods = "CTRL", key = "X", window = "activewindow" }))
-hl.bind("ALT + Z", SendShortcut({ mods = "CTRL", key = "Z", window = "activewindow" }))
-hl.bind("ALT + W", SendShortcut({ mods = "CTRL", key = "W", window = "activewindow" }))
-hl.bind("ALT + N", function()
-	local w = hl.get_active_window()
-	if w ~= nil and w.class == "com.mitchellh.ghostty" then
-		hl.dispatch(SendShortcut({ mods = "ALT", key = "N", window = "activewindow" }))
-	else
-		hl.dispatch(SendShortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
-	end
-end)
-hl.bind("ALT + right", SendShortcut({ mods = "", key = "End", window = "activewindow" }))
-hl.bind("ALT + left", SendShortcut({ mods = "", key = "Home", window = "activewindow" }))
-hl.bind("ALT + SHIFT + right", SendShortcut({ mods = "SHIFT", key = "End", window = "activewindow" }))
-hl.bind("ALT + SHIFT + left", SendShortcut({ mods = "SHIFT", key = "Home", window = "activewindow" }))
-hl.bind("ALT + up", SendShortcut({ mods = "CTRL", key = "Home", window = "activewindow" }))
-hl.bind("ALT + down", SendShortcut({ mods = "CTRL", key = "End", window = "activewindow" }))
-hl.bind("ALT + SHIFT + up", SendShortcut({ mods = "CTRL SHIFT", key = "Home", window = "activewindow" }))
-hl.bind("ALT + SHIFT + down", SendShortcut({ mods = "CTRL SHIFT", key = "End", window = "activewindow" }))
-hl.bind("CTRL + Backspace", SendShortcut({ mods = "", key = "Delete", window = "activewindow" }), { repeating = true })
-hl.bind("SUPER + up", SendShortcut({ mods = "ALT", key = "Up", window = "activewindow" }))
-hl.bind("SUPER + down", SendShortcut({ mods = "ALT", key = "Down", window = "activewindow" }))
 
 for i = 1, 9 do
 	hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
@@ -146,28 +79,69 @@ hl.bind("SUPER + F", hl.dsp.window.float())
 hl.bind("SUPER + S", hl.dsp.workspace.toggle_special("magic"))
 hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true })
-hl.bind(
-	"XF86AudioRaiseVolume",
-	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
-	{ repeating = true, locked = true }
-)
-hl.bind(
-	"XF86AudioLowerVolume",
-	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
-	{ repeating = true, locked = true }
-)
+hl.bind("SUPER + up", SendShortcut({ mods = "ALT", key = "Up", window = "activewindow" }))
+hl.bind("SUPER + down", SendShortcut({ mods = "ALT", key = "Down", window = "activewindow" }))
+hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("hyprctl switchxkblayout all next"))
+
+hl.bind("CTRL + Backspace", SendShortcut({ mods = "", key = "Delete", window = "activewindow" }), { repeating = true })
+
+hl.bind("ALT + right", SendShortcut({ mods = "", key = "End", window = "activewindow" }))
+hl.bind("ALT + left", SendShortcut({ mods = "", key = "Home", window = "activewindow" }))
+hl.bind("ALT + SHIFT + right", SendShortcut({ mods = "SHIFT", key = "End", window = "activewindow" }))
+hl.bind("ALT + SHIFT + left", SendShortcut({ mods = "SHIFT", key = "Home", window = "activewindow" }))
+hl.bind("ALT + up", SendShortcut({ mods = "CTRL", key = "Home", window = "activewindow" }))
+hl.bind("ALT + down", SendShortcut({ mods = "CTRL", key = "End", window = "activewindow" }))
+hl.bind("ALT + SHIFT + up", SendShortcut({ mods = "CTRL SHIFT", key = "Home", window = "activewindow" }))
+hl.bind("ALT + SHIFT + down", SendShortcut({ mods = "CTRL SHIFT", key = "End", window = "activewindow" }))
+hl.bind("ALT + V", SendShortcut({ mods = "CTRL SHIFT", key = "V", window = "activewindow" }))
+hl.bind("ALT + SHIFT + I", SendShortcut({ mods = "CTRL SHIFT", key = "code:31", window = "activewindow" }))
+hl.bind("ALT + F", SendShortcut({ mods = "CTRL", key = "F", window = "activewindow" }))
+hl.bind("ALT + X", SendShortcut({ mods = "CTRL", key = "X", window = "activewindow" }))
+hl.bind("ALT + Z", SendShortcut({ mods = "CTRL", key = "Z", window = "activewindow" }))
+hl.bind("ALT + T", hl.dsp.exec_cmd(terminal))
+hl.bind("ALT + SPACE", hl.dsp.exec_cmd(menu))
+hl.bind("ALT + Q", hl.dsp.window.kill())
+hl.bind("ALT + A", SendShortcut({ mods = "CTRL", key = "A", window = "activewindow" }))
+hl.bind("ALT + R", SendShortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
+
+hl.bind("ALT + L", function()
+	local w = hl.get_active_window()
+	if IsBrowser(w) then
+		hl.dispatch(SendShortcut({ mods = "CTRL", key = "L", window = "activewindow" }))
+	else
+		hl.dispatch(SendShortcut({ mods = "ALT", key = "L", window = "activewindow" }))
+	end
+end)
+
+hl.bind("ALT + W", function()
+	local w = hl.get_active_window()
+	if IsBrowser(w) then
+		hl.dispatch(SendShortcut({ mods = "CTRL", key = "W", window = "activewindow" }))
+	else
+		hl.bind("ALT + W", hl.dsp.window.close())
+	end
+end)
+
+hl.bind("ALT + C", function()
+	local w = hl.get_active_window()
+	if IsBrowser(w) then
+		hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
+	else
+		hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
+	end
+end)
+
+hl.bind("ALT + N", function()
+	local w = hl.get_active_window()
+	if w ~= nil and w.class == "com.mitchellh.ghostty" then
+		hl.dispatch(SendShortcut({ mods = "ALT", key = "N", window = "activewindow" }))
+	else
+		hl.dispatch(SendShortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
+	end
+end)
+
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
-hl.bind(
-	"XF86MonBrightnessUp",
-	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc call sys brightness"),
-	{ repeating = true, locked = true }
-)
-hl.bind(
-	"XF86MonBrightnessDown",
-	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc call sys brightness"),
-	{ repeating = true, locked = true }
-)
 hl.bind("XF86KbdBrightnessUp", hl.dsp.exec_cmd("qs ipc call kbd up"), { repeating = true, locked = true })
 hl.bind("XF86KbdBrightnessDown", hl.dsp.exec_cmd("qs ipc call kbd down"), { repeating = true, locked = true })
 hl.bind("Print", hl.dsp.exec_cmd("grim"))
@@ -178,11 +152,6 @@ hl.bind("ALT + SHIFT + 5", hl.dsp.exec_cmd("qs ipc call screenshot region"))
 hl.bind("SUPER + V", hl.dsp.exec_cmd("qs ipc call launcher clipboard"))
 hl.bind("XF86PowerOff", hl.dsp.exec_cmd("qs ipc call lock lock"))
 hl.bind("SUPER + ALT + F6", hl.dsp.exec_cmd("qs ipc call power cycle"))
-hl.layer_rule({
-	name = "quickshell-region-no-anim",
-	match = { namespace = "^quickshell-region$" },
-	no_anim = true,
-})
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
@@ -194,3 +163,39 @@ hl.bind("KP_Left", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 hl.bind("KP_Begin", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("KP_Right", hl.dsp.exec_cmd("playerctl next"), { locked = true })
 -- hl.bind("ALT + M", hl.dsp.exit())
+
+hl.bind(
+	"XF86AudioRaiseVolume",
+	hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"),
+	{ repeating = true, locked = true }
+)
+
+hl.bind(
+	"XF86AudioLowerVolume",
+	hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),
+	{ repeating = true, locked = true }
+)
+
+hl.bind(
+	"XF86MonBrightnessUp",
+	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc call sys brightness"),
+	{ repeating = true, locked = true }
+)
+
+hl.bind(
+	"XF86MonBrightnessDown",
+	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc call sys brightness"),
+	{ repeating = true, locked = true }
+)
+
+hl.bind("switch:on:Lid Switch", function()
+	hl.timer(function()
+		hl.dispatch(hl.dsp.dpms({ action = "disable" }))
+	end, { timeout = 500, type = "oneshot" })
+end, { locked = true })
+
+hl.bind("switch:off:Lid Switch", function()
+	hl.timer(function()
+		hl.dispatch(hl.dsp.dpms({ action = "enable" }))
+	end, { timeout = 500, type = "oneshot" })
+end, { locked = true })

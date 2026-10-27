@@ -30,4 +30,9 @@ function TypeText(text)
 	return hl.dsp.exec_cmd("wtype '" .. text .. "'")
 end
 
-
+function TypeAndReset(text)
+	return function()
+		hl.dispatch(TypeText(text))
+		hl.dispatch(hl.dsp.submap("reset"))
+	end
+end

@@ -87,10 +87,8 @@ local function ToggleScratchpad(scratchpad)
 		Launch(scratchpad)
 	elseif IsHidden(w) or not w.pinned or not IsOnActiveMonitor(w) then
 		Show(scratchpad, w)
-	elseif w.active then
-		Hide(scratchpad, w)
 	else
-		hl.dispatch(hl.dsp.focus({ window = WindowSelector(w) }))
+		Hide(scratchpad, w)
 	end
 end
 
