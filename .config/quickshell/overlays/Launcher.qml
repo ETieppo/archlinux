@@ -11,7 +11,7 @@ PanelWindow {
     id: root
 
     readonly property bool open: Ui.launcherOpen
-    readonly property int maxBubbles: 80
+    readonly property int maxBubbles: 10
     readonly property int blobR: 40
     readonly property int surface: 64
     readonly property real poolY: height - surface + 30
