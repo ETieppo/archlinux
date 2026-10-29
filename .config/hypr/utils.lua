@@ -16,7 +16,7 @@ local browserClassPatterns = { "^glide%-glide$", "^claude$", "^chrome%-" }
 
 function IsBrowser(w)
 	if w == nil then
-		return false
+		return nil
 	end
 	for _, pattern in ipairs(browserClassPatterns) do
 		if w.class:find(pattern) ~= nil then

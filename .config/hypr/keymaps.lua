@@ -114,17 +114,16 @@ hl.bind("ALT + L", function()
 end)
 
 hl.bind("ALT + W", function()
-	local w = hl.get_active_window()
-	if IsBrowser(w) then
+	local is_browser = IsBrowser(hl.get_active_window())
+	if is_browser then
 		hl.dispatch(SendShortcut({ mods = "CTRL", key = "W", window = "activewindow" }))
-	else
-		hl.bind("ALT + W", hl.dsp.window.close())
+	elseif is_browser ~= nil then
+    hl.dispatch(hl.dsp.window.close())
 	end
 end)
 
 hl.bind("ALT + C", function()
-	local w = hl.get_active_window()
-	if IsBrowser(w) then
+	if IsBrowser(hl.get_active_window()) then
 		hl.dispatch(SendShortcut({ mods = "CTRL", key = "C", window = "activewindow" }))
 	else
 		hl.dispatch(SendShortcut({ mods = "CTRL SHIFT", key = "C", window = "activewindow" }))
