@@ -11,7 +11,7 @@ PanelWindow {
     id: root
 
     readonly property bool open: Ui.launcherOpen
-    readonly property int maxBubbles: 28
+    readonly property int maxBubbles: 80
     readonly property int blobR: 40
     readonly property int surface: 64
     readonly property real poolY: height - surface + 30
@@ -23,6 +23,7 @@ PanelWindow {
     property real time: 0
     property string query: ""
     property int current: 0
+    property bool normalMode: false
     property var slotOf: ({})
     property point lastPointer: Qt.point(-1, -1)
     property point pointer: Qt.point(-1, -1)
@@ -58,6 +59,7 @@ PanelWindow {
             return;
         input.text = "";
         current = 0;
+        normalMode = false;
         input.forceActiveFocus();
     }
     onQueryChanged: {
@@ -252,6 +254,48 @@ PanelWindow {
             Quickshell.execDetached(["sh", "-c", item.name]);
         }
         close();
+    }
+
+    function navigateByKey(key) {
+        if (key === Qt.Key_Down)
+            spatial(0, 1);
+        else if (key === Qt.Key_Up)
+            spatial(0, -1);
+        else if (key === Qt.Key_Right)
+            spatial(1, 0);
+        else if (key === Qt.Key_Left)
+            spatial(-1, 0);
+        else if (key === Qt.Key_Return || key === Qt.Key_Enter)
+            activate(results[current]);
+        else
+            return false;
+        return true;
+    }
+
+    function handleInsertKey(key) {
+        if (key === Qt.Key_Escape) {
+            normalMode = true;
+            return true;
+        }
+        return navigateByKey(key);
+    }
+
+    function handleNormalKey(key) {
+        if (key === Qt.Key_Escape)
+            close();
+        else if (key === Qt.Key_H)
+            spatial(-1, 0);
+        else if (key === Qt.Key_J)
+            spatial(0, 1);
+        else if (key === Qt.Key_K)
+            spatial(0, -1);
+        else if (key === Qt.Key_L)
+            spatial(1, 0);
+        else if (key === Qt.Key_I || key === Qt.Key_A || key === Qt.Key_Slash)
+            normalMode = false;
+        else
+            navigateByKey(key);
+        return true;
     }
 
     function spatial(dx, dy) {
@@ -606,6 +650,7 @@ PanelWindow {
                 font.bold: true
                 focus: true
                 clip: true
+                readOnly: root.normalMode
                 onTextChanged: root.query = text
 
                 Text {
@@ -616,22 +661,16 @@ PanelWindow {
                 }
 
                 Keys.onPressed: e => {
-                    if (e.key === Qt.Key_Escape)
-                        root.close();
-                    else if (e.key === Qt.Key_Down)
-                        root.spatial(0, 1);
-                    else if (e.key === Qt.Key_Up)
-                        root.spatial(0, -1);
-                    else if (e.key === Qt.Key_Right)
-                        root.spatial(1, 0);
-                    else if (e.key === Qt.Key_Left)
-                        root.spatial(-1, 0);
-                    else if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter)
-                        root.activate(capsule.cur);
-                    else
-                        return;
-                    e.accepted = true;
+                    e.accepted = root.normalMode ? root.handleNormalKey(e.key) : root.handleInsertKey(e.key);
                 }
+            }
+
+            Label {
+                visible: root.normalMode
+                text: "NORMAL"
+                color: root.liquidTop
+                font.pixelSize: 12
+                font.bold: true
             }
 
             Label {

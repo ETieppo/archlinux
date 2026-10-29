@@ -7,6 +7,8 @@ Singleton {
     id: root
 
     readonly property int delay: 1500
+    readonly property list<string> commandWrappers: ["sudo", "doas", "time", "nohup", "env", "exec", "command"]
+    readonly property var unboundedPatterns: [/^(bun|npm|pnpm|yarn) (run|dev|start|serve|preview|watch)(\s|$)/, /^(bunx|npx|pnpx) (vite|next|nuxt|astro|nodemon|serve)(\s|$)/, /^deno (run|task|serve)(\s|$)/, /^cargo (run|watch|leptos|tauri dev)(\s|$)/, /^zig build run(\s|$)/, /^go run(\s|$)/, /^dotnet (run|watch)(\s|$)/, /^(flutter|tauri) (run|dev)(\s|$)/, /^(make|just) (run|dev|watch|serve|start)(\s|$)/, /^docker[- ]compose (up|watch)(?!.*\s(-d|--detach)(\s|$))/, /^docker[- ]compose logs .*(-f|--follow)(\s|$)/, /^docker (attach|logs -f|run -it|run -ti)(\s|$)/, /^python3? -m http\.server(\s|$)/, /^tail (-f|-F|--follow)(\s|$)/, /^journalctl\s.*(-f|--follow)(\s|$)/, /^ping6? /, /^(vite|nodemon|quickshell)(\s|$)/, /^qs( -c| -p| --config| --path|$)/]
     property var jobs: []
     property var last: null
     property var ended: ({})
@@ -37,6 +39,20 @@ Singleton {
         Store.runs = runs;
     }
 
+    function normalizeSegment(segment) {
+        const words = segment.trim().split(/\s+/).filter(w => w);
+        while (words.length && (/^\w+=/.test(words[0]) || commandWrappers.includes(words[0])))
+            words.shift();
+        if (!words.length)
+            return "";
+        words[0] = words[0].split("/").pop();
+        return words.join(" ");
+    }
+
+    function isUnbounded(cmd) {
+        return cmd.split(/\n|;|&&|\|\|?|&/).map(normalizeSegment).some(segment => unboundedPatterns.some(pattern => pattern.test(segment)));
+    }
+
     function fmt(ms) {
         const s = Math.floor(ms / 1000);
         if (s < 60)
@@ -52,6 +68,8 @@ Singleton {
             ended = e;
             return;
         }
+        if (isUnbounded(cmd))
+            return;
         now = Date.now();
         jobs = [...jobs, {
             id,

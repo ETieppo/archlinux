@@ -1,4 +1,5 @@
 pragma Singleton
+
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -6,6 +7,8 @@ import Quickshell.Io
 Singleton {
     id: root
 
+    property var dusk: [21.5 / 24, 21.5 / 24]
+    property var dawn: [8.5 / 24, 8.5 / 24]
     readonly property real lat: -23.5
     readonly property real lng: -46.6
     readonly property date now: clock.date
@@ -14,8 +17,6 @@ Singleton {
     readonly property real sunrise: sun[0]
     readonly property real sunset: sun[1]
     readonly property bool isDay: progress > sunrise && progress < sunset
-    property var dusk: [21.5 / 24, 21.5 / 24]
-    property var dawn: [8.5 / 24, 8.5 / 24]
     readonly property var hues: [
         ["07:00", 360],
         ["08:30", 330],
