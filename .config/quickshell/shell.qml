@@ -37,6 +37,5 @@ ShellRoot {
     Osd {}
     PolkitDialog {}
     Lock {}
-    Idle {}
     Night {}
 }
