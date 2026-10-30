@@ -12,7 +12,7 @@ function SendShortcut(params)
 	end
 end
 
-local browserClassPatterns = { "^glide%-glide$", "^claude$", "^chrome%-" }
+local browserClassPatterns = { "^firefox", "^glide%-glide$", "^claude$", "^chrome%-" }
 
 function IsBrowser(w)
 	if w == nil then
