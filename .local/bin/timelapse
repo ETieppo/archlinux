@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Timelapse script
+# -s FACTOR  speed-up factor (default 60: 1 min real = 1 s of video)
+# arg would be out name, tested with mkv
+
+readonly DISPLAY_OUTPUT="eDP-1"
+readonly FRAME_RATE=30
+readonly DEFAULT_SPEEDUP=60
+readonly DEFAULT_OUTPUT_FILE="timelapse.mkv"
+
+speedup="$DEFAULT_SPEEDUP"
+output_file=""
+
+usage() {
+  cat >&2 << EOF
+Usage: $(basename "$0") [-s factor] [output_file]
+
+Options:
+  -s    Speed-up factor (default: ${DEFAULT_SPEEDUP})
+        e.g. 60 -> 1 hour becomes 1 minute
+  -h    Show this help
+
+Default output file: ${DEFAULT_OUTPUT_FILE}
+EOF
+  exit "${1:-0}"
+}
+
+parse_args() {
+  local option
+  while getopts ":s:h" option; do
+    case "$option" in
+      s) speedup="$OPTARG" ;;
+      h) usage 0 ;;
+      *) usage 1 ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+  output_file="${1:-$DEFAULT_OUTPUT_FILE}"
+
+  if ! [[ "$speedup" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+    echo "Invalid speed-up factor: ${speedup}" >&2
+    usage 1
+  fi
+}
+
+start_recording() {
+  local -a video_encoder_args=(
+    -c libx264
+    -x yuv444p
+    -F "setpts=PTS/${speedup},fps=${FRAME_RATE},scale=out_color_matrix=bt709:out_range=tv,format=yuv444p"
+    -p crf=16
+    -p preset=medium
+    -p tune=animation
+    -p colorspace=bt709
+    -p color_primaries=bt709
+    -p color_trc=bt709
+    -p color_range=tv
+  )
+
+  exec wf-recorder \
+    -o "$DISPLAY_OUTPUT" \
+    -r "$FRAME_RATE" \
+    "${video_encoder_args[@]}" \
+    -f "$output_file"
+}
+
+main() {
+  parse_args "$@"
+  start_recording
+}
+
+main "$@"
