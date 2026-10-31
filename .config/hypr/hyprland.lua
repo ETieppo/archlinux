@@ -84,7 +84,7 @@ hl.config({
 
 	input = {
 		kb_layout = "us,ru",
-		kb_variant = ",phonetic",
+    kb_variant = "altgr-intl,phonetic",
 		kb_model = "",
 		follow_mouse = 1,
 		sensitivity = 0,

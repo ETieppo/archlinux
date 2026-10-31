@@ -50,13 +50,8 @@ for _, dead in ipairs(deadKeys) do
 	hl.bind("SUPER + " .. dead.trigger, hl.dsp.submap(dead.name))
 end
 
-hl.bind("SUPER + C", function()
-	hl.dispatch(TypeText("ç"))
-end)
-
-hl.bind("SUPER + SHIFT + C", function()
-	hl.dispatch(TypeText("Ç"))
-end)
+hl.bind("SUPER + C", SendShortcut({ mods = "MOD5", key = "comma", window = "activewindow" }))
+hl.bind("SUPER + SHIFT + C", SendShortcut({ mods = "MOD5 SHIFT", key = "comma", window = "activewindow" }))
 
 for i = 1, 9 do
 	hl.bind("SUPER + " .. i, hl.dsp.focus({ workspace = tostring(i) }))
@@ -118,7 +113,7 @@ hl.bind("ALT + W", function()
 	if is_browser then
 		hl.dispatch(SendShortcut({ mods = "CTRL", key = "W", window = "activewindow" }))
 	elseif is_browser ~= nil then
-    hl.dispatch(hl.dsp.window.close())
+		hl.dispatch(hl.dsp.window.close())
 	end
 end)
 
