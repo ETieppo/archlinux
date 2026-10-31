@@ -108,6 +108,15 @@ hl.bind("ALT + L", function()
 	end
 end)
 
+hl.bind("ALT + S", hl.dsp.submap("resize"))
+hl.define_submap("resize", function()
+	hl.bind("L", hl.dsp.window.resize({ x = 10, y = 0, relative = true }), { repeating = true })
+	hl.bind("H", hl.dsp.window.resize({ x = -10, y = 0, relative = true }), { repeating = true })
+	hl.bind("J", hl.dsp.window.resize({ x = 0, y = 10, relative = true }), { repeating = true })
+	hl.bind("K", hl.dsp.window.resize({ x = 0, y = -10, relative = true }), { repeating = true })
+	hl.bind("escape", hl.dsp.submap("reset"))
+end)
+
 hl.bind("ALT + W", function()
 	local is_browser = IsBrowser(hl.get_active_window())
 	if is_browser then
