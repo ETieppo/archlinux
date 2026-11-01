@@ -1,8 +1,6 @@
 export EDITOR="nvim"
 export SUDO_EDITOR=nvim
 alias snvim="sudo XDG_CONFIG_HOME=$HOME/.config nvim"
-alias dot='git --git-dir=$HOME/.archlinux --work-tree=$HOME'
-alias ndot='git -C $HOME/.config/nvim'
 
 # OH-MY-ZSH
 export ZSH="$HOME/.oh-my-zsh"
@@ -28,3 +26,14 @@ export PATH="$PATH:$HOME/.cargo/bin"
 
 # BREW
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+
+# DOT NDOT
+function dot { git --git-dir=$HOME/.archlinux --work-tree=$HOME "$@" }
+function ndot { git -C $HOME/.config/nvim "$@" }
+function _dot {
+  if (( CURRENT > 2 )) && [[ $words[2] == add ]]; then _files; else GIT_DIR=$HOME/.archlinux GIT_WORK_TREE=$HOME service=git _git; fi
+}
+function _ndot { builtin cd -q $HOME/.config/nvim || return; service=git _git; builtin cd -q $OLDPWD }
+
+compdef _dot dot
+compdef _ndot ndot
