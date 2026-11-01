@@ -12,14 +12,14 @@ highlight CurrLine    cterm=none   ctermfg=default ctermbg=235     gui=none   gu
 highlight OtherLine   cterm=none   ctermfg=default ctermbg=233     gui=none   guifg=default guibg=#101014
 highlight Selected    cterm=bold   ctermfg=141     ctermbg=234     gui=bold   guifg=#bb9af7 guibg=#1a1a26
 
-highlight Directory   cterm=bold   ctermfg=146     ctermbg=default gui=bold   guifg=#a9b1d6 guibg=default
-highlight Link        cterm=italic ctermfg=default ctermbg=default gui=italic guifg=default guibg=default
+highlight Directory   cterm=bold   ctermfg=57      ctermbg=default gui=bold   guifg=#702ded guibg=default
+highlight Link        cterm=italic ctermfg=170     ctermbg=default gui=italic guifg=#c930c7 guibg=default
 highlight HardLink    cterm=none   ctermfg=default ctermbg=default gui=none   guifg=default guibg=default
-highlight BrokenLink  cterm=italic ctermfg=210     ctermbg=default gui=italic guifg=#f7768e guibg=default
-highlight Executable  cterm=bold   ctermfg=default ctermbg=default gui=bold   guifg=default guibg=default
-highlight Socket      cterm=none   ctermfg=141     ctermbg=default gui=none   guifg=#bb9af7 guibg=default
-highlight Device      cterm=none   ctermfg=179     ctermbg=default gui=none   guifg=#e0af68 guibg=default
-highlight Fifo        cterm=none   ctermfg=67      ctermbg=default gui=none   guifg=#737aa2 guibg=default
+highlight BrokenLink  cterm=italic ctermfg=161     ctermbg=default gui=italic guifg=#e41951 guibg=default
+highlight Executable  cterm=bold   ctermfg=202     ctermbg=default gui=bold   guifg=#ff6a00 guibg=default
+highlight Socket      cterm=none   ctermfg=161     ctermbg=default gui=none   guifg=#e41951 guibg=default
+highlight Device      cterm=none   ctermfg=161     ctermbg=default gui=none   guifg=#e41951 guibg=default
+highlight Fifo        cterm=none   ctermfg=161     ctermbg=default gui=none   guifg=#e41951 guibg=default
 
 highlight TopLine     cterm=none   ctermfg=103     ctermbg=default gui=none   guifg=#787c99 guibg=default
 highlight TopLineSel  cterm=bold   ctermfg=73      ctermbg=default gui=bold   guifg=#41a6b5 guibg=default
@@ -33,27 +33,23 @@ highlight WildMenu    cterm=bold   ctermfg=232     ctermbg=57      gui=bold   gu
 highlight SuggestBox  cterm=none   ctermfg=146     ctermbg=233     gui=none   guifg=#a9b1d6 guibg=#101014
 highlight CmpMismatch cterm=bold   ctermfg=210     ctermbg=default gui=bold   guifg=#f7768e guibg=default
 
-highlight {.steampath}
-        \ cterm=none ctermfg=57 ctermbg=default gui=none guifg=#702ded guibg=default
 highlight {.steampid,*.pid}
         \ cterm=none ctermfg=161 ctermbg=default gui=none guifg=#e41951 guibg=default
 highlight {*.sh,*.bash,*.zsh,*.fish,.bashrc,.zshrc,.zprofile,.profile}
         \ cterm=none ctermfg=202 ctermbg=default gui=none guifg=#ff6a00 guibg=default
 highlight {*.lua,*.py,*.js,*.ts,*.jsx,*.tsx,*.rs,*.go,*.c,*.h,*.cpp,*.hpp,*.java,*.cs,*.rb,*.php,*.vim,*.vifm}
-        \ cterm=none ctermfg=111 ctermbg=default gui=none guifg=#7aa2f7 guibg=default
+        \ cterm=none ctermfg=210 ctermbg=default gui=none guifg=#ff8787 guibg=default
 highlight {*.json,*.toml,*.yaml,*.yml,*.ini,*.conf,*.cfg,*.xml,*.csv,*.env,vifmrc}
-        \ cterm=none ctermfg=38 ctermbg=default gui=none guifg=#0db9d7 guibg=default
+        \ cterm=none ctermfg=138 ctermbg=default gui=none guifg=#af8787 guibg=default
 highlight {*.zip,*.tar,*.tar.gz,*.tgz,*.tar.xz,*.txz,*.tar.zst,*.gz,*.xz,*.zst,*.bz2,*.7z,*.rar}
-        \ cterm=none ctermfg=125 ctermbg=default gui=none guifg=#b8003a guibg=default
+        \ cterm=none ctermfg=161 ctermbg=default gui=none guifg=#e41951 guibg=default
 highlight {*.png,*.jpg,*.jpeg,*.gif,*.webp,*.svg,*.bmp,*.ico,*.avif}
-        \ cterm=none ctermfg=141 ctermbg=default gui=none guifg=#bb9af7 guibg=default
+        \ cterm=none ctermfg=88 ctermbg=default gui=none guifg=#94002F guibg=default
 highlight {*.mp3,*.flac,*.ogg,*.opus,*.wav,*.mp4,*.mkv,*.webm,*.mov,*.avi}
         \ cterm=none ctermfg=88 ctermbg=default gui=none guifg=#94002F guibg=default
 highlight {*.pdf,*.epub,*.docx,*.odt}
-        \ cterm=none ctermfg=138 ctermbg=default gui=none guifg=#c0768e guibg=default
-highlight {*.md,*.txt}
-        \ cterm=none ctermfg=252 ctermbg=default gui=none guifg=#c5cae9 guibg=default
+        \ cterm=none ctermfg=138 ctermbg=default gui=none guifg=#af8787 guibg=default
 highlight {*.lock,*.bak,*.tmp,*.swp,*~}
         \ cterm=none ctermfg=60 ctermbg=default gui=none guifg=#545470 guibg=default
 highlight {*,.*}
-        \ cterm=none ctermfg=53 ctermbg=default gui=none guifg=#601D49 guibg=default
+        \ cterm=none ctermfg=242 ctermbg=default gui=none guifg=#686868 guibg=default
