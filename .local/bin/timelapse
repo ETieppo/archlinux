@@ -5,10 +5,11 @@ set -euo pipefail
 # -s FACTOR  speed-up factor (default 60: 1 min real = 1 s of video)
 # arg would be out name, tested with mkv
 
+DEFAULT_OUTPUT_FILE="timelapse_$(date +%Y-%m-%d_%H-%M-%S).mkv"
+readonly DEFAULT_OUTPUT_FILE
 readonly DISPLAY_OUTPUT="eDP-1"
 readonly FRAME_RATE=30
 readonly DEFAULT_SPEEDUP=60
-readonly DEFAULT_OUTPUT_FILE="timelapse.mkv"
 
 speedup="$DEFAULT_SPEEDUP"
 output_file=""
@@ -22,7 +23,7 @@ Options:
         e.g. 60 -> 1 hour becomes 1 minute
   -h    Show this help
 
-Default output file: ${DEFAULT_OUTPUT_FILE}
+Default output file: ~/${DEFAULT_OUTPUT_FILE}
 EOF
   exit "${1:-0}"
 }
