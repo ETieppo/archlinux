@@ -15,8 +15,8 @@ Singleton {
         popups = popups.filter(p => p !== n);
     }
 
-    function send(appName, summary, body, urgency) {
-        Quickshell.execDetached(["notify-send", "-a", appName, "-u", urgency || "normal", summary, body || ""]);
+    function send(appName, summary, body, urgency, icon) {
+        Quickshell.execDetached(["notify-send", "-a", appName, "-u", urgency || "normal", ...(icon ? ["-i", icon] : []), summary, body || ""]);
     }
 
     function clearAll() {

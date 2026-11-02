@@ -8,6 +8,8 @@ Singleton {
 
     readonly property int delay: 1500
     readonly property list<string> commandWrappers: ["sudo", "doas", "time", "nohup", "env", "exec", "command"]
+    readonly property list<string> interactivePrograms: ["nvim", "vim", "vi", "nano", "less", "more", "man", "ssh", "mosh", "htop", "btop", "top", "vifm", "tmux", "zellij", "claude", "lazygit", "fzf", "watch", "su", "sudoedit", "snvim", "psql", "mysql", "sqlite3"]
+    readonly property list<string> replPrograms: ["python", "python3", "node", "bun", "deno", "irb", "ghci", "iex", "lua"]
     readonly property var unboundedPatterns: [/^(bun|npm|pnpm|yarn) (run|dev|start|serve|preview|watch)(\s|$)/, /^(bunx|npx|pnpx) (vite|next|nuxt|astro|nodemon|serve)(\s|$)/, /^deno (run|task|serve)(\s|$)/, /^cargo (run|watch|leptos|tauri dev)(\s|$)/, /^zig build run(\s|$)/, /^go run(\s|$)/, /^dotnet (run|watch)(\s|$)/, /^(flutter|tauri) (run|dev)(\s|$)/, /^(make|just) (run|dev|watch|serve|start)(\s|$)/, /^docker[- ]compose (up|watch)(?!.*\s(-d|--detach)(\s|$))/, /^docker[- ]compose logs .*(-f|--follow)(\s|$)/, /^docker (attach|logs -f|run -it|run -ti)(\s|$)/, /^python3? -m http\.server(\s|$)/, /^tail (-f|-F|--follow)(\s|$)/, /^journalctl\s.*(-f|--follow)(\s|$)/, /^ping6? /, /^(vite|nodemon|quickshell)(\s|$)/, /^qs( -c| -p| --config| --path|$)/]
     property var jobs: []
     property var last: null
@@ -49,8 +51,18 @@ Singleton {
         return words.join(" ");
     }
 
-    function isUnbounded(cmd) {
-        return cmd.split(/\n|;|&&|\|\|?|&/).map(normalizeSegment).some(segment => unboundedPatterns.some(pattern => pattern.test(segment)));
+    function isIgnoredSegment(segment) {
+        const words = segment.split(" ");
+        if (interactivePrograms.includes(words[0]))
+            return true;
+        if (words.length === 1 && replPrograms.includes(words[0]))
+            return true;
+        return unboundedPatterns.some(pattern => pattern.test(segment));
+    }
+
+    function isIgnored(cmd) {
+        const segments = cmd.split(/\n|;|&&|\|\|?|&/).map(normalizeSegment).filter(segment => segment);
+        return !segments.length || segments.some(isIgnoredSegment);
     }
 
     function fmt(ms) {
@@ -68,7 +80,7 @@ Singleton {
             ended = e;
             return;
         }
-        if (isUnbounded(cmd))
+        if (isIgnored(cmd))
             return;
         now = Date.now();
         jobs = [...jobs, {

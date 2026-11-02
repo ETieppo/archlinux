@@ -13,6 +13,10 @@ Singleton {
     property bool locked: false
     property bool launcherOpen: false
     property string wallpaper: Quickshell.env("HOME") + "/.local/share/wallpapers/alone.png"
+    property string lastColor: ""
+    property bool powerOpen: false
+    property bool selecting: false
+    property string _geom: ""
 
     FileView {
         path: Quickshell.env("HOME") + "/.config/hypr/hyprpaper.conf"
@@ -53,8 +57,6 @@ Singleton {
             root.launcherOpen = !root.launcherOpen;
         }
     }
-    property string lastColor: ""
-    property bool powerOpen: false
 
     function toggleNightLight() {
         if (nightLight)
@@ -94,9 +96,6 @@ Singleton {
         picker.running = true;
     }
 
-    property bool selecting: false
-    property string _geom: ""
-
     function screenshot(region) {
         if (region)
             selecting = true;
@@ -111,13 +110,18 @@ Singleton {
     }
 
     function _shoot(geom) {
-        Quickshell.execDetached(["sh", "-c", `
-            dir="$HOME"; mkdir -p "$dir"
-            f="$dir/$(date +%F_%H-%M-%S).png"
-            ${geom ? `grim -g "${geom}" "$f"` : 'sleep 0.3; grim "$f"'} || exit 1
-            wl-copy < "$f"
-            notify-send -a Screenshot -i "$f" "Screenshot saved" "Copied to clipboard"
-        `]);
+        screenshotCapture.file = `${Quickshell.env("HOME")}/${Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss")}.png`;
+        screenshotCapture.command = ["sh", "-c", geom ? 'grim -g "$1" "$2" && wl-copy < "$2"' : 'sleep 0.3; grim "$2" && wl-copy < "$2"', "_", geom, screenshotCapture.file];
+        screenshotCapture.running = true;
+    }
+
+    Process {
+        id: screenshotCapture
+        property string file: ""
+        onExited: exitCode => {
+            if (exitCode === 0)
+                Notifs.send("Screenshot", "Screenshot saved", "Copied to clipboard", "normal", file);
+        }
     }
 
     Timer {

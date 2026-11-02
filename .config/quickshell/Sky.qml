@@ -7,7 +7,6 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    property var dusk: [21.5 / 24, 21.5 / 24]
     property var dawn: [8.5 / 24, 8.5 / 24]
     readonly property real lat: -23.5
     readonly property real lng: -46.6
@@ -48,6 +47,18 @@ Singleton {
     readonly property real screen: screenAt(progress)
     readonly property bool rising: span(dawn[0], progress) < wakeMin / 1440
     readonly property bool sleeping: night >= 1
+    readonly property var stops: [
+        [0, "#2b2d63"],
+        [Math.max(0.01, sunrise - 0.05), "#4a4290"],
+        [sunrise, "#fab387"],
+        [sunrise + 0.06, "#89dceb"],
+        [(sunrise + sunset) / 2, "#91ffff"],
+        [sunset - 0.06, "#89b4fa"],
+        [sunset, "#f38ba8"],
+        [Math.min(0.99, sunset + 0.05), "#6a4a9a"],
+        [1, "#2b2d63"]
+    ]
+    readonly property color body: isDay ? colorAt(progress) : "#b4befe"
 
     function span(a, b) {
         return ((b - a) % 1 + 1) % 1;
@@ -105,24 +116,9 @@ Singleton {
                 const a = (Number(m[1]) * 60 + Number(m[2])) / 1440;
                 return [a, m[3] !== undefined ? (Number(m[3]) * 60 + Number(m[4])) / 1440 : a];
             };
-            root.dusk = t("dusk-time") ?? root.dusk;
             root.dawn = t("dawn-time") ?? root.dawn;
         }
     }
-
-    readonly property var stops: [
-        [0, "#2b2d63"],
-        [Math.max(0.01, sunrise - 0.05), "#4a4290"],
-        [sunrise, "#fab387"],
-        [sunrise + 0.06, "#89dceb"],
-        [(sunrise + sunset) / 2, "#91ffff"],
-        [sunset - 0.06, "#89b4fa"],
-        [sunset, "#f38ba8"],
-        [Math.min(0.99, sunset + 0.05), "#6a4a9a"],
-        [1, "#2b2d63"]
-    ]
-
-    readonly property color body: isDay ? colorAt(progress) : "#b4befe"
 
     function fmt(frac) {
         const m = Math.round(frac * 1440);

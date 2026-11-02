@@ -10,12 +10,11 @@ import qs.components
 
 Scope {
     id: root
+    readonly property var flow: agent.flow
 
     PolkitAgent {
         id: agent
     }
-
-    readonly property var flow: agent.flow
 
     PanelWindow {
         id: win

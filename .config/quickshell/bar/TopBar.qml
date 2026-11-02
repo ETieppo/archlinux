@@ -5,7 +5,6 @@ import Quickshell.Bluetooth
 import Quickshell.Io
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
-import Quickshell.Services.UPower
 import qs
 
 PanelWindow {
@@ -30,7 +29,6 @@ PanelWindow {
   readonly property var sink: Pipewire.defaultAudioSink
   readonly property var source: Pipewire.defaultAudioSource
   readonly property var player: Mpris.players.values.find(p => p.isPlaying) ?? Mpris.players.values[0] ?? null
-  readonly property var battery: UPower.displayDevice
   readonly property var bt: Bluetooth.defaultAdapter
 
   function icon(list, value, max = 100) {
@@ -40,6 +38,16 @@ PanelWindow {
 
   function sh(cmd) {
     Quickshell.execDetached(["sh", "-c", cmd]);
+  }
+
+  function toggleMute(node) {
+    if (node?.audio)
+      node.audio.muted = !node.audio.muted;
+  }
+
+  function changeVolume(node, delta) {
+    if (node?.audio)
+      node.audio.volume = Math.max(0, Math.min(100, Math.round(node.audio.volume * 100) + delta)) / 100;
   }
 
   PwObjectTracker {
@@ -167,7 +175,15 @@ PanelWindow {
       readonly property var connected: Bluetooth.devices.values.filter(d => d.connected)
       text: !bar.bt || !bar.bt.enabled ? "󰂲" : connected.length ? "󰂱" : "󰂰"
       tip: !bar.bt || !bar.bt.enabled ? "Bluetooth Off" : connected.length ? connected.map(d => `Device: ${d.name}` + (d.batteryAvailable ? `\nBattery: ${Math.round(d.battery * 100)}%` : "")).join("\n") : "Bluetooth Disconnected"
-      onClicked: m => bar.sh(m.button === Qt.RightButton ? bar.scripts + "bluetooth off" : "ghostty -e " + bar.scripts + "bluetooth")
+      onClicked: m => {
+        if (m.button === Qt.RightButton) {
+          if (bar.bt) {
+            bar.bt.enabled = false;
+            Notifs.send("Bluetooth", "Bluetooth Off", "", "normal", "network-bluetooth-inactive");
+          }
+        } else
+        bar.sh("ghostty -e " + bar.scripts + "bluetooth");
+      }
     }
     WbModule {
       visible: Sys.updatesText !== ""
@@ -222,8 +238,8 @@ PanelWindow {
         readonly property real vol: bar.source?.audio?.volume ?? 0
         text: (bar.source?.audio?.muted ? "󰍭" : "󰍬") + ` ${Math.round(vol * 100)}%`
         tip: `<b>Input Device</b>: ${bar.source?.description ?? ""}`
-        onClicked: bar.sh(bar.scripts + "volume input mute")
-        onWheel: d => bar.sh(bar.scripts + "volume input " + (d > 0 ? "raise" : "lower"))
+        onClicked: bar.toggleMute(bar.source)
+        onWheel: d => bar.changeVolume(bar.source, d > 0 ? 1 : -1)
       }
 
       WbModule {
@@ -240,8 +256,8 @@ PanelWindow {
           : form === "headset" ? (muted ? "󰋐" : "󰋎")
           : muted ? "󰝟" : bar.icon(["󰕿", "󰖀", "󰕾"], vol * 100)) + ` ${Math.round(vol * 100)}%`
         tip: `<b>Output Device</b>: ${bar.sink?.description ?? ""}`
-        onClicked: bar.sh(bar.scripts + "volume output mute")
-        onWheel: d => bar.sh(bar.scripts + "volume output " + (d > 0 ? "raise" : "lower"))
+        onClicked: bar.toggleMute(bar.sink)
+        onWheel: d => bar.changeVolume(bar.sink, d > 0 ? 1 : -1)
       }
     }
 
@@ -253,34 +269,11 @@ PanelWindow {
 
     WbModule {
       id: batt
-      visible: bar.battery?.isPresent ?? false
+      visible: Battery.present
       minChars: 7
-      readonly property int pct: {
-        const p = bar.battery?.percentage ?? 0;
-        return Math.round(p <= 1 ? p * 100 : p);
-      }
-      readonly property bool charging: bar.battery?.state === UPowerDeviceState.Charging
-      readonly property bool discharging: bar.battery?.state === UPowerDeviceState.Discharging
-      text: (charging ? "󰉁" : bar.icon(["󰂎", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"], pct)) + ` ${pct}%`
-      color: charging ? Theme.green : discharging && pct <= 10 ? Theme.red : discharging && pct <= 20 ? Theme.yellow : Theme.wbFg
-      tip: {
-        const b = bar.battery;
-        if (!b) return "";
-        const t = charging ? b.timeToFull : b.timeToEmpty;
-        return t > 0 ? `${Math.floor(t / 3600)}h ${Math.floor(t % 3600 / 60)}min` : `${pct}%`;
-      }
-
-      property int lastLevel: 100
-      onPctChanged: {
-        const n = (msg, icon) => bar.sh(`hyprctl notify -1 5000 'rgb(0, 253, 255)' '${msg}' -u critical -i '${icon}' -h string:x-canonical-private-synchronous:battery`);
-        if (discharging && pct <= 10 && lastLevel > 10)
-        n("Battery Critical (10%)", "battery-010");
-        else if (discharging && pct <= 20 && lastLevel > 20)
-        n("Battery Low (20%)", "battery-020");
-        else if (charging && pct === 100 && lastLevel < 100)
-        n("Battery Full (100%)", "battery-100-charged");
-        lastLevel = pct;
-      }
+      text: (Battery.charging ? "󰉁" : bar.icon(["󰂎", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"], Battery.pct)) + ` ${Battery.pct}%`
+      color: Battery.charging ? Theme.green : Battery.discharging && Battery.pct <= 10 ? Theme.red : Battery.discharging && Battery.pct <= 20 ? Theme.yellow : Theme.wbFg
+      tip: Battery.timeLeft > 0 ? `${Math.floor(Battery.timeLeft / 3600)}h ${Math.floor(Battery.timeLeft % 3600 / 60)}min` : `${Battery.pct}%`
     }
   }
 }

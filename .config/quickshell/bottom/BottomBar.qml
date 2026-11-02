@@ -37,6 +37,12 @@ PanelWindow {
     height: parent.height
     spacing: 18
 
+    TopProcessSeg {
+      Layout.preferredWidth: 420
+    }
+
+    Rule {}
+
     TermSeg {
       Layout.preferredWidth: 300
     }

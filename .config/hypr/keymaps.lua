@@ -181,13 +181,13 @@ hl.bind(
 
 hl.bind(
 	"XF86MonBrightnessUp",
-	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+ && qs ipc call sys brightness"),
+	hl.dsp.exec_cmd("qs ipc call sys raiseBrightness"),
 	{ repeating = true, locked = true }
 )
 
 hl.bind(
 	"XF86MonBrightnessDown",
-	hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%- && qs ipc call sys brightness"),
+	hl.dsp.exec_cmd("qs ipc call sys lowerBrightness"),
 	{ repeating = true, locked = true }
 )
 

@@ -265,8 +265,11 @@ Singleton {
     function updates(): void {
       root.checkUpdates();
     }
-    function brightness(): void {
-      bl.reload();
+    function raiseBrightness(): void {
+      root.stepBrightness("5%+");
+    }
+    function lowerBrightness(): void {
+      root.stepBrightness("5%-");
     }
   }
 
@@ -336,6 +339,16 @@ Singleton {
     id: thermal
     path: "/sys/class/thermal/thermal_zone1/temp"
     onLoaded: root.temp = Math.round(Number(text()) / 1000)
+  }
+
+  function stepBrightness(delta) {
+    brightnessStep.command = ["brightnessctl", "-q", "-e4", "-n2", "set", delta];
+    brightnessStep.running = true;
+  }
+
+  Process {
+    id: brightnessStep
+    onExited: bl.reload()
   }
 
   function setBrightnessRaw(v) {

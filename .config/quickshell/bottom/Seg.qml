@@ -10,6 +10,7 @@ Item {
     property real fillOpacity: 1
     property bool busy: false
     property bool knob: false
+    property bool trackVisible: true
     property string tip: ""
     readonly property alias track: track
     readonly property alias hovered: hover.hovered
@@ -24,13 +25,14 @@ Item {
     Item {
         id: line
         x: 0
-        y: 4
+        y: root.trackVisible ? 4 : (root.height - height) / 2
         width: parent.width
         height: 17
     }
 
     Item {
         id: track
+        visible: root.trackVisible
         x: 0
         y: 24
         width: parent.width

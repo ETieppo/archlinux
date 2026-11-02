@@ -137,13 +137,6 @@ pair_and_connect() {
 }
 
 main() {
-	if [[ $1 == off ]]; then
-		bluetoothctl power off
-		notify-send 'Bluetooth Off' -i 'network-bluetooth-inactive' \
-			-h string:x-canonical-private-synchronous:bluetooth
-		return 0
-	fi
-
 	printf "\e[?25l"
 
 	power_on

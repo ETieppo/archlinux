@@ -31,6 +31,78 @@ PanelWindow {
     property real crownX: width / 2
     property real crownY: height / 2
     readonly property bool crownOn: open && results[current]?.kind === "app"
+    readonly property var magnets: {
+        const out = [];
+        if (pointer.y >= 0)
+            out.push({ x: pointer.x, s: Math.exp(-Math.max(0, poolY - pointer.y) / 380), w: 105, h: 210 });
+        if (crownOn)
+            out.push({ x: crownX, s: 0.8 * Math.exp(-Math.max(0, poolY - crownY) / 520), w: 85, h: 560 });
+        for (let k = 0; k < 3; k++)
+            out.push({
+                x: width * (0.5 + 0.46 * Math.sin(time * 0.045 * (k + 1) + k * 2.3)),
+                s: Math.max(0, Math.sin(time * 0.09 * (k + 1.4) + k * 1.7)),
+                w: 70 + k * 25,
+                h: 95 + k * 20
+            });
+        return out;
+    }
+    readonly property var apps: {
+        const seen = new Set();
+        return DesktopEntries.applications.values.filter(e => !e.noDisplay && !seen.has(e.id) && seen.add(e.id));
+    }
+    readonly property var results: {
+        const q = query.trim();
+        if (q.startsWith(">")) {
+            const cmd = q.slice(1).trim();
+            return cmd ? [{ kind: "run", name: cmd }] : [];
+        }
+        const out = [];
+        const looksMath = q.startsWith("=") || (/^[\d\s.,+\-*/()^%]+$/.test(q) && /[+\-*/^%]/.test(q));
+        if (looksMath) {
+            const v = calc(q.replace(/^=/, ""));
+            if (v !== null)
+                out.push({ kind: "calc", name: String(v) });
+            if (q.startsWith("="))
+                return out;
+        }
+        const ql = q.toLowerCase();
+        const scored = apps.map(e => ({ e, s: score(e, ql) })).filter(x => x.s > 0);
+        scored.forEach(x => x.s += Math.min(30, (Store.usage[x.e.id] ?? 0) * 3));
+        scored.sort((a, b) => b.s - a.s || a.e.name.localeCompare(b.e.name));
+        return out.concat(scored.slice(0, maxBubbles).map(x => ({ kind: "app", entry: x.e, name: x.e.name })));
+    }
+    readonly property var rank: {
+        const m = {};
+        results.forEach((r, i) => {
+            if (r.kind === "app")
+                m[r.entry.id] = i;
+        });
+        return m;
+    }
+    readonly property var shown: results.filter(r => r.kind === "app").map(r => r.entry.id)
+    readonly property var slots: {
+        const W = width - 160, H = height - surface - 220;
+        if (W <= 0 || H <= 0)
+            return [];
+        const cols = 7, rows = 4, cw = W / cols, ch = H / rows;
+        let seed = 7;
+        const rnd = () => {
+            seed = (seed * 16807) % 2147483647;
+            return seed / 2147483647;
+        };
+        const out = [];
+        for (let r = 0; r < rows; r++)
+            for (let c = 0; c < cols; c++)
+                out.push({
+                    x: 80 + (c + 0.5 + (rnd() - 0.5) * 0.5) * cw + (r % 2 ? cw * 0.25 : -cw * 0.25),
+                    y: 90 + (r + 0.5 + (rnd() - 0.5) * 0.45) * ch
+                });
+        for (let i = out.length - 1; i > 0; i--) {
+            const j = Math.floor(rnd() * (i + 1));
+            [out[i], out[j]] = [out[j], out[i]];
+        }
+        return out;
+    }
 
     screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0]
     anchors.top: true
@@ -77,22 +149,6 @@ PanelWindow {
         easing.type: Easing.OutCubic
     }
     onShownChanged: reslot()
-
-    readonly property var magnets: {
-        const out = [];
-        if (pointer.y >= 0)
-            out.push({ x: pointer.x, s: Math.exp(-Math.max(0, poolY - pointer.y) / 380), w: 105, h: 210 });
-        if (crownOn)
-            out.push({ x: crownX, s: 0.8 * Math.exp(-Math.max(0, poolY - crownY) / 520), w: 85, h: 560 });
-        for (let k = 0; k < 3; k++)
-            out.push({
-                x: width * (0.5 + 0.46 * Math.sin(time * 0.045 * (k + 1) + k * 2.3)),
-                s: Math.max(0, Math.sin(time * 0.09 * (k + 1.4) + k * 1.7)),
-                w: 70 + k * 25,
-                h: 95 + k * 20
-            });
-        return out;
-    }
 
     function fieldAt(x) {
         let f = 0, lean = 0;
@@ -156,67 +212,6 @@ PanelWindow {
         } catch (err) {
             return null;
         }
-    }
-
-    readonly property var apps: {
-        const seen = new Set();
-        return DesktopEntries.applications.values.filter(e => !e.noDisplay && !seen.has(e.id) && seen.add(e.id));
-    }
-
-    readonly property var results: {
-        const q = query.trim();
-        if (q.startsWith(">")) {
-            const cmd = q.slice(1).trim();
-            return cmd ? [{ kind: "run", name: cmd }] : [];
-        }
-        const out = [];
-        const looksMath = q.startsWith("=") || (/^[\d\s.,+\-*/()^%]+$/.test(q) && /[+\-*/^%]/.test(q));
-        if (looksMath) {
-            const v = calc(q.replace(/^=/, ""));
-            if (v !== null)
-                out.push({ kind: "calc", name: String(v) });
-            if (q.startsWith("="))
-                return out;
-        }
-        const ql = q.toLowerCase();
-        const scored = apps.map(e => ({ e, s: score(e, ql) })).filter(x => x.s > 0);
-        scored.forEach(x => x.s += Math.min(30, (Store.usage[x.e.id] ?? 0) * 3));
-        scored.sort((a, b) => b.s - a.s || a.e.name.localeCompare(b.e.name));
-        return out.concat(scored.slice(0, maxBubbles).map(x => ({ kind: "app", entry: x.e, name: x.e.name })));
-    }
-
-    readonly property var rank: {
-        const m = {};
-        results.forEach((r, i) => {
-            if (r.kind === "app")
-                m[r.entry.id] = i;
-        });
-        return m;
-    }
-    readonly property var shown: results.filter(r => r.kind === "app").map(r => r.entry.id)
-
-    readonly property var slots: {
-        const W = width - 160, H = height - surface - 220;
-        if (W <= 0 || H <= 0)
-            return [];
-        const cols = 7, rows = 4, cw = W / cols, ch = H / rows;
-        let seed = 7;
-        const rnd = () => {
-            seed = (seed * 16807) % 2147483647;
-            return seed / 2147483647;
-        };
-        const out = [];
-        for (let r = 0; r < rows; r++)
-            for (let c = 0; c < cols; c++)
-                out.push({
-                    x: 80 + (c + 0.5 + (rnd() - 0.5) * 0.5) * cw + (r % 2 ? cw * 0.25 : -cw * 0.25),
-                    y: 90 + (r + 0.5 + (rnd() - 0.5) * 0.45) * ch
-                });
-        for (let i = out.length - 1; i > 0; i--) {
-            const j = Math.floor(rnd() * (i + 1));
-            [out[i], out[j]] = [out[j], out[i]];
-        }
-        return out;
     }
 
     function reslot() {
