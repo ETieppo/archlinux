@@ -6,15 +6,14 @@ require("utils")
 hl.env("GTK_USE_PORTAL", "1")
 
 hl.monitor({ output = "eDP-1", mode = "1920x1080@144", position = "auto", scale = 1 })
-hl.monitor({ output = "DP-1", mode = "prefered", position = "auto-left", scale = 1 })
-hl.monitor({ output = "HDMI-A-1", mode = "prefered", position = "auto-left", scale = 1 })
+hl.monitor({ output = "DP-1", mode = "preferred", position = "auto-left", scale = 1 })
+hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-left", scale = 1 })
 
 hl.on("hyprland.start", function()
 	hl.exec_cmd("qs kill; qs -d")
 	hl.exec_cmd("sleep 1 && darkman set dark")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
-	hl.exec_cmd("pkill -x gammastep; gammastep")
 	hl.exec_cmd("hyprpaper")
 	hl.exec_cmd("fm1d --fm=vifm-term")
 end)
@@ -74,6 +73,10 @@ hl.config({
 
 	animations = {
 		enabled = true,
+	},
+
+	render = {
+		cm_auto_hdr = 0,
 	},
 
 	misc = {
