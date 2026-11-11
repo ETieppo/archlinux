@@ -592,3 +592,7 @@ nnoremap <a-o> :sync %c<cr>
 " ------------------------------------------------------------------------------
 
 " https://github.com/cirala/vifm_devicons
+
+" garante que abra com split
+vsplit
+view!

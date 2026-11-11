@@ -1,3 +1,6 @@
+[init]
+  defaultBranch = master
+
 [user]
 	name = Tieppo
 	email = tieppo.emerson.a.jr@gmail.com
