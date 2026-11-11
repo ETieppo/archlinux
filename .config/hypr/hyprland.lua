@@ -24,7 +24,7 @@ hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
 
 hl.window_rule({
 	name = "youtube-pip",
-	match = { class = "glide-glide", title = "Picture-in-Picture" },
+	match = { class = "firefox-firefox", title = "Picture-in-Picture" },
 	float = true,
 	pin = true,
 	no_focus = true,

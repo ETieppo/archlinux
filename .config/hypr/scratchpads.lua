@@ -3,7 +3,7 @@ local scratchpads = {
 		name = "claude",
 		class = "claude",
 		key = "slash",
-		launch = 'glide-bin --new-instance --profile "$HOME/.local/share/claude-glide" --name claude https://claude.ai',
+		launch = 'firefox --new-instance --profile "$HOME/.local/share/claude-firefox" --name claude https://claude.ai',
 		width = 520,
 	},
 }

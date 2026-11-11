@@ -100,13 +100,10 @@ hl.bind("ALT + A", SendShortcut({ mods = "CTRL", key = "A", window = "activewind
 hl.bind("ALT + R", SendShortcut({ mods = "CTRL", key = "R", window = "activewindow" }))
 
 hl.bind("ALT + L", function()
-	local w = hl.get_active_window()
-	if IsBrowser(w) then
+	if IsBrowser(hl.get_active_window()) then
 		hl.dispatch(SendShortcut({ mods = "CTRL", key = "L", window = "activewindow" }))
-	else
-		hl.dispatch(SendShortcut({ mods = "ALT", key = "L", window = "activewindow" }))
 	end
-end)
+end, { non_consuming = true })
 
 hl.bind("ALT + S", hl.dsp.submap("resize"))
 hl.define_submap("resize", function()
@@ -179,11 +176,7 @@ hl.bind(
 	{ repeating = true, locked = true }
 )
 
-hl.bind(
-	"XF86MonBrightnessUp",
-	hl.dsp.exec_cmd("qs ipc call sys raiseBrightness"),
-	{ repeating = true, locked = true }
-)
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("qs ipc call sys raiseBrightness"), { repeating = true, locked = true })
 
 hl.bind(
 	"XF86MonBrightnessDown",
