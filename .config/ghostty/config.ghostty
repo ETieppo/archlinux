@@ -7,6 +7,7 @@ macos-titlebar-style              = hidden
 adjust-cell-height                = 10%
 font-size                         = 12
 font-family                       = "IosevkaCustom Nerd Font Extended"
+config-file                       = ?material_icons.ghostty
 
 palette                           = 1=#e41951
 palette                           = 2=#01dc84

@@ -37,3 +37,10 @@ function _ndot { builtin cd -q $HOME/.config/nvim || return; service=git _git; b
 
 compdef _dot dot
 compdef _ndot ndot
+
+# ZVM
+export ZVM_INSTALL="$HOME/.zvm/self"
+if [ -d "$ZVM_INSTALL" ]; then
+  export PATH="$PATH:$HOME/.zvm/bin"
+  export PATH="$PATH:$ZVM_INSTALL"
+fi
