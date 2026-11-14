@@ -28,14 +28,14 @@ export PATH="$PATH:$HOME/.cargo/bin"
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
 
 # DOT NDOT
-function dot { git --git-dir=$HOME/.archlinux --work-tree=$HOME "$@" }
+function sdot { git --git-dir=$HOME/.archlinux --work-tree=$HOME "$@" }
 function ndot { git -C $HOME/.config/nvim "$@" }
-function _dot {
+function _sdot {
   if (( CURRENT > 2 )) && [[ $words[2] == add ]]; then _files; else GIT_DIR=$HOME/.archlinux GIT_WORK_TREE=$HOME service=git _git; fi
 }
 function _ndot { builtin cd -q $HOME/.config/nvim || return; service=git _git; builtin cd -q $OLDPWD }
 
-compdef _dot dot
+compdef _sdot sdot
 compdef _ndot ndot
 
 # ZVM
