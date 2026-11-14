@@ -15,7 +15,8 @@ palette                           = 3=#faf945
 palette                           = 9=#ff0051
 palette                           = 10=#60fa68
 palette                           = 11=#fffc67
-background                        = #08080b
+# background                        = #08080b
+background                        = #0c0d12
 # background                        = #101116
 foreground                        = #686868
 # foreground                      = #e41951
