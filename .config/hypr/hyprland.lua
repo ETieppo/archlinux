@@ -42,8 +42,10 @@ hl.config({
 		gaps_out = 6,
 		border_size = 1,
 		col = {
-			active_border = { colors = { "rgba(33ccffee)", 0x33CC, "rgba(33ccffee)" }, angle = 45 },
-			inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
+			-- active_border = { colors = { "#91ffff", 0x33CC, "#91ffff" }, angle = 45 },
+			-- inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
+      active_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
+			   inactive_border={colors={"#00000000"}},
 		},
 		resize_on_border = true,
 		allow_tearing = false,
