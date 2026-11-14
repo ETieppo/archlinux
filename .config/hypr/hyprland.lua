@@ -87,6 +87,10 @@ hl.config({
 		allow_session_lock_restore = true,
 	},
 
+	cursor = {
+		inactive_timeout = 0.05,
+	},
+
 	input = {
 		kb_layout = "us,ru",
     kb_variant = "altgr-intl,phonetic",
