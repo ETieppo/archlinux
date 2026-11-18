@@ -1,0 +1,38 @@
+#!/bin/bash
+
+trash="${XDG_DATA_HOME:-$HOME/.local/share}/Trash"
+mkdir -p "$trash/files" "$trash/info"
+
+if [ $# -eq 0 ]; then
+  echo "Use: $(basename "$0") file..." >&2
+  exit 1
+fi
+
+status=0
+for f in "$@"; do
+  if [ ! -e "$f" ] && [ ! -L "$f" ]; then
+    echo "Not found: $f" >&2
+    status=1
+    continue
+  fi
+
+  filepath=$(realpath -s -- "$f")
+  filename=$(basename -- "$filepath")
+
+  to="$filename"
+  n=1
+  while [ -e "$trash/files/$to" ] || [ -e "$trash/info/$to.trashinfo" ]; do
+    to="$filename.$n"
+    n=$((n + 1))
+  done
+
+  printf '[Trash Info]\nPath=%s\nDeletionDate=%s\n' \
+    "$filepath" "$(date +%Y-%m-%dT%H:%M:%S)" > "$trash/info/$to.trashinfo"
+
+  if ! mv -- "$f" "$trash/files/$to"; then
+    rm -f "$trash/info/$to.trashinfo"
+    status=1
+  fi
+done
+
+exit $status
