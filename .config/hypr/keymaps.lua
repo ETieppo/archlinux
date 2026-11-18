@@ -1,6 +1,6 @@
 require("utils")
 
-local terminal = "env GTK_IM_MODULE=simple ghostty"
+local terminal = "env GTK_IM_MODULE=simple xdg-terminal-exec"
 local menu = "qs ipc call launcher toggle"
 local deadKeys = {
 	{

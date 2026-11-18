@@ -11,7 +11,7 @@ Singleton {
   property real mem: 0
   property real memUsed: 0
   property real memTotal: 0
-  property int temp: 0
+  readonly property int temp: temps.find(s => s.cpu)?.t ?? 0
   property int disk: 0
   property string diskInfo: ""
   property real brightness: 0
@@ -34,6 +34,7 @@ Singleton {
   property string dgpuState: "absent"
   readonly property int gpu: dgpu?.util ?? 0
   readonly property int gpuTemp: dgpu?.temp ?? 0
+  readonly property bool gpuAvailable: igpu !== null || dgpuState !== "absent"
   property var temps: []
   property int updates: 0
   property string updatesInfo: ""
@@ -42,7 +43,7 @@ Singleton {
 
   property var _prevCpu: null
   property var _prevCores: []
-  readonly property string _bl: "/sys/class/backlight/intel_backlight"
+  property var _sensorReadings: ({})
 
   Timer {
     interval: 2000
@@ -52,9 +53,8 @@ Singleton {
     onTriggered: {
       stat.reload();
       meminfo.reload();
-      thermal.reload();
       loadavg.reload();
-      sensors.running = true;
+      root.readTemperatures();
       freqs.running = true;
     }
   }
@@ -178,56 +178,35 @@ Singleton {
     root.dgpuState = state;
   }
 
-  Process {
-    id: sensors
-    command: ["sh", "-c", "for h in /sys/class/hwmon/hwmon*; do n=$(cat $h/name); for t in $h/temp*_input; do [ -f \"$t\" ] || continue; echo \"$n|$(cat ${t%_input}_label 2>/dev/null)|$(cat $t)\"; done; done"]
-    stdout: StdioCollector {
-      onStreamFinished: {
-        const rows = this.text.trim().split("\n").map(l => l.split("|")).filter(r => r.length === 3).map(r => ({
-              dev: r[0],
-              label: r[1],
-              t: Math.round(Number(r[2]) / 1000)
-            }));
-        const pick = (dev, label) => rows.find(r => r.dev === dev && (!label || r.label === label))?.t;
-        const cores = rows.filter(r => r.dev === "coretemp" && r.label.startsWith("Core")).map(r => r.t);
-        const nvme = rows.filter(r => r.dev === "nvme");
-        root.temps = [
-          {
-            name: "CPU package",
-            t: pick("coretemp", "Package id 0")
-          },
-          {
-            name: "Hottest core",
-            t: cores.length ? Math.max(...cores) : undefined
-          },
-          {
-            name: "GPU",
-            t: root.gpuTemp || undefined
-          },
-          ...nvme.map((r, i) => ({
-                name: `SSD ${i + 1}`,
-                t: r.t
-              })),
-          {
-            name: "Wi-Fi",
-            t: pick("iwlwifi_1")
-          },
-          {
-            name: "Ethernet",
-            t: rows.find(r => r.dev.startsWith("r8169"))?.t
-          },
-          {
-            name: "Board",
-            t: pick("acpitz")
-          }
-        ].filter(x => x.t !== undefined);
-      }
+  Instantiator {
+    id: sensorFiles
+    model: Hardware.temperatureSourceProps.reduce((paths, source) => paths.concat(source.paths), [])
+    delegate: FileView {
+      required property string modelData
+      path: modelData
+      onLoaded: root._sensorReadings[modelData] = Math.round(Number(text()) / 1000)
     }
+  }
+
+  function readTemperatures() {
+    for (let i = 0; i < sensorFiles.count; i++)
+      sensorFiles.objectAt(i).reload();
+    const sources = Hardware.temperatureSourceProps.map(source => ({
+          name: source.name,
+          cpu: source.cpu,
+          values: source.paths.map(path => root._sensorReadings[path]).filter(t => t !== undefined)
+        })).filter(source => source.values.length).map(source => ({
+          name: source.name,
+          cpu: source.cpu,
+          t: Math.max(...source.values)
+        }));
+    const gpu = root.gpuTemp ? [{ name: "GPU", cpu: false, t: root.gpuTemp }] : [];
+    root.temps = [...sources.filter(source => source.cpu), ...gpu, ...sources.filter(source => !source.cpu)];
   }
 
   Timer {
     interval: 1000
-    running: true
+    running: Hardware.backlightPath !== ""
     repeat: true
     onTriggered: bl.reload()
   }
@@ -278,9 +257,11 @@ Singleton {
   }
 
   function setBrightness(pct) {
+    if (!Hardware.backlightPath)
+      return;
     const v = Math.max(1, Math.min(100, Math.round(pct)));
     brightness = v;
-    Quickshell.execDetached(["brightnessctl", "-q", "set", v + "%"]);
+    Quickshell.execDetached(["brightnessctl", "-q", "-d", Hardware.backlightName, "set", v + "%"]);
   }
 
   FileView {
@@ -335,14 +316,10 @@ Singleton {
     onLoaded: root.loadAvg = text().trim().split(/\s+/).slice(0, 3).join(" ")
   }
 
-  FileView {
-    id: thermal
-    path: "/sys/class/thermal/thermal_zone1/temp"
-    onLoaded: root.temp = Math.round(Number(text()) / 1000)
-  }
-
   function stepBrightness(delta) {
-    brightnessStep.command = ["brightnessctl", "-q", "-e4", "-n2", "set", delta];
+    if (!Hardware.backlightPath)
+      return;
+    brightnessStep.command = ["brightnessctl", "-q", "-d", Hardware.backlightName, "-e4", "-n2", "set", delta];
     brightnessStep.running = true;
   }
 
@@ -352,18 +329,20 @@ Singleton {
   }
 
   function setBrightnessRaw(v) {
+    if (!Hardware.backlightPath)
+      return;
     brightnessRaw = v;
-    Quickshell.execDetached(["brightnessctl", "-q", "set", String(v)]);
+    Quickshell.execDetached(["brightnessctl", "-q", "-d", Hardware.backlightName, "set", String(v)]);
   }
 
   FileView {
     id: blMax
-    path: root._bl + "/max_brightness"
+    path: Hardware.backlightPath ? Hardware.backlightPath + "/max_brightness" : ""
   }
 
   FileView {
     id: bl
-    path: root._bl + "/brightness"
+    path: Hardware.backlightPath ? Hardware.backlightPath + "/brightness" : ""
     onLoaded: {
       const max = Number(blMax.text());
       if (max > 0) {

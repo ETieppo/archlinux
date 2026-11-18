@@ -83,6 +83,7 @@ PanelWindow {
       tip: `<b>Memory</b>: ${Sys.memUsed.toFixed(1)} / ${Sys.memTotal.toFixed(1)} GiB`
     }
     WbModule {
+      visible: Sys.gpuAvailable
       minChars: 3
       text: `󰢮 ${Sys.gpu}%`
       tip: `<b>GPU</b>: ${Sys.gpu}%` + (Sys.gpuTemp ? ` · ${Sys.gpuTemp}°C` : "")
@@ -165,7 +166,7 @@ PanelWindow {
         if (m.button === Qt.RightButton)
         bar.sh(bar.scripts + "network off");
         else
-        bar.sh("ghostty -e " + bar.scripts + "network");
+        bar.sh("xdg-terminal-exec " + bar.scripts + "network");
         Sys.refreshNet();
       }
     }
@@ -182,7 +183,7 @@ PanelWindow {
             Notifs.send("Bluetooth", "Bluetooth Off", "", "normal", "network-bluetooth-inactive");
           }
         } else
-        bar.sh("ghostty -e " + bar.scripts + "bluetooth");
+        bar.sh("xdg-terminal-exec " + bar.scripts + "bluetooth");
       }
     }
     WbModule {
@@ -196,7 +197,7 @@ PanelWindow {
         if (m.button === Qt.RightButton)
         Sys.checkUpdates();
         else
-        bar.sh("ghostty -e " + bar.scripts + "update");
+        bar.sh("xdg-terminal-exec " + bar.scripts + "update");
       }
     }
   }
@@ -262,6 +263,7 @@ PanelWindow {
     }
 
     WbModule {
+      visible: Hardware.backlightPath !== ""
       minChars: 7
       text: bar.icon(["\ue38d", "\ue3d3", "\ue3d1", "\ue3cf", "\ue3ce", "\ue3cd", "\ue3ca", "\ue3c8", "\ue39b"], Sys.brightness) + ` ${Sys.brightness}%`
       onWheel: d => Sys.setBrightness(Sys.brightness + (d > 0 ? 1 : -1))

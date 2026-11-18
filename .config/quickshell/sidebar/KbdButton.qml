@@ -8,10 +8,11 @@ import qs.components
 SideButton {
     id: root
 
+    visible: KbdLight.present
     icon: KbdLight.bright > 0 ? "󰌌" : "󰥻"
     iconColor: KbdLight.bright > 0 ? KbdLight.color : Theme.muted
     active: pop.visible
-    tip: pop.visible ? "" : `Keyboard light · ${KbdLight.sleeping ? "sleep mode" : KbdLight.mode === "sky" ? "following the sky" : "fixed color"} · ${KbdLight.bright}/${KbdLight.max}\n󰒭 scroll adjusts brightness`
+    tip: pop.visible ? "" : `Keyboard light · ${KbdLight.sleeping ? "sleep mode · " : !KbdLight.supportsColor ? "" : KbdLight.mode === "sky" ? "following the sky · " : "fixed color · "}${KbdLight.bright}/${KbdLight.max}\n󰒭 scroll adjusts brightness`
 
     readonly property bool open: pop.visible
 
@@ -59,7 +60,7 @@ SideButton {
                         color: Theme.accent
                     }
                     Label {
-                        text: KbdLight.bright === 0 ? "off" : (KbdLight.sleeping ? "󰒲 sleep · " : KbdLight.mode === "sky" ? "sky · " : "") + `${KbdLight.bright}/${KbdLight.max}`
+                        text: KbdLight.bright === 0 ? "off" : (KbdLight.sleeping ? "󰒲 sleep · " : KbdLight.supportsColor && KbdLight.mode === "sky" ? "sky · " : "") + `${KbdLight.bright}/${KbdLight.max}`
                         color: Theme.dim
                         font.pixelSize: 12
                     }
@@ -94,6 +95,7 @@ SideButton {
                 }
 
                 Rectangle {
+                    visible: KbdLight.supportsColor
                     Layout.fillWidth: true
                     implicitHeight: 34
                     radius: 10
@@ -126,6 +128,7 @@ SideButton {
                 }
 
                 GridLayout {
+                    visible: KbdLight.supportsColor
                     columns: 5
                     rowSpacing: 8
                     columnSpacing: 8

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+readonly BACKLIGHT_ROOT=/sys/class/backlight
+readonly LED_ROOT=/sys/class/leds
+readonly HWMON_ROOT=/sys/class/hwmon
+readonly BACKLIGHT_TYPE_PRIORITY=(firmware platform raw)
+
+probe_backlight() {
+	local type device
+	for type in "${BACKLIGHT_TYPE_PRIORITY[@]}"; do
+		for device in "$BACKLIGHT_ROOT"/*; do
+			[[ -r $device/max_brightness && $(<"$device/type") == "$type" ]] || continue
+			echo "backlight|$device"
+			return
+		done
+	done
+}
+
+probe_keyboard_light() {
+	local device kind
+	for device in "$LED_ROOT"/*kbd_backlight; do
+		[[ -r $device/max_brightness ]] || continue
+		kind=mono
+		[[ -e $device/multi_intensity ]] && kind=rgb
+		echo "keyboard|$device|$kind|$(<"$device/max_brightness")"
+		return
+	done
+}
+
+probe_temperatures() {
+	local monitor input label
+	for monitor in "$HWMON_ROOT"/hwmon*; do
+		for input in "$monitor"/temp*_input; do
+			[[ -r $input ]] || continue
+			label=""
+			[[ -r ${input%_input}_label ]] && label=$(<"${input%_input}_label")
+			echo "temperature|$(<"$monitor/name")|$label|$input"
+		done
+	done
+}
+
+main() {
+	probe_backlight
+	probe_keyboard_light
+	probe_temperatures
+}
+
+main "$@"

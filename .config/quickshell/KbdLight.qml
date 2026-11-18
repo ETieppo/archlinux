@@ -15,7 +15,9 @@ Singleton {
     readonly property int max: 4
     readonly property int hold: 3600000
     readonly property string warmFrom: "21:00"
-    readonly property string dir: "/sys/class/leds/rgb:kbd_backlight"
+    readonly property string dir: Hardware.keyboardLightPath
+    readonly property bool present: dir !== ""
+    readonly property bool supportsColor: Hardware.keyboardLightRgb
     readonly property color skyColor: Qt.hsva(Sky.hue / 360, 1, 1, 1)
     readonly property bool sleeping: Sky.sleeping
     readonly property real night: Sky.night
@@ -35,7 +37,7 @@ Singleton {
         { c: "#ffffff", led: [25, 10, 255] }
     ]
     readonly property var preset: presets.find(p => Qt.colorEqual(p.c, fixedColor)) ?? null
-    readonly property color color: mode === "sky" ? skyColor : mix(fixedColor, Qt.rgba(1, 0, 0, 1), evening)
+    readonly property color color: !supportsColor ? Theme.fg : mode === "sky" ? skyColor : mix(fixedColor, Qt.rgba(1, 0, 0, 1), evening)
     readonly property real evening: {
         const a = Sky.frac(warmFrom), s = Sky.span(a, Sky.progress), len = Sky.span(a, Sky.bedtime);
         return night > 0 ? 1 : s < len ? s / len : 0;
@@ -49,8 +51,19 @@ Singleton {
         return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1);
     }
 
+    function hardwareLevel() {
+        return bright === 0 ? 0 : Math.max(1, Math.round(Hardware.keyboardLightMax * bright / max * dim));
+    }
+
+    function writeCommand() {
+        return supportsColor ? `echo "${rgb()}" > ${dir}/multi_intensity; echo ${bright} > ${dir}/brightness` : `echo ${hardwareLevel()} > ${dir}/brightness`;
+    }
+
     function apply() {
-        Quickshell.execDetached(["sh", "-c", `echo "${rgb()}" > ${dir}/multi_intensity; echo ${bright} > ${dir}/brightness`]);
+        if (!present)
+            return;
+        _last = writeCommand();
+        Quickshell.execDetached(["sh", "-c", _last]);
         Store.kbd = {
             bright,
             mode,
@@ -127,20 +140,17 @@ Singleton {
     }
 
     Timer {
-        running: root.bright > 0
+        running: root.present && root.bright > 0
         interval: 5000
         repeat: true
         onTriggered: {
-            const c = root.rgb();
-            if (c !== root._last) {
-                root._last = c;
+            if (root.writeCommand() !== root._last)
                 root.apply();
-            }
         }
     }
 
     Timer {
-        running: true
+        running: Hardware.ready
         interval: 800
         onTriggered: {
             root.apply();

@@ -1,0 +1,239 @@
+#!/usr/bin/env python3
+
+import json
+import os
+import subprocess
+import time
+
+SAMPLE_SECONDS = 1.0
+RANKING_SIZE = 10
+CLOCK_TICKS_PER_SECOND = os.sysconf("SC_CLK_TCK")
+PAGE_SIZE_BYTES = os.sysconf("SC_PAGE_SIZE")
+DRM_DEVICE_PREFIX = "/dev/dri/"
+DRM_ENGINE_PREFIX = "drm-engine-"
+DRM_CAPACITY_PREFIX = "drm-engine-capacity-"
+NVIDIA_VENDOR_ID = "0x10de"
+DISPLAY_CLASS_PREFIX = "0x03"
+PCI_DEVICES_PATH = "/sys/bus/pci/devices"
+NVIDIA_PMON_COMMAND = ["nvidia-smi", "pmon", "-c", "1", "-s", "u"]
+NVIDIA_TIMEOUT_SECONDS = 3
+CPU_IDLE_PERCENT = 1.0
+GPU_IDLE_PERCENT = 1.0
+DISK_IDLE_BYTES_PER_SECOND = 100 * 1024
+MEMORY_IDLE_BYTES = 1
+DELETED_SUFFIX = " (deleted)"
+KERNEL_THREAD_FLAG = 0x00200000
+IGNORED_PROCESS_NAMES = {"Hyprland", "quickshell"}
+OWN_PID = os.getpid()
+
+
+def read_text(path):
+    try:
+        with open(path, "r", errors="replace") as file:
+            return file.read()
+    except OSError:
+        return None
+
+
+def process_name(pid, comm):
+    try:
+        executable = os.readlink(f"/proc/{pid}/exe")
+    except OSError:
+        return comm
+    basename = os.path.basename(executable.removesuffix(DELETED_SUFFIX))
+    return basename if any(character.isalpha() for character in basename) else comm
+
+
+def read_disk_bytes(pid):
+    content = read_text(f"/proc/{pid}/io")
+    if content is None:
+        return None
+    fields = dict(line.split(":", 1) for line in content.splitlines() if ":" in line)
+    try:
+        return int(fields["read_bytes"]) + int(fields["write_bytes"])
+    except (KeyError, ValueError):
+        return None
+
+
+def parse_drm_fdinfo(content):
+    fields = {}
+    engines = {}
+    capacities = {}
+    for line in content.splitlines():
+        key, _, value = line.partition(":")
+        value = value.strip()
+        if key.startswith(DRM_CAPACITY_PREFIX):
+            capacities[key.removeprefix(DRM_CAPACITY_PREFIX)] = int(value)
+        elif key.startswith(DRM_ENGINE_PREFIX) and value.endswith(" ns"):
+            engines[key.removeprefix(DRM_ENGINE_PREFIX)] = int(value.removesuffix(" ns"))
+        else:
+            fields[key] = value
+    if "drm-client-id" not in fields or not engines:
+        return None
+    client_key = (fields.get("drm-pdev", ""), fields["drm-client-id"])
+    return client_key, {name: (busy, capacities.get(name, 1)) for name, busy in engines.items()}
+
+
+def read_gpu_clients(pid):
+    clients = {}
+    try:
+        descriptors = os.listdir(f"/proc/{pid}/fd")
+    except OSError:
+        return clients
+    for descriptor in descriptors:
+        try:
+            target = os.readlink(f"/proc/{pid}/fd/{descriptor}")
+        except OSError:
+            continue
+        if not target.startswith(DRM_DEVICE_PREFIX):
+            continue
+        content = read_text(f"/proc/{pid}/fdinfo/{descriptor}")
+        parsed = parse_drm_fdinfo(content) if content else None
+        if parsed:
+            clients[parsed[0]] = parsed[1]
+    return clients
+
+
+def read_process(pid):
+    stat = read_text(f"/proc/{pid}/stat")
+    if not stat:
+        return None
+    comm = stat[stat.find("(") + 1:stat.rfind(")")]
+    fields = stat[stat.rfind(")") + 2:].split()
+    if int(fields[6]) & KERNEL_THREAD_FLAG:
+        return None
+    name = process_name(pid, comm)
+    return {
+        "name": name,
+        "ignored": name in IGNORED_PROCESS_NAMES,
+        "cpu_ticks": int(fields[11]) + int(fields[12]),
+        "memory_bytes": int(fields[21]) * PAGE_SIZE_BYTES,
+        "disk_bytes": read_disk_bytes(pid),
+        "gpu_clients": read_gpu_clients(pid),
+    }
+
+
+def take_snapshot():
+    started = time.monotonic()
+    snapshot = {}
+    for entry in os.listdir("/proc"):
+        if not entry.isdigit():
+            continue
+        pid = int(entry)
+        if pid == OWN_PID:
+            continue
+        try:
+            process = read_process(pid)
+        except (OSError, ValueError, IndexError):
+            continue
+        if process:
+            snapshot[pid] = process
+    return snapshot, (started + time.monotonic()) / 2
+
+
+def find_nvidia_device():
+    try:
+        devices = os.listdir(PCI_DEVICES_PATH)
+    except OSError:
+        return None
+    for device in devices:
+        path = f"{PCI_DEVICES_PATH}/{device}"
+        vendor = (read_text(f"{path}/vendor") or "").strip()
+        device_class = (read_text(f"{path}/class") or "").strip()
+        if vendor == NVIDIA_VENDOR_ID and device_class.startswith(DISPLAY_CLASS_PREFIX):
+            return path
+    return None
+
+
+def nvidia_is_awake(device_path):
+    return (read_text(f"{device_path}/power/runtime_status") or "").strip() == "active"
+
+
+def gpu_engines_visible(snapshot):
+    return any(process["gpu_clients"] for process in snapshot.values())
+
+
+def read_nvidia_usage(device_path):
+    if device_path is None or not nvidia_is_awake(device_path):
+        return {}
+    try:
+        output = subprocess.run(NVIDIA_PMON_COMMAND, capture_output=True, text=True, timeout=NVIDIA_TIMEOUT_SECONDS).stdout
+    except (OSError, subprocess.SubprocessError):
+        return {}
+    usage = {}
+    for line in output.splitlines():
+        columns = line.split()
+        if line.startswith("#") or len(columns) < 4 or not columns[1].isdigit() or not columns[3].isdigit():
+            continue
+        pid = int(columns[1])
+        usage[pid] = usage.get(pid, 0) + int(columns[3])
+    return usage
+
+
+def gpu_client_percent(before, after, elapsed_ns):
+    busiest = 0.0
+    for engine, (busy_after, capacity) in after.items():
+        busy_before = before.get(engine, (busy_after, capacity))[0]
+        busiest = max(busiest, 100 * (busy_after - busy_before) / (elapsed_ns * max(capacity, 1)))
+    return busiest
+
+
+def accumulate(totals, name, key, value):
+    entry = totals.setdefault(name, {"cpu": 0.0, "gpu": 0.0, "memory": 0, "disk": 0, "count": 0})
+    entry[key] += value
+
+
+def aggregate(before, after, elapsed_seconds, nvidia_usage):
+    totals = {}
+    elapsed_ns = elapsed_seconds * 1e9
+    seen_gpu_clients = set()
+    for pid, process in after.items():
+        if process["ignored"]:
+            continue
+        name = process["name"]
+        accumulate(totals, name, "count", 1)
+        accumulate(totals, name, "memory", process["memory_bytes"])
+        previous = before.get(pid)
+        if previous and previous["name"] == name:
+            cpu_seconds = (process["cpu_ticks"] - previous["cpu_ticks"]) / CLOCK_TICKS_PER_SECOND
+            accumulate(totals, name, "cpu", 100 * cpu_seconds / elapsed_seconds)
+            if process["disk_bytes"] is not None and previous["disk_bytes"] is not None:
+                accumulate(totals, name, "disk", (process["disk_bytes"] - previous["disk_bytes"]) / elapsed_seconds)
+            for client_key, engines in process["gpu_clients"].items():
+                if client_key in seen_gpu_clients or client_key not in previous["gpu_clients"]:
+                    continue
+                seen_gpu_clients.add(client_key)
+                accumulate(totals, name, "gpu", gpu_client_percent(previous["gpu_clients"][client_key], engines, elapsed_ns))
+        if pid in nvidia_usage:
+            accumulate(totals, name, "gpu", nvidia_usage[pid])
+    return totals
+
+
+def rank(totals, key, threshold):
+    ordered = sorted(totals.items(), key=lambda item: item[1][key], reverse=True)
+    return [
+        {"name": name, "value": round(entry[key], 1), "count": entry["count"]}
+        for name, entry in ordered[:RANKING_SIZE]
+        if entry[key] >= threshold
+    ]
+
+
+def main():
+    before, before_time = take_snapshot()
+    time.sleep(SAMPLE_SECONDS)
+    nvidia_device = find_nvidia_device()
+    nvidia_usage = read_nvidia_usage(nvidia_device)
+    after, after_time = take_snapshot()
+    elapsed_seconds = after_time - before_time
+    totals = aggregate(before, after, elapsed_seconds, nvidia_usage)
+    print(json.dumps({
+        "gpu_supported": nvidia_device is not None or gpu_engines_visible(after),
+        "cpu": rank(totals, "cpu", CPU_IDLE_PERCENT),
+        "gpu": rank(totals, "gpu", GPU_IDLE_PERCENT),
+        "memory": rank(totals, "memory", MEMORY_IDLE_BYTES),
+        "disk": rank(totals, "disk", DISK_IDLE_BYTES_PER_SECOND),
+    }))
+
+
+if __name__ == "__main__":
+    main()

@@ -8,6 +8,7 @@ hl.env("GTK_USE_PORTAL", "1")
 hl.monitor({ output = "eDP-1", mode = "1920x1080@144", position = "auto", scale = 1 })
 hl.monitor({ output = "DP-1", mode = "preferred", position = "auto-left", scale = 1 })
 hl.monitor({ output = "HDMI-A-1", mode = "preferred", position = "auto-left", scale = 1 })
+hl.monitor({ output = "Unknown-1", mode = "preferred", position = "auto", scale = 4 / 3 })
 
 hl.on("hyprland.start", function()
 	hl.exec_cmd("qs kill; qs -d")
