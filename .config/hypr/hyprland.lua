@@ -84,6 +84,10 @@ hl.config({
 		cm_auto_hdr = 0,
 	},
 
+	debug = {
+		error_position = 1,
+	},
+
 	misc = {
 		force_default_wallpaper = 0,
 		disable_hyprland_logo = true,
