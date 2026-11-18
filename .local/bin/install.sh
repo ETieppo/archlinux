@@ -47,10 +47,19 @@ OMZ_DIR="$HOME/.oh-my-zsh"
 GREETER_INSTALLER="$HOME/.config/quickshell/greeter/install.sh"
 HYPR_GPU_CONF="$HOME/.config/hypr/gpu.lua"
 BACKUP_DIR="$HOME/.archlinux-backup/$(date +%Y%m%d-%H%M%S)"
+LOCAL_PACKAGES_DIR="$HOME/.packages"
+USER_FONTS_DIR="$HOME/.local/share/fonts"
+GREETER_FONTS_DIR="/usr/local/share/fonts/IosevkaCustom"
+LEGACY_GREETER_FONTS_DIR="/usr/share/fonts/TTF"
+MKINITCPIO_PRESETS_DIR="/etc/mkinitcpio.d"
+CERBERUS_BOOT_CONFIG="/etc/cerberus/boot.conf"
+DEVICE_TREE_COMPATIBLE="/proc/device-tree/compatible"
 
 # ── Preferences ───────────────────────────────────────────────────────────────
 LOGIN_SHELL="/usr/bin/zsh"
-PLYMOUTH_THEME="arch-logo-symbol"
+PLYMOUTH_THEME="cerberus"
+UKI_SPLASH="/usr/share/systemd/bootctl/splash-cerberus.bmp"
+GREETER_FONT_PREFIX="IosevkaCustom"
 KERNEL_PARAMS=(quiet splash)
 GTK_THEME="Ant"
 ICON_THEME="Ant"
@@ -67,13 +76,23 @@ PKGS_BASE=(
 PKGS_AUDIO=(pipewire pipewire-alsa pipewire-pulse pipewire-jack wireplumber pavucontrol playerctl)
 PKGS_DESKTOP=(
   hyprland hyprpaper hyprpicker xdg-desktop-portal-hyprland quickshell greetd plymouth
-  ghostty thunar gvfs tumbler ffmpegthumbnailer file-roller
+  thunar gvfs tumbler ffmpegthumbnailer file-roller
   grim wl-clipboard cliphist wtype brightnessctl gammastep geoclue darkman
   adwaita-icon-theme gsettings-desktop-schemas
 )
-PKGS_FONTS=(noto-fonts ttf-jetbrains-mono-nerd)
-PKGS_APPS=(chromium btop steam)
+PKGS_FONTS=(
+  noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra
+  ttf-jetbrains-mono-nerd ttf-nerd-fonts-symbols-mono
+)
+PKGS_APPS=(chromium btop)
 PKGS_DEV=(neovim rustup bun postgresql httpie)
+PKGS_PC=(ghostty steam)
+PKGS_APPLE=(kitty)
+KEYRING_PKGS=(archlinux-keyring)
+KEYRING_PKGS_APPLE=(archlinuxarm-keyring)
+
+# ── Packages built from $LOCAL_PACKAGES_DIR ───────────────────────────────────
+LOCAL_PKGS=(plymouth-theme-cerberus)
 
 # ── CONFLICT REPLACE ----------------------------------------------------------
 PKGS_REPLACED=(
@@ -82,10 +101,15 @@ PKGS_REPLACED=(
 
 # ── AUR -------------------------------------------------------------──────────
 AUR_PKGS=(
-  ant-theme-git plymouth-theme-arch-logo-symbol
-  glide-browser-bin elecwhat-bin apidog-bin beekeeper-studio-bin pixterm-git
-  minio minio-client xdg-desktop-portal-termfilechooser-hunkyburrito-git
+  ant-theme-git glide-browser-bin elecwhat-bin beekeeper-studio-bin pixterm-git
+  minio-client xdg-desktop-portal-termfilechooser-hunkyburrito-git
 )
+AUR_PKGS_PC=(apidog-bin minio)
+
+# ── Apple Silicon (Cerberus image) ────────────────────────────────────────────
+APPLE_PLATFORM_COMPATIBLE="apple,arm-platform"
+APPLE_BASE_PKG="cerberus-system"
+APPLE_EXCLUDED_SYSTEM_FILES=(/etc/pacman.conf)
 
 # ── Hardware according detection ─---------------──────────────────────────────
 PKGS_GPU_AMD=(mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon)
@@ -119,12 +143,13 @@ MACHINE_FILES=(
   /etc/default/grub /etc/kernel/cmdline /etc/mkinitcpio.conf /etc/locale.gen
   /etc/nsswitch.conf /etc/plymouth/plymouthd.conf
   /etc/udev/rules.d/99-input.rules /etc/udev/rules.d/99-kbd-backlight.rules
-  /etc/modules-load.d/tuxedo.conf
+  /etc/modules-load.d/tuxedo.conf /etc/mkinitcpio.d/linux.preset /etc/cerberus/boot.conf
 )
 
 # ══ Runtime state ═════════════════════════════════════════════════════════════
 USER_NAME=$(id -un)
 CPU_VENDOR=""
+IS_APPLE_SILICON=0
 HAS_AMD=0 HAS_INTEL=0 IS_TUXEDO=0 NEEDS_SOF=0
 NVIDIA_DRIVER=""
 FIRST_INSTALL=0
@@ -251,6 +276,15 @@ is_machine_file() {
   return 1
 }
 
+is_platform_excluded_file() {
+  local file
+  ((IS_APPLE_SILICON)) || return 1
+  for file in "${APPLE_EXCLUDED_SYSTEM_FILES[@]}"; do
+    if [[ $1 == "$file" ]]; then return 0; fi
+  done
+  return 1
+}
+
 # Copies $SYSTEM_DIR/<path> → /<path> as root:root. With arguments, only those prefixes.
 sync_system_files() {
   [[ -d $SYSTEM_DIR ]] || return 0
@@ -268,6 +302,10 @@ sync_system_files() {
       warn "skipped $dest: it is per-machine, remove it from $SYSTEM_DIR"
       continue
     fi
+    if is_platform_excluded_file "$dest"; then
+      info "skipped $dest: the Apple Silicon image manages it"
+      continue
+    fi
     if sudo cmp -s "$src" "$dest"; then continue; fi
     if [[ -x $src ]]; then mode=755; else mode=644; fi
     backup_root_file "$dest"
@@ -277,9 +315,20 @@ sync_system_files() {
 }
 
 # ══ Hardware detection ════════════════════════════════════════════════════════
+detect_platform() {
+  if [[ -r $DEVICE_TREE_COMPATIBLE ]] &&
+    grep -qzxF "$APPLE_PLATFORM_COMPATIBLE" "$DEVICE_TREE_COMPATIBLE"; then
+    IS_APPLE_SILICON=1
+  fi
+}
+
 detect_hardware() {
   step "Detecting hardware"
   local dev id nvidia_id="" yn=(no yes)
+  if ((IS_APPLE_SILICON)); then
+    info "Platform:       $(gpu_summary), kernel, GPU and firmware come from $APPLE_BASE_PKG"
+    return 0
+  fi
   for dev in /sys/bus/pci/devices/*; do
     [[ $(< "$dev/class") == 0x03* ]] || continue
     case $(< "$dev/vendor") in
@@ -314,6 +363,10 @@ detect_hardware() {
 
 gpu_summary() {
   local parts=() out="" part
+  if ((IS_APPLE_SILICON)); then
+    echo "Apple Silicon"
+    return 0
+  fi
   if ((HAS_INTEL)); then parts+=(Intel); fi
   if ((HAS_AMD)); then parts+=(AMD); fi
   if [[ -n $NVIDIA_DRIVER ]]; then parts+=("NVIDIA ($NVIDIA_DRIVER)"); fi
@@ -330,9 +383,25 @@ kernel_headers() {
 }
 
 # ══ Steps ═════════════════════════════════════════════════════════════════════
+is_arch_based() {
+  local key value
+  [[ -r /etc/os-release ]] || return 1
+  while IFS='=' read -r key value; do
+    value=${value//\"/}
+    case $key in
+      ID) if [[ $value == arch || $value == archarm ]]; then return 0; fi ;;
+      ID_LIKE) if [[ " $value " == *" arch "* ]]; then return 0; fi ;;
+    esac
+  done < /etc/os-release
+  return 1
+}
+
 preflight() {
   ((EUID != 0)) || die "run as your user; the script calls sudo when it needs to"
-  [[ -f /etc/arch-release ]] || die "this script targets Arch Linux"
+  is_arch_based || die "this script targets Arch Linux and Arch Linux ARM"
+  if ((IS_APPLE_SILICON)) && ! pacman -Q "$APPLE_BASE_PKG" > /dev/null 2>&1; then
+    die "Apple Silicon without $APPLE_BASE_PKG: install the Cerberus image first"
+  fi
   have sudo || die "sudo is not installed"
   if [[ -e /var/lib/pacman/db.lck ]] &&
     ! pgrep -x 'pacman|yay|paru|makepkg|pamac-daemon|packagekitd' > /dev/null; then
@@ -343,7 +412,9 @@ preflight() {
 
 bootstrap() {
   step "Base system"
-  sudo pacman -Sy --needed --noconfirm archlinux-keyring
+  local keyrings=("${KEYRING_PKGS[@]}")
+  if ((IS_APPLE_SILICON)); then keyrings+=("${KEYRING_PKGS_APPLE[@]}"); fi
+  sudo pacman -Sy --needed --noconfirm "${keyrings[@]}"
   sudo pacman -Su --needed --noconfirm git base-devel
   hash -r
 }
@@ -379,6 +450,11 @@ multilib_enabled() { pacman-conf --repo-list | grep -x multilib > /dev/null; }
 configure_pacman() {
   step "pacman"
   sync_system_files /etc/pacman.conf /etc/pacman.d
+  if ((! IS_APPLE_SILICON)); then ensure_multilib; fi
+  sudo pacman -Syu --noconfirm
+}
+
+ensure_multilib() {
   if ! multilib_enabled; then
     if [[ -f $SYSTEM_DIR/etc/pacman.conf ]]; then
       die "[multilib] is disabled in $SYSTEM_DIR/etc/pacman.conf (steam and lib32 drivers need it)"
@@ -386,7 +462,6 @@ configure_pacman() {
     sudo sed -i '/^#\[multilib\]$/,/^#Include/ s/^#//' /etc/pacman.conf
     multilib_enabled || die "could not enable [multilib] in /etc/pacman.conf"
   fi
-  sudo pacman -Syu --noconfirm
 }
 
 install_yay() {
@@ -400,8 +475,9 @@ install_yay() {
 # Runs before the other packages: drivers already in place satisfy virtual dependencies
 # such as steam's lib32-vulkan-driver, instead of --noconfirm picking a random provider.
 install_hardware_packages() {
-  step "Hardware packages"
   local pkgs=() aur=() headers=() pkg
+  if ((IS_APPLE_SILICON)); then return 0; fi
+  step "Hardware packages"
 
   case $CPU_VENDOR in
     GenuineIntel) pkgs+=(intel-ucode) ;;
@@ -443,10 +519,35 @@ install_hardware_packages() {
 
 install_packages() {
   step "Packages"
+  local platform_pkgs=("${PKGS_PC[@]}") platform_aur=("${AUR_PKGS_PC[@]}")
+  if ((IS_APPLE_SILICON)); then platform_pkgs=("${PKGS_APPLE[@]}") platform_aur=(); fi
   remove_installed "${PKGS_REPLACED[@]}"
   pacman_install "${PKGS_BASE[@]}" "${PKGS_AUDIO[@]}" "${PKGS_FONTS[@]}" \
-    "${PKGS_DESKTOP[@]}" "${PKGS_APPS[@]}" "${PKGS_DEV[@]}"
-  yay_install_each "${AUR_PKGS[@]}"
+    "${PKGS_DESKTOP[@]}" "${PKGS_APPS[@]}" "${PKGS_DEV[@]}" "${platform_pkgs[@]}"
+  yay_install_each "${AUR_PKGS[@]}" "${platform_aur[@]}"
+}
+
+recipe_version() {
+  awk -F= '$1 == "pkgver" { version = $2 } $1 == "pkgrel" { release = $2 }
+    END { print version "-" release }' "$1"
+}
+
+install_local_packages() {
+  step "Local packages ($LOCAL_PACKAGES_DIR)"
+  local name recipe_dir build_dir installed_version
+  for name in "${LOCAL_PKGS[@]}"; do
+    recipe_dir=$LOCAL_PACKAGES_DIR/$name
+    if [[ ! -f $recipe_dir/PKGBUILD ]]; then
+      warn "recipe not found: $recipe_dir/PKGBUILD"
+      continue
+    fi
+    installed_version=$(pacman -Q "$name" 2> /dev/null | cut -d' ' -f2 || true)
+    if [[ $installed_version == "$(recipe_version "$recipe_dir/PKGBUILD")" ]]; then continue; fi
+    build_dir=$TMP_DIR/packages/$name
+    mkdir -p "$build_dir"
+    cp -a "$recipe_dir/." "$build_dir/"
+    (cd "$build_dir" && makepkg -si --noconfirm --needed)
+  done
 }
 
 deploy_system_files() {
@@ -570,6 +671,60 @@ configure_kernel_cmdline() {
   ((found)) || warn "unknown bootloader; add to the kernel command line: ${KERNEL_PARAMS[*]}"
 }
 
+with_uki_splash() {
+  local options=$1
+  if [[ $options =~ (^|[[:space:]])--splash[[:space:]]+[^[:space:]]+ ]]; then
+    options=${options/"${BASH_REMATCH[0]}"/"${BASH_REMATCH[1]}--splash $UKI_SPLASH"}
+  else
+    options+="${options:+ }--splash $UKI_SPLASH"
+  fi
+  printf '%s' "$options"
+}
+
+configure_uki_splash() {
+  local preset line kind uki_kinds=() lines=()
+  if [[ ! -f $UKI_SPLASH ]]; then
+    warn "UKI splash $UKI_SPLASH is not installed; keeping the current one"
+    return 0
+  fi
+  for preset in "$MKINITCPIO_PRESETS_DIR"/*.preset; do
+    mapfile -t uki_kinds < <(sed -nE 's/^([A-Za-z0-9_]+)_uki=.*/\1/p' "$preset")
+    ((${#uki_kinds[@]})) || continue
+    lines=()
+    while IFS= read -r line || [[ -n $line ]]; do
+      for kind in "${uki_kinds[@]}"; do
+        if [[ $line =~ ^${kind}_options=\"(.*)\"$ ]]; then
+          line="${kind}_options=\"$(with_uki_splash "${BASH_REMATCH[1]}")\""
+        fi
+      done
+      lines+=("$line")
+    done < "$preset"
+    for kind in "${uki_kinds[@]}"; do
+      if ! grep -q "^${kind}_options=" "$preset"; then
+        lines+=("${kind}_options=\"--splash $UKI_SPLASH\"")
+      fi
+    done
+    printf '%s\n' "${lines[@]}" | write_root_file "$preset"
+  done
+}
+
+configure_cerberus_bootargs() {
+  local current merged line lines=()
+  if [[ ! -f $CERBERUS_BOOT_CONFIG ]]; then
+    warn "$CERBERUS_BOOT_CONFIG not found; add to BOOTARGS by hand: ${KERNEL_PARAMS[*]}"
+    return 0
+  fi
+  current=$(sed -nE 's/^BOOTARGS="(.*)"$/\1/p' "$CERBERUS_BOOT_CONFIG")
+  merged=$(merge_params "$current" "${KERNEL_PARAMS[@]}")
+  if [[ $merged == "$current" ]]; then return 0; fi
+  while IFS= read -r line || [[ -n $line ]]; do
+    if [[ $line == BOOTARGS=* ]]; then line="BOOTARGS=\"$merged\""; fi
+    lines+=("$line")
+  done < "$CERBERUS_BOOT_CONFIG"
+  printf '%s\n' "${lines[@]}" | write_root_file "$CERBERUS_BOOT_CONFIG"
+  sudo cerberus-boot-update
+}
+
 configure_boot() {
   step "Boot (Plymouth, kernel command line, initramfs)"
   if [[ -d /usr/share/plymouth/themes/$PLYMOUTH_THEME ]]; then
@@ -577,6 +732,11 @@ configure_boot() {
   else
     warn "Plymouth theme '$PLYMOUTH_THEME' is not installed; keeping the default"
   fi
+  if ((IS_APPLE_SILICON)); then
+    configure_cerberus_bootargs
+    return 0
+  fi
+  configure_uki_splash
   # Hook right after systemd/udev (so before sd-encrypt/encrypt); the rest of HOOKS is untouched.
   if ! grep -Eq '^HOOKS=.*\bplymouth\b' /etc/mkinitcpio.conf; then
     sudo sed -Ei '/^HOOKS=/ s/\b(systemd|udev)\b/\1 plymouth/' /etc/mkinitcpio.conf
@@ -622,8 +782,25 @@ configure_dev() {
   fi
 }
 
+install_greeter_fonts() {
+  local font name
+  for font in "$USER_FONTS_DIR/$GREETER_FONT_PREFIX"*.ttf; do
+    name=${font##*/}
+    if sudo cmp -s "$font" "$GREETER_FONTS_DIR/$name"; then continue; fi
+    sudo install -D -m 644 -o root -g root "$font" "$GREETER_FONTS_DIR/$name"
+    info "$GREETER_FONTS_DIR/$name"
+  done
+  for font in "$GREETER_FONTS_DIR/$GREETER_FONT_PREFIX"*.ttf; do
+    if [[ ! -f $USER_FONTS_DIR/${font##*/} ]]; then remove_root_file "$font"; fi
+  done
+  for font in "$LEGACY_GREETER_FONTS_DIR/$GREETER_FONT_PREFIX"*.ttf; do
+    if ! pacman -Qo "$font" > /dev/null 2>&1; then remove_root_file "$font"; fi
+  done
+}
+
 configure_desktop() {
   step "Appearance and greeter"
+  install_greeter_fonts
   sudo fc-cache -s > /dev/null
   fc-cache > /dev/null
   if [[ -S ${XDG_RUNTIME_DIR:-/nonexistent}/bus ]]; then
@@ -710,6 +887,7 @@ main() {
   trap 'on_error $LINENO' ERR
   trap cleanup EXIT
   TMP_DIR=$(mktemp -d)
+  detect_platform
   preflight
 
   if [[ $mode == sync ]]; then
@@ -731,6 +909,7 @@ main() {
   install_yay
   install_hardware_packages
   install_packages
+  install_local_packages
   deploy_system_files
   configure_gpu
   configure_input

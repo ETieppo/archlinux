@@ -1,0 +1,15 @@
+pkgname=plymouth-theme-cerberus
+pkgver=1
+pkgrel=2
+pkgdesc="Cerberus boot splash with glowing eyes and a progress bar"
+arch=('any')
+license=('custom')
+depends=('plymouth')
+source=('cerberus.plymouth' 'cerberus.script' 'logo.png' 'eyes.png' 'bar-track.png' 'bar-fill.png' 'splash.bmp')
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+package() {
+	install -d "$pkgdir/usr/share/plymouth/themes/cerberus"
+	install -m644 cerberus.plymouth cerberus.script logo.png eyes.png bar-track.png bar-fill.png "$pkgdir/usr/share/plymouth/themes/cerberus/"
+	install -Dm644 splash.bmp "$pkgdir/usr/share/systemd/bootctl/splash-cerberus.bmp"
+}

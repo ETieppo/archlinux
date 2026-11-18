@@ -1,0 +1,121 @@
+logo_screen_ratio = 0.4;
+bar_gap = 48;
+pulse_period_seconds = 2.4;
+refresh_rate = 50;
+eye_opacity_floor = 0.3;
+progress_easing = 0.06;
+text_color_red = 0.85;
+text_color_green = 0.85;
+text_color_blue = 0.85;
+text_gap = 28;
+
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+screen_x = Window.GetX();
+screen_y = Window.GetY();
+
+logo_source = Image("logo.png");
+logo_scale = Math.Min(1, screen_width * logo_screen_ratio / logo_source.GetWidth());
+logo_width = Math.Int(logo_source.GetWidth() * logo_scale);
+logo_height = Math.Int(logo_source.GetHeight() * logo_scale);
+logo_x = screen_x + Math.Int((screen_width - logo_width) / 2);
+logo_y = screen_y + Math.Int((screen_height - logo_height) / 2) - bar_gap;
+
+logo_sprite = Sprite(logo_source.Scale(logo_width, logo_height));
+eyes_sprite = Sprite(Image("eyes.png").Scale(logo_width, logo_height));
+
+bar_track = Image("bar-track.png");
+bar_fill = Image("bar-fill.png");
+bar_width = bar_track.GetWidth();
+bar_height = bar_track.GetHeight();
+bar_x = screen_x + Math.Int((screen_width - bar_width) / 2);
+bar_y = logo_y + logo_height + bar_gap;
+bar_track_sprite = Sprite(bar_track);
+bar_fill_sprite = Sprite();
+
+message_sprite = Sprite();
+prompt_sprite = Sprite();
+bullets_sprite = Sprite();
+
+elapsed_seconds = 0;
+target_progress = 0;
+shown_progress = 0;
+shown_fill_width = -1;
+
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+logo_sprite.SetPosition(logo_x, logo_y, 1);
+eyes_sprite.SetPosition(logo_x, logo_y, 2);
+bar_track_sprite.SetPosition(bar_x, bar_y, 1);
+bar_fill_sprite.SetPosition(bar_x, bar_y, 2);
+
+if (Plymouth.GetMode() != "boot") {
+    bar_track_sprite.SetOpacity(0);
+    bar_fill_sprite.SetOpacity(0);
+}
+
+fun update_eyes() {
+    wave = 0.5 + 0.5 * Math.Sin(2 * Math.Pi * elapsed_seconds / pulse_period_seconds);
+    eyes_sprite.SetOpacity(eye_opacity_floor + (1 - eye_opacity_floor) * wave);
+}
+
+fun update_bar() {
+    global.shown_progress = shown_progress + (target_progress - shown_progress) * progress_easing;
+    fill_width = Math.Int(bar_width * shown_progress);
+    if (fill_width != shown_fill_width && fill_width >= bar_height) {
+        bar_fill_sprite.SetImage(bar_fill.Scale(fill_width, bar_height));
+        global.shown_fill_width = fill_width;
+    }
+}
+
+fun refresh_callback() {
+    global.elapsed_seconds = elapsed_seconds + 1 / refresh_rate;
+    update_eyes();
+    update_bar();
+}
+
+fun boot_progress_callback(duration, progress) {
+    global.target_progress = Math.Clamp(progress, 0, 1);
+}
+
+fun place_below_bar(sprite, image, line) {
+    sprite.SetImage(image);
+    sprite.SetOpacity(1);
+    sprite.SetPosition(screen_x + Math.Int((screen_width - image.GetWidth()) / 2), bar_y + bar_height + text_gap * line, 3);
+}
+
+fun message_callback(text) {
+    place_below_bar(message_sprite, Image.Text(text, text_color_red, text_color_green, text_color_blue), 1);
+}
+
+fun display_password_callback(prompt, bullet_count) {
+    bullets = "";
+    for (index = 0; index < bullet_count; index++)
+        bullets = bullets + "*";
+    place_below_bar(prompt_sprite, Image.Text(prompt, text_color_red, text_color_green, text_color_blue), 2);
+    place_below_bar(bullets_sprite, Image.Text(bullets + " ", text_color_red, text_color_green, text_color_blue), 3);
+}
+
+fun display_normal_callback() {
+    prompt_sprite.SetOpacity(0);
+    bullets_sprite.SetOpacity(0);
+}
+
+fun display_question_callback(prompt, entry) {
+    place_below_bar(prompt_sprite, Image.Text(prompt, text_color_red, text_color_green, text_color_blue), 2);
+    place_below_bar(bullets_sprite, Image.Text(entry + " ", text_color_red, text_color_green, text_color_blue), 3);
+}
+
+fun quit_callback() {
+    global.target_progress = 1;
+    global.shown_progress = 1;
+    update_bar();
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);
+Plymouth.SetBootProgressFunction(boot_progress_callback);
+Plymouth.SetMessageFunction(message_callback);
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+Plymouth.SetDisplayQuestionFunction(display_question_callback);
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetQuitFunction(quit_callback);

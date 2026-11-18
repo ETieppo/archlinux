@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Cerberus
+Description=Cerberus logo with glowing eyes and a boot progress bar
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/cerberus
+ScriptFile=/usr/share/plymouth/themes/cerberus/cerberus.script
