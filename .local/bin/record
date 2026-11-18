@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Record script
+# -p to record with pc audio
+# -m to record with mic audio
+# arg wold be out name, was tested with mkv
+
+readonly BLUETOOTH_CARD="bluez_card.38_D5_18_B8_1E_61"
+readonly BLUETOOTH_MIC="bluez_input.38:D5:18:B8:1E:61"
+readonly HIGH_QUALITY_PROFILE="a2dp-sink"
+readonly HEADSET_PROFILE="headset-head-unit"
+readonly PROFILE_SWITCH_DELAY_SECONDS=2
+readonly MIX_SINK_NAME="recording_mix"
+readonly LOOPBACK_LATENCY_MS=20
+readonly DISPLAY_OUTPUT="eDP-1"
+readonly FRAME_RATE=30
+readonly AUDIO_CODEC="libopus"
+readonly DEFAULT_OUTPUT_FILE="record.mkv"
+readonly -a VIDEO_ENCODER_ARGS=(
+  -c libx264
+  -x yuv444p
+  -F "fps=${FRAME_RATE},scale=out_color_matrix=bt709:out_range=tv,format=yuv444p"
+  -p crf=16
+  -p preset=medium
+  -p tune=animation
+  -p colorspace=bt709
+  -p color_primaries=bt709
+  -p color_trc=bt709
+  -p color_range=tv
+)
+
+record_mic=false
+record_system_audio=false
+profile_switched=false
+output_file=""
+system_audio_source=""
+loaded_modules=()
+audio_args=()
+
+usage() {
+  cat >&2 << EOF
+Usage: $(basename "$0") [-m] [-p] [output_file]
+
+Options:
+  -m    Record the Bluetooth headset microphone
+  -p    Record the system audio
+  -h    Show this help
+
+Without -m or -p, the video is recorded without audio.
+Default output file: ${DEFAULT_OUTPUT_FILE}
+EOF
+  exit "${1:-0}"
+}
+
+parse_args() {
+  local option
+  while getopts ":mph" option; do
+    case "$option" in
+      m) record_mic=true ;;
+      p) record_system_audio=true ;;
+      h) usage 0 ;;
+      *) usage 1 ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+  output_file="${1:-$DEFAULT_OUTPUT_FILE}"
+}
+
+load_module() {
+  local module_id
+  module_id="$(pactl load-module "$@")"
+  loaded_modules+=("$module_id")
+}
+
+cleanup() {
+  local index
+  for ((index = ${#loaded_modules[@]} - 1; index >= 0; index--)); do
+    pactl unload-module "${loaded_modules[index]}" || true
+  done
+
+  if [[ "$profile_switched" == true ]]; then
+    pactl set-card-profile "$BLUETOOTH_CARD" "$HIGH_QUALITY_PROFILE" || true
+    wpctl settings bluetooth.autoswitch-to-headset-profile true || true
+  fi
+}
+
+switch_to_headset_profile() {
+  profile_switched=true
+  wpctl settings bluetooth.autoswitch-to-headset-profile false
+  pactl set-card-profile "$BLUETOOTH_CARD" "$HEADSET_PROFILE"
+  sleep "$PROFILE_SWITCH_DELAY_SECONDS"
+}
+
+configure_audio() {
+  system_audio_source="$(pactl get-default-sink).monitor"
+
+  case "${record_mic}:${record_system_audio}" in
+    true:true)
+      load_module module-null-sink \
+        sink_name="$MIX_SINK_NAME" \
+        sink_properties=device.description="$MIX_SINK_NAME"
+      load_module module-loopback \
+        source="$BLUETOOTH_MIC" sink="$MIX_SINK_NAME" latency_msec="$LOOPBACK_LATENCY_MS"
+      load_module module-loopback \
+        source="$system_audio_source" sink="$MIX_SINK_NAME" latency_msec="$LOOPBACK_LATENCY_MS"
+      audio_args=(--audio="${MIX_SINK_NAME}.monitor" -C "$AUDIO_CODEC")
+      ;;
+    true:false)
+      audio_args=(--audio="$BLUETOOTH_MIC" -C "$AUDIO_CODEC")
+      ;;
+    false:true)
+      audio_args=(--audio="$system_audio_source" -C "$AUDIO_CODEC")
+      ;;
+  esac
+}
+
+start_recording() {
+  wf-recorder \
+    -o "$DISPLAY_OUTPUT" \
+    -r "$FRAME_RATE" \
+    "${VIDEO_ENCODER_ARGS[@]}" \
+    "${audio_args[@]}" \
+    -f "$output_file"
+}
+
+main() {
+  parse_args "$@"
+
+  trap cleanup EXIT
+  trap : INT
+
+  if [[ "$record_mic" == true ]]; then
+    switch_to_headset_profile
+  fi
+
+  configure_audio
+  start_recording
+}
+
+main "$@"
