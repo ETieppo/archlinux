@@ -8,55 +8,46 @@ Singleton {
 
     property string _last: ""
     property real since: Store.kbd.since ?? 0
-    property int bright: Store.kbd.bright ?? 4
-    property string mode: Store.kbd.mode ?? "sky"
-    property color fixedColor: Store.kbd.color ?? "#91ffff"
+    property int bright: Store.kbd.bright ?? autoBright
 
-    readonly property int max: 4
+    readonly property int max: 100
     readonly property int hold: 3600000
-    readonly property string warmFrom: "21:00"
+    readonly property var presetPercents: [0, 5, 25, 50, 100]
+    readonly property int step: Math.max(5, Math.ceil(max / Math.max(1, Hardware.keyboardLightMax)))
+    readonly property int autoBright: Hardware.isMac ? 5 : max
+    readonly property bool followsScreen: !Hardware.isMac
+    readonly property bool restingAtNight: bright === 0 && night > 0
+    readonly property string levelText: bright === 0 ? "off" : `${bright}%`
     readonly property string dir: Hardware.keyboardLightPath
     readonly property bool present: dir !== ""
     readonly property bool supportsColor: Hardware.keyboardLightRgb
     readonly property color skyColor: Qt.hsva(Sky.hue / 360, 1, 1, 1)
+    readonly property color color: supportsColor ? skyColor : Theme.fg
     readonly property bool sleeping: Sky.sleeping
     readonly property real night: Sky.night
-    readonly property var presets: [
-        { c: "#ff2020", led: [255, 3, 3] },
-        { c: "#ff6a00", led: [255, 37, 0] },
-        { c: "#ffd000", led: [255, 163, 0] },
-        { c: "#ffff90", led: [255, 255, 255] },
-        { c: "#a0ff40", led: [74, 255, 255] },
-        { c: "#30ff40", led: [6, 255, 12] },
-        { c: "#20c0b0", led: [3, 20, 255] },
-        { c: "#91ffff", led: [9, 10, 255] },
-        { c: "#2050ff", led: [0, 0, 255] },
-        { c: "#8a2be2", led: [12, 0, 255] },
-        { c: "#ff60b0", led: [66, 5, 196] },
-        { c: "#ff2060", led: [255, 1, 76] },
-        { c: "#ffffff", led: [25, 10, 255] }
-    ]
-    readonly property var preset: presets.find(p => Qt.colorEqual(p.c, fixedColor)) ?? null
-    readonly property color color: !supportsColor ? Theme.fg : mode === "sky" ? skyColor : mix(fixedColor, Qt.rgba(1, 0, 0, 1), evening)
-    readonly property real evening: {
-        const a = Sky.frac(warmFrom), s = Sky.span(a, Sky.progress), len = Sky.span(a, Sky.bedtime);
-        return night > 0 ? 1 : s < len ? s / len : 0;
+    readonly property var presets: {
+        const byLevel = new Map();
+        for (const percent of presetPercents)
+            byLevel.set(hardwareLevel(percent, 1), percent);
+        return [...byLevel.values()];
     }
     readonly property real dim: {
+        if (!followsScreen)
+            return 1;
         const ref = Store.nightSaved * Sys.brightnessMax / 100;
         return ref > 0 && Sys.brightnessRaw > 0 ? Math.max(0.04, Math.min(1, Sys.brightnessRaw / ref)) : 1;
     }
 
-    function mix(a, b, t) {
-        return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1);
+    function hardwareLevel(percent, scale) {
+        return percent === 0 ? 0 : Math.max(1, Math.round(Hardware.keyboardLightMax * percent / max * scale));
     }
 
-    function hardwareLevel() {
-        return bright === 0 ? 0 : Math.max(1, Math.round(Hardware.keyboardLightMax * bright / max * dim));
+    function rgb() {
+        return [skyColor.r, skyColor.g, skyColor.b].map(v => Math.round(Math.pow(v, 2.2) * 255 * dim)).join(" ");
     }
 
     function writeCommand() {
-        return supportsColor ? `echo "${rgb()}" > ${dir}/multi_intensity; echo ${bright} > ${dir}/brightness` : `echo ${hardwareLevel()} > ${dir}/brightness`;
+        return supportsColor ? `echo "${rgb()}" > ${dir}/multi_intensity; echo ${hardwareLevel(bright, 1)} > ${dir}/brightness` : `echo ${hardwareLevel(bright, dim)} > ${dir}/brightness`;
     }
 
     function apply() {
@@ -66,40 +57,26 @@ Singleton {
         Quickshell.execDetached(["sh", "-c", _last]);
         Store.kbd = {
             bright,
-            mode,
-            since,
-            color: fixedColor.toString()
+            since
         };
-    }
-
-    function rgb() {
-        const lin = c => [c.r, c.g, c.b].map(v => Math.pow(v, 2.2) * 255);
-        const v = mode === "sky" ? lin(skyColor) : (preset?.led ?? lin(fixedColor)).map((x, i) => x + ((i ? 0 : 255) - x) * evening);
-        return v.map(x => Math.round(x * dim)).join(" ");
     }
 
     function setBright(v) {
         bright = Math.max(0, Math.min(max, v));
-        touch();
+        if (restingAtNight || bright === autoBright)
+            clearManual();
+        else
+            touch();
         apply();
     }
 
-    function setColor(c) {
-        mode = "fixed";
-        fixedColor = c;
-        if (bright === 0)
-            bright = max;
-        touch();
-        apply();
+    function stepBright(direction) {
+        setBright(Math.round((bright + direction * step) / step) * step);
     }
 
-    function followSky() {
-        mode = "sky";
-        if (bright === 0)
-            bright = max;
+    function clearManual() {
         since = 0;
         revert.stop();
-        apply();
     }
 
     function touch() {
@@ -109,9 +86,8 @@ Singleton {
     }
 
     function restore() {
-        mode = "sky";
-        bright = max;
-        since = 0;
+        bright = autoBright;
+        clearManual();
         apply();
     }
 
@@ -120,9 +96,17 @@ Singleton {
         if (since > 0 && left > 0) {
             revert.interval = left;
             revert.restart();
-        } else if (mode !== "sky" || bright !== max) {
+        } else if (restingAtNight) {
+            clearManual();
+            apply();
+        } else {
             restore();
         }
+    }
+
+    onNightChanged: {
+        if (night <= 0 && bright === 0 && since === 0)
+            restore();
     }
 
     Timer {
@@ -133,8 +117,9 @@ Singleton {
     Connections {
         target: Ui
         function onAutoAll() {
-            revert.stop();
-            if (root.since > 0 || root.mode !== "sky" || root.bright !== root.max)
+            if (root.restingAtNight)
+                root.clearManual();
+            else
                 root.restore();
         }
     }
@@ -161,13 +146,10 @@ Singleton {
     IpcHandler {
         target: "kbd"
         function up(): void {
-            root.setBright(root.bright + 1);
+            root.stepBright(1);
         }
         function down(): void {
-            root.setBright(root.bright - 1);
-        }
-        function sky(): void {
-            root.followSky();
+            root.stepBright(-1);
         }
     }
 }

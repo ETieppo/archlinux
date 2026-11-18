@@ -20,6 +20,15 @@ Singleton {
     { name: "Board", device: /^acpitz$/, label: /.*/, reduce: "first", cpu: false }
   ]
 
+  readonly property string macHostName: "cerberus"
+  readonly property string hostName: hostFile.text().trim()
+  readonly property bool isMac: hostName === macHostName
+  readonly property int defaultNotchPhysicalWidth: 309
+  readonly property int defaultNotchPhysicalHeight: 56
+  readonly property int notchPhysicalWidth: isMac ? (Store.notchPhysicalWidth > 0 ? Store.notchPhysicalWidth : defaultNotchPhysicalWidth) : 0
+  readonly property int notchStripPhysicalHeight: isMac ? 64 : 0
+  readonly property int notchPhysicalHeight: isMac ? (Store.notchPhysicalHeight > 0 ? Math.min(Store.notchPhysicalHeight, notchStripPhysicalHeight) : defaultNotchPhysicalHeight) : 0
+
   property bool ready: false
   property string backlightPath: ""
   readonly property string backlightName: backlightPath.split("/").pop()
@@ -53,6 +62,12 @@ Singleton {
     }
     root.temperatureSourceProps = root.temperatureRuleProps.reduce((sources, rule) => sources.concat(root.groupSensors(sensors, rule).map(source => Object.assign(source, { cpu: rule.cpu }))), []);
     root.ready = true;
+  }
+
+  FileView {
+    id: hostFile
+    path: "/etc/hostname"
+    blockLoading: true
   }
 
   Process {

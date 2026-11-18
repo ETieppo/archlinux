@@ -10,6 +10,10 @@ Singleton {
     property alias kbd: adapter.kbd
     property alias nightSaved: adapter.nightSaved
     property alias runs: adapter.runs
+    property alias launcherStyle: adapter.launcherStyle
+    property alias topBarStyle: adapter.topBarStyle
+    property alias notchPhysicalWidth: adapter.notchPhysicalWidth
+    property alias notchPhysicalHeight: adapter.notchPhysicalHeight
 
     function bump(id) {
         const u = Object.assign({}, usage);
@@ -29,12 +33,13 @@ Singleton {
         JsonAdapter {
             id: adapter
             property var usage: ({})
-            property var kbd: ({
-                    bright: 4,
-                    mode: "sky"
-                })
+            property var kbd: ({})
             property int nightSaved: -1
             property var runs: ({})
+            property string launcherStyle: ""
+            property string topBarStyle: ""
+            property int notchPhysicalWidth: 0
+            property int notchPhysicalHeight: 0
         }
     }
 }

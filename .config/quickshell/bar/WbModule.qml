@@ -16,6 +16,7 @@ Item {
     property color color: Theme.wbFg
     property string tip: ""
     property bool marginsOn: true
+    property bool glow: false
     readonly property alias hovered: ma.containsMouse
 
     signal clicked(var mouse)
@@ -45,6 +46,11 @@ Item {
         font.family: Theme.font
         font.pixelSize: 16
         font.bold: root.bold
+        layer.enabled: root.glow
+        layer.effect: NeonGlow {
+            glowColor: root.color
+            strength: 0.6
+        }
     }
 
     MouseArea {

@@ -37,6 +37,15 @@ Canvas {
             ctx.arcTo(w - f, 0, w - f, r, r);
             ctx.lineTo(w - f, h - f);
             ctx.arc(w, h - f, f, Math.PI, Math.PI / 2, true);
+        } else if (edge === "top") {
+            ctx.moveTo(0, 0);
+            ctx.arc(0, f, f, -Math.PI / 2, 0, false);
+            ctx.lineTo(f, h - r);
+            ctx.arcTo(f, h, f + r, h, r);
+            ctx.lineTo(w - f - r, h);
+            ctx.arcTo(w - f, h, w - f, h - r, r);
+            ctx.lineTo(w - f, f);
+            ctx.arc(w, f, f, Math.PI, Math.PI * 1.5, false);
         } else {
             ctx.moveTo(w, 0);
             ctx.arc(w - f, 0, f, 0, Math.PI / 2, false);

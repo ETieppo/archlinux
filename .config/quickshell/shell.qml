@@ -9,16 +9,22 @@ import qs.sidebar
 import qs.notifications
 import qs.overlays
 import qs.lock
+import qs.enums
 
 ShellRoot {
     Variants {
-        model: Quickshell.screens
+        model: Ui.topBarStyle === TopBarStyleEnum.classic ? Quickshell.screens : []
         TopBar {}
     }
 
     Variants {
         model: Quickshell.screens
         SideBar {}
+    }
+
+    Variants {
+        model: Ui.topBarStyle === TopBarStyleEnum.notch ? Quickshell.screens : []
+        NotchBar {}
     }
 
     Variants {
@@ -33,7 +39,31 @@ ShellRoot {
         RegionSelector {}
     }
 
-    Launcher {}
+    LazyLoader {
+        active: Ui.launcherStyle === LauncherStyleEnum.lava
+        Launcher {}
+    }
+
+    LazyLoader {
+        active: Ui.launcherStyle === LauncherStyleEnum.edge
+        EdgeLauncher {}
+    }
+
+    LazyLoader {
+        active: Ui.launcherStyle === LauncherStyleEnum.orbit
+        OrbitLauncher {}
+    }
+
+    LazyLoader {
+        active: Ui.launcherStyle === LauncherStyleEnum.drum
+        DrumLauncher {}
+    }
+
+    LazyLoader {
+        active: Ui.launcherStyle === LauncherStyleEnum.reticle
+        ReticleLauncher {}
+    }
+
     Osd {}
     PolkitDialog {}
     Lock {}

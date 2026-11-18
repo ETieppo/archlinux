@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
+import qs.enums
 
 Singleton {
     id: root
@@ -10,6 +11,11 @@ Singleton {
     property bool nightLight: false
     property real nightOffAt: 0
     property real screenManualAt: 0
+    readonly property bool nightLightSupported: !Hardware.isMac
+    readonly property string defaultLauncherStyle: Hardware.isMac ? LauncherStyleEnum.orbit : LauncherStyleEnum.lava
+    readonly property string launcherStyle: LauncherStyleEnum.all.includes(Store.launcherStyle) ? Store.launcherStyle : defaultLauncherStyle
+    readonly property string defaultTopBarStyle: Hardware.isMac ? TopBarStyleEnum.notch : TopBarStyleEnum.classic
+    readonly property string topBarStyle: TopBarStyleEnum.all.includes(Store.topBarStyle) ? Store.topBarStyle : defaultTopBarStyle
     property bool locked: false
     property bool launcherOpen: false
     property string wallpaper: Quickshell.env("HOME") + "/.local/share/wallpapers/alone.png"
@@ -56,6 +62,58 @@ Singleton {
         function toggle(): void {
             root.launcherOpen = !root.launcherOpen;
         }
+        function style(name: string): void {
+            root.useLauncherStyle(name);
+        }
+        function nextStyle(): void {
+            root.cycleLauncherStyle();
+        }
+    }
+
+    function useLauncherStyle(style) {
+        if (LauncherStyleEnum.all.includes(style))
+            Store.launcherStyle = style;
+    }
+
+    function cycleLauncherStyle() {
+        const styles = LauncherStyleEnum.all;
+        useLauncherStyle(styles[(styles.indexOf(launcherStyle) + 1) % styles.length]);
+    }
+
+    function useTopBarStyle(style) {
+        if (TopBarStyleEnum.all.includes(style))
+            Store.topBarStyle = style;
+    }
+
+    function cycleTopBarStyle() {
+        const styles = TopBarStyleEnum.all;
+        useTopBarStyle(styles[(styles.indexOf(topBarStyle) + 1) % styles.length]);
+    }
+
+    IpcHandler {
+        target: "topbar"
+        function style(name: string): void {
+            root.useTopBarStyle(name);
+        }
+        function notchWidth(physicalPixels: int): string {
+            Store.notchPhysicalWidth = Math.max(0, physicalPixels);
+            return `notch width: ${Hardware.notchPhysicalWidth}px`;
+        }
+        function adjustNotch(deltaPixels: int): string {
+            Store.notchPhysicalWidth = Math.max(40, Hardware.notchPhysicalWidth + deltaPixels);
+            return `notch width: ${Hardware.notchPhysicalWidth}px`;
+        }
+        function notchHeight(physicalPixels: int): string {
+            Store.notchPhysicalHeight = Math.max(0, physicalPixels);
+            return `notch height: ${Hardware.notchPhysicalHeight}px`;
+        }
+        function adjustNotchHeight(deltaPixels: int): string {
+            Store.notchPhysicalHeight = Math.max(8, Hardware.notchPhysicalHeight + deltaPixels);
+            return `notch height: ${Hardware.notchPhysicalHeight}px`;
+        }
+        function nextStyle(): void {
+            root.cycleTopBarStyle();
+        }
     }
 
     function toggleNightLight() {
@@ -74,7 +132,7 @@ Singleton {
     signal autoAll()
 
     function restoreAuto() {
-        if (!nightLight)
+        if (!nightLight && nightLightSupported)
             nightRevert.triggered();
         nightRevert.stop();
         autoAll();
@@ -161,7 +219,7 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 root.nightLight = this.text.trim() === "on";
-                if (!root.nightLight) {
+                if (!root.nightLight && root.nightLightSupported) {
                     root.nightOffAt = Date.now();
                     nightRevert.restart();
                 }

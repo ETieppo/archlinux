@@ -174,6 +174,7 @@ PanelWindow {
     }
     SideButton {
       icon: "󱩌"
+      visible: Ui.nightLightSupported
       tip: Ui.nightLight ? "Night light: on" : "Night light: off"
       active: Ui.nightLight
       iconColor: Theme.accent

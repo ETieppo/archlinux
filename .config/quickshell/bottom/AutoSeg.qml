@@ -8,9 +8,9 @@ Seg {
     readonly property int hold: 3600000
     readonly property var items: [
         { name: "Screen brightness", at: Ui.screenManualAt },
-        { name: "Night light", at: Ui.nightOffAt },
-        { name: "Keyboard light", at: KbdLight.since }
-    ]
+        { name: "Night light", at: Ui.nightOffAt, shown: Ui.nightLightSupported },
+        { name: "Keyboard light", at: KbdLight.since, shown: KbdLight.present }
+    ].filter(i => i.shown ?? true)
     readonly property var manual: items.filter(i => i.at > 0)
     property real now: Date.now()
     readonly property real remaining: manual.length ? Math.max(0, Math.min(...manual.map(i => i.at + hold)) - now) : 0
