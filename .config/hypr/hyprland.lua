@@ -47,8 +47,8 @@ hl.config({
 		col = {
 			-- active_border = { colors = { "#91ffff", 0x33CC, "#91ffff" }, angle = 45 },
 			-- inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
-      active_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
-			   inactive_border={colors={"#00000000"}},
+			active_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
+			inactive_border = { colors = { "#00000000" } },
 		},
 		resize_on_border = true,
 		allow_tearing = false,
@@ -100,7 +100,7 @@ hl.config({
 
 	input = {
 		kb_layout = "us,ru",
-    kb_variant = "altgr-intl,phonetic",
+		kb_variant = "altgr-intl,phonetic",
 		kb_model = "",
 		follow_mouse = 1,
 		sensitivity = 0,
