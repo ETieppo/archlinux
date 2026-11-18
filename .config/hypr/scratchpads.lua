@@ -37,8 +37,10 @@ local function Place(scratchpad, w)
 	local monitor = hl.get_active_monitor()
 	local gaps = hl.get_config("general.gaps_out")
 	local reserved = monitor.reserved
-	local height = math.floor(monitor.height - reserved.top - reserved.bottom - gaps.top - gaps.bottom)
-	local x = math.floor(monitor.x + monitor.width - reserved.right - gaps.right - scratchpad.width)
+	local logicalWidth = monitor.width / monitor.scale
+	local logicalHeight = monitor.height / monitor.scale
+	local height = math.floor(logicalHeight - reserved.top - reserved.bottom - gaps.top - gaps.bottom)
+	local x = math.floor(monitor.x + logicalWidth - reserved.right - gaps.right - scratchpad.width)
 	local y = math.floor(monitor.y + reserved.top + gaps.top)
 	hl.dispatch(hl.dsp.window.resize({ x = scratchpad.width, y = height, window = WindowSelector(w) }))
 	hl.dispatch(hl.dsp.window.move({ x = x, y = y, window = WindowSelector(w) }))

@@ -7,3 +7,6 @@
 
 [url "git@github.com:etieppo/"]
 	insteadOf = tieppo:
+
+[url "https://github.com/AsahiLinux/"]
+  insteadOf = asahi:

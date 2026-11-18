@@ -12,7 +12,7 @@ sudo cp "$src/shell.qml" "$root/Theme.qml" "$root/Sky.qml" "$dst/"
 sudo cp "$root/components/Label.qml" "$root/components/Icon.qml" "$root/components/SkyBar.qml" "$dst/components/"
 sudo cp "$root/lock/LockSurface.qml" "$dst/lock/"
 [ -n "$wallpaper" ] && [ -f "$wallpaper" ] && sudo cp "$wallpaper" "$dst/wallpaper"
-sudo cp "$src/hyprland.lua" /etc/greetd/hyprland.lua
+{ cat "$src/hyprland.lua"; grep '^hl\.monitor(' "$HOME/.config/hypr/hyprland.lua" || true; } | sudo tee /etc/greetd/hyprland.lua >/dev/null
 sudo chmod -R a+rX "$dst" /etc/greetd/hyprland.lua
 
 sudo tee /etc/greetd/config.toml >/dev/null <<EOF
