@@ -1,3 +1,6 @@
+local browserClassPatterns = { "^firefox", "^glide%-glide$", "^claude$", "^chrome%-" }
+local terminalClassPatterns = { "^com%.mitchellh%.ghostty$", "^kitty$" }
+
 function SendShortcut(params)
 	local timer = function()
 		local args = params
@@ -12,13 +15,23 @@ function SendShortcut(params)
 	end
 end
 
-local browserClassPatterns = { "^firefox", "^glide%-glide$", "^claude$", "^chrome%-" }
-
 function IsBrowser(w)
 	if w == nil then
 		return nil
 	end
 	for _, pattern in ipairs(browserClassPatterns) do
+		if w.class:find(pattern) ~= nil then
+			return true
+		end
+	end
+	return false
+end
+
+function IsTerminal(w)
+	if w == nil then
+		return false
+	end
+	for _, pattern in ipairs(terminalClassPatterns) do
 		if w.class:find(pattern) ~= nil then
 			return true
 		end

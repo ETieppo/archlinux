@@ -132,8 +132,7 @@ hl.bind("ALT + C", function()
 end)
 
 hl.bind("ALT + N", function()
-	local w = hl.get_active_window()
-	if w ~= nil and w.class == "com.mitchellh.ghostty" then
+	if IsTerminal(hl.get_active_window()) then
 		hl.dispatch(SendShortcut({ mods = "ALT", key = "N", window = "activewindow" }))
 	else
 		hl.dispatch(SendShortcut({ mods = "CTRL", key = "N", window = "activewindow" }))
