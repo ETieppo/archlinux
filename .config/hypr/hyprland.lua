@@ -3,6 +3,7 @@ require("keymaps")
 require("scratchpads").Setup("ALT")
 require("utils")
 
+local WINDOW_MARGIN = 6
 local macPanelProfile = os.getenv("HOME") .. "/.config/hypr/icc/macbook-air-m4-color-lcd.icc"
 
 hl.env("GTK_USE_PORTAL", "1")
@@ -42,7 +43,12 @@ hl.config({
 	master = { new_status = "master" },
 	general = {
 		gaps_in = 2,
-		gaps_out = 2,
+		gaps_out = {
+			top = 0,
+			left = WINDOW_MARGIN,
+			right = WINDOW_MARGIN,
+			bottom = WINDOW_MARGIN,
+		},
 		border_size = 1,
 		col = {
 			-- active_border = { colors = { "#91ffff", 0x33CC, "#91ffff" }, angle = 45 },
