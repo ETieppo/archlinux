@@ -1,5 +1,6 @@
 pragma Singleton
 import QtQuick
+import QtMultimedia
 import Quickshell
 import Quickshell.Services.UPower
 
@@ -25,5 +26,18 @@ Singleton {
     else if (charging && pct === 100 && lastLevel < 100)
       Notifs.send("Battery", "Battery Full - 100%", "", "normal", "battery-100-charged");
     lastLevel = pct;
+  }
+
+  SoundEffect {
+    id: chargerConnectedSound
+    source: `file://${Quickshell.env("HOME")}/.local/share/sounds/charging.wav`
+  }
+
+  Connections {
+    target: UPower
+    function onOnBatteryChanged() {
+      if (!UPower.onBattery)
+        chargerConnectedSound.play();
+    }
   }
 }
