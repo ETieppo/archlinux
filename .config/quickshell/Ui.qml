@@ -11,7 +11,8 @@ Singleton {
     property bool nightLight: false
     property real nightOffAt: 0
     property real screenManualAt: 0
-    readonly property bool nightLightSupported: !Hardware.isMac
+    readonly property string nightLightProcessName: Hardware.isMac ? "nightlight" : "gammastep"
+    readonly property string nightLightCommand: Hardware.isMac ? `${Quickshell.env("HOME")}/.local/bin/nightlight` : "gammastep"
     readonly property string defaultLauncherStyle: Hardware.isMac ? LauncherStyleEnum.orbit : LauncherStyleEnum.lava
     readonly property string launcherStyle: LauncherStyleEnum.all.includes(Store.launcherStyle) ? Store.launcherStyle : defaultLauncherStyle
     readonly property string defaultTopBarStyle: Hardware.isMac ? TopBarStyleEnum.notch : TopBarStyleEnum.classic
@@ -118,9 +119,9 @@ Singleton {
 
     function toggleNightLight() {
         if (nightLight)
-            Quickshell.execDetached(["pkill", "-x", "gammastep"]);
+            Quickshell.execDetached(["pkill", "-x", nightLightProcessName]);
         else
-            Quickshell.execDetached(["gammastep"]);
+            startNightLight();
         nightLight = !nightLight;
         nightOffAt = nightLight ? 0 : Date.now();
         if (nightLight)
@@ -129,10 +130,14 @@ Singleton {
             nightRevert.restart();
     }
 
+    function startNightLight() {
+        Quickshell.execDetached(["sh", "-c", 'pkill -x "$1"; while pgrep -x "$1" >/dev/null; do sleep 0.1; done; exec "$2"', "_", nightLightProcessName, nightLightCommand]);
+    }
+
     signal autoAll()
 
     function restoreAuto() {
-        if (!nightLight && nightLightSupported)
+        if (!nightLight)
             nightRevert.triggered();
         nightRevert.stop();
         autoAll();
@@ -143,7 +148,7 @@ Singleton {
         interval: 3600000
         onTriggered: {
             if (!root.nightLight) {
-                Quickshell.execDetached(["sh", "-c", "pkill -x gammastep; gammastep"]);
+                root.startNightLight();
                 root.nightLight = true;
             }
             root.nightOffAt = 0;
@@ -215,11 +220,11 @@ Singleton {
 
     Process {
         running: true
-        command: ["sh", "-c", "pgrep -x gammastep >/dev/null && echo on || echo off"]
+        command: ["sh", "-c", 'pgrep -x "$1" >/dev/null && echo on || echo off', "_", root.nightLightProcessName]
         stdout: StdioCollector {
             onStreamFinished: {
                 root.nightLight = this.text.trim() === "on";
-                if (!root.nightLight && root.nightLightSupported) {
+                if (!root.nightLight) {
                     root.nightOffAt = Date.now();
                     nightRevert.restart();
                 }

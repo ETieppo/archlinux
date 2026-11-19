@@ -1,0 +1,187 @@
+#!/bin/bash
+set -u
+
+readonly CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/gammastep/config.ini"
+readonly SHADER_DIR="${XDG_RUNTIME_DIR:-/tmp}/nightlight"
+readonly SHADER_OPTION="decoration:screen_shader"
+readonly EMPTY_SHADER="[[EMPTY]]"
+readonly NEUTRAL_TEMPERATURE=6500
+readonly TEMPERATURE_STEP=50
+readonly TICK_SECONDS=30
+readonly FADE_STEPS=20
+readonly FADE_STEP_SECONDS=0.05
+
+day_temperature=6500
+night_temperature=4500
+dusk_start_minutes=1080
+dusk_end_minutes=1080
+dawn_start_minutes=360
+dawn_end_minutes=360
+fade_enabled=1
+current_temperature=$NEUTRAL_TEMPERATURE
+sleep_pid=""
+
+config_value() {
+	sed -n "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*\([^;[:space:]]*\).*/\1/p" "$CONFIG_FILE" | tail -n 1
+}
+
+clock_to_minutes() {
+	local hours=${1%%:*}
+	local minutes=${1##*:}
+	echo $((10#$hours * 60 + 10#$minutes))
+}
+
+read_config() {
+	local value range_start range_end
+
+	[[ -r $CONFIG_FILE ]] || return 0
+
+	value=$(config_value temp-day)
+	[[ $value =~ ^[0-9]+$ ]] && day_temperature=$value
+	value=$(config_value temp-night)
+	[[ $value =~ ^[0-9]+$ ]] && night_temperature=$value
+	value=$(config_value fade)
+	[[ $value =~ ^[01]$ ]] && fade_enabled=$value
+
+	value=$(config_value dusk-time)
+	if [[ $value =~ ^([0-9]{1,2}:[0-9]{2})(-([0-9]{1,2}:[0-9]{2}))?$ ]]; then
+		range_start=${BASH_REMATCH[1]}
+		range_end=${BASH_REMATCH[3]:-$range_start}
+		dusk_start_minutes=$(clock_to_minutes "$range_start")
+		dusk_end_minutes=$(clock_to_minutes "$range_end")
+	fi
+
+	value=$(config_value dawn-time)
+	if [[ $value =~ ^([0-9]{1,2}:[0-9]{2})(-([0-9]{1,2}:[0-9]{2}))?$ ]]; then
+		range_start=${BASH_REMATCH[1]}
+		range_end=${BASH_REMATCH[3]:-$range_start}
+		dawn_start_minutes=$(clock_to_minutes "$range_start")
+		dawn_end_minutes=$(clock_to_minutes "$range_end")
+	fi
+}
+
+scheduled_temperature() {
+	awk -v now="$(clock_to_minutes "$(date +%H:%M)")" \
+		-v day="$day_temperature" -v night="$night_temperature" \
+		-v dusk_start="$dusk_start_minutes" -v dusk_end="$dusk_end_minutes" \
+		-v dawn_start="$dawn_start_minutes" -v dawn_end="$dawn_end_minutes" \
+		-v step="$TEMPERATURE_STEP" '
+		function blend(from, to, start, end) {
+			return end > start ? from + (to - from) * (now - start) / (end - start) : to
+		}
+		BEGIN {
+			if (now >= dawn_end && now < dusk_start) temperature = day
+			else if (now >= dusk_start && now < dusk_end) temperature = blend(day, night, dusk_start, dusk_end)
+			else if (now >= dawn_start && now < dawn_end) temperature = blend(night, day, dawn_start, dawn_end)
+			else temperature = night
+			printf "%d\n", int(temperature / step + 0.5) * step
+		}'
+}
+
+temperature_to_rgb() {
+	awk -v temperature="$1" -v neutral="$NEUTRAL_TEMPERATURE" '
+		function clamp(value) { return value < 0 ? 0 : (value > 1 ? 1 : value) }
+		function channels(kelvin, rgb,    scaled) {
+			scaled = kelvin / 100
+			if (scaled <= 66) {
+				rgb["r"] = 1
+				rgb["g"] = clamp((99.4708025861 * log(scaled) - 161.1195681661) / 255)
+				rgb["b"] = scaled <= 19 ? 0 : clamp((138.5177312231 * log(scaled - 10) - 305.0447927307) / 255)
+			} else {
+				rgb["r"] = clamp(329.698727446 * (scaled - 60) ^ -0.1332047592 / 255)
+				rgb["g"] = clamp(288.1221695283 * (scaled - 60) ^ -0.0755148492 / 255)
+				rgb["b"] = 1
+			}
+		}
+		BEGIN {
+			channels(temperature, target)
+			channels(neutral, reference)
+			printf "%.4f, %.4f, %.4f\n", clamp(target["r"] / reference["r"]), clamp(target["g"] / reference["g"]), clamp(target["b"] / reference["b"])
+		}'
+}
+
+shader_path_for() {
+	echo "$SHADER_DIR/$1.frag"
+}
+
+write_shader() {
+	local shader_path
+	shader_path=$(shader_path_for "$1")
+	[[ -f $shader_path ]] && return 0
+	cat >"$shader_path" <<EOF
+#version 300 es
+precision highp float;
+in vec2 v_texcoord;
+uniform sampler2D tex;
+out vec4 fragColor;
+
+void main() {
+    vec4 pixelColor = texture(tex, v_texcoord);
+    pixelColor.rgb *= vec3($(temperature_to_rgb "$1"));
+    fragColor = pixelColor;
+}
+EOF
+}
+
+active_shader() {
+	hyprctl getoption "$SHADER_OPTION" 2>/dev/null | sed -n 's/^str: //p'
+}
+
+apply_temperature() {
+	local desired_shader="$EMPTY_SHADER"
+
+	if ((${1} != NEUTRAL_TEMPERATURE)); then
+		write_shader "$1"
+		desired_shader=$(shader_path_for "$1")
+	fi
+
+	if [[ $(active_shader) != "$desired_shader" ]]; then
+		hyprctl eval "hl.config({ decoration = { screen_shader = \"$desired_shader\" } })" >/dev/null
+	fi
+
+	find "$SHADER_DIR" -maxdepth 1 -name '*.frag' ! -path "$desired_shader" -delete
+	current_temperature=$1
+}
+
+fade_to() {
+	local start_temperature=$current_temperature
+	local step_index temperature
+
+	if ((fade_enabled == 1 && start_temperature != $1)); then
+		for ((step_index = 1; step_index < FADE_STEPS; step_index++)); do
+			temperature=$((start_temperature + ($1 - start_temperature) * step_index / FADE_STEPS))
+			temperature=$(((temperature + TEMPERATURE_STEP / 2) / TEMPERATURE_STEP * TEMPERATURE_STEP))
+			apply_temperature "$temperature"
+			sleep "$FADE_STEP_SECONDS"
+		done
+	fi
+
+	apply_temperature "$1"
+}
+
+shutdown() {
+	trap - TERM INT HUP
+	[[ -n $sleep_pid ]] && kill "$sleep_pid" 2>/dev/null
+	fade_to "$NEUTRAL_TEMPERATURE"
+	rm -rf "$SHADER_DIR"
+	exit 0
+}
+
+main() {
+	mkdir -p "$SHADER_DIR"
+	trap shutdown TERM INT HUP
+
+	read_config
+	fade_to "$(scheduled_temperature)"
+
+	while true; do
+		sleep "$TICK_SECONDS" &
+		sleep_pid=$!
+		wait "$sleep_pid"
+		sleep_pid=""
+		read_config
+		apply_temperature "$(scheduled_temperature)"
+	done
+}
+
+main "$@"
