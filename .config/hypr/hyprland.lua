@@ -42,7 +42,7 @@ hl.config({
 	master = { new_status = "master" },
 	general = {
 		gaps_in = 2,
-		gaps_out = 6,
+		gaps_out = 2,
 		border_size = 1,
 		col = {
 			-- active_border = { colors = { "#91ffff", 0x33CC, "#91ffff" }, angle = 45 },
