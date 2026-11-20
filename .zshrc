@@ -1,5 +1,8 @@
 export EDITOR="nvim"
 export SUDO_EDITOR=nvim
+
+sec=/usr/share/seclists/
+
 alias snvim="sudo XDG_CONFIG_HOME=$HOME/.config nvim"
 
 # OH-MY-ZSH
