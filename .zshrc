@@ -1,3 +1,4 @@
+DISABLE_MAGIC_FUNCTIONS=true
 source "$HOME/.envs.sh"
 export EDITOR="nvim"
 export SUDO_EDITOR=nvim
