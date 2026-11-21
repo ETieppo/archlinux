@@ -56,3 +56,7 @@ fi
 
 # RUBY
 export PATH="$PATH:$HOME/.rbenv/shims"
+
+# GO
+export GO_PATH="$HOME/.go"
+export PATH="$PATH:$GO_PATH/bin"
