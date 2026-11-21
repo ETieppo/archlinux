@@ -1,16 +1,18 @@
+source "$HOME/.envs.sh"
 export EDITOR="nvim"
 export SUDO_EDITOR=nvim
-
-sec=/usr/share/seclists/
+export PATH="$HOME/.local/bin:$PATH"
 
 alias snvim="sudo XDG_CONFIG_HOME=$HOME/.config nvim"
+sec=/usr/share/seclists/
 
 # OH-MY-ZSH
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="bira"
-plugins=(git)
+plugins=(git vi-mode)
 source $ZSH/oh-my-zsh.sh
 source ~/.config/zsh/theme-colors.zsh
+
 [[ $TERM == xterm-kitty ]] && alias ssh="kitten ssh"
 
 # NVM | NODE | BUN | TS | ANGULAR | NESTJS
@@ -20,7 +22,6 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-export PATH="$HOME/.local/bin:$PATH"
 
 source ~/.config/quickshell/scripts/term-hook.zsh
 export PATH="/usr/lib/qt6/bin:$PATH"
@@ -32,12 +33,16 @@ export PATH="$PATH:$HOME/.cargo/bin"
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
 
 # DOT NDOT
-function sdot { git --git-dir=$HOME/.archlinux --work-tree=$HOME "$@" }
-function ndot { git -C $HOME/.config/nvim "$@" }
+function sdot { git --git-dir=$HOME/.archlinux --work-tree=$HOME "$@"; }
+function ndot { git -C $HOME/.config/nvim "$@"; }
 function _sdot {
-  if (( CURRENT > 2 )) && [[ $words[2] == add ]]; then _files; else GIT_DIR=$HOME/.archlinux GIT_WORK_TREE=$HOME service=git _git; fi
+  if ((CURRENT > 2)) && [[ $words[2] == add ]]; then _files; else GIT_DIR=$HOME/.archlinux GIT_WORK_TREE=$HOME service=git _git; fi
 }
-function _ndot { builtin cd -q $HOME/.config/nvim || return; service=git _git; builtin cd -q $OLDPWD }
+function _ndot {
+  builtin cd -q $HOME/.config/nvim || return
+  service=git _git
+  builtin cd -q $OLDPWD
+}
 
 compdef _sdot sdot
 compdef _ndot ndot
@@ -48,3 +53,6 @@ if [ -d "$ZVM_INSTALL" ]; then
   export PATH="$PATH:$HOME/.zvm/bin"
   export PATH="$PATH:$ZVM_INSTALL"
 fi
+
+# RUBY
+export PATH="$PATH:$HOME/.rbenv/shims"
