@@ -260,6 +260,7 @@ Singleton {
     if (!Hardware.backlightPath)
       return;
     const v = Math.max(1, Math.min(100, Math.round(pct)));
+    fading = false;
     brightness = v;
     Quickshell.execDetached(["brightnessctl", "-q", "-d", Hardware.backlightName, "set", v + "%"]);
   }
@@ -319,6 +320,7 @@ Singleton {
   function stepBrightness(delta) {
     if (!Hardware.backlightPath)
       return;
+    fading = false;
     brightnessStep.command = ["brightnessctl", "-q", "-d", Hardware.backlightName, "-e4", "-n2", "set", delta];
     brightnessStep.running = true;
   }
