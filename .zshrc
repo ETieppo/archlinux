@@ -16,7 +16,7 @@ plugins=(git vi-mode)
 source $ZSH/oh-my-zsh.sh
 source ~/.config/zsh/theme-colors.zsh
 
-[[ $TERM == xterm-kitty ]] && alias ssh="kitten ssh"
+# [[ $TERM == xterm-kitty ]] && alias ssh="kitten ssh"
 
 # NVM | NODE | BUN | TS | ANGULAR | NESTJS
 [ -s "/home/tieppo/.bun/_bun" ] && source "/home/tieppo/.bun/_bun"
