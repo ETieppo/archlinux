@@ -8,6 +8,9 @@ alias snvim="sudo XDG_CONFIG_HOME=$HOME/.config nvim"
 sec=/usr/share/seclists/
 
 # OH-MY-ZSH
+VI_MODE_SET_CURSOR=true
+VI_MODE_RESET_PROMPT_ON_MODE_CHANGE=true
+KEYTIMEOUT=1
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="bira"
 plugins=(git vi-mode)
@@ -59,5 +62,5 @@ fi
 export PATH="$PATH:$HOME/.rbenv/shims"
 
 # GO
-export GO_PATH="$HOME/.go"
-export PATH="$PATH:$GO_PATH/bin"
+export GOPATH="$HOME/.go"
+export PATH="$PATH:$GOPATH/bin"
