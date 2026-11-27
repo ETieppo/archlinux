@@ -69,21 +69,16 @@ hl.config {
   master = { new_status = 'master' },
   general = {
     gaps_in = 2,
-    gaps_out = {
-      top = 0,
-      left = WINDOW_MARGIN,
-      right = WINDOW_MARGIN,
-      bottom = WINDOW_MARGIN,
-    },
+    gaps_out = 4,
     border_size = 1,
     col = {
-      -- active_border = { colors = { "#91ffff", 0x33CC, "#91ffff" }, angle = 45 },
-      -- inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
-      active_border = {
-        colors = { '#EAFBFF66', 0x33CC, '#EAFBFF66' },
-        angle = 45,
-      },
-      inactive_border = { colors = { '#00000000' } },
+      active_border = { colors = { "#91ffff", 0x33CC, "#91ffff" }, angle = 45 },
+      inactive_border = { colors = { "#EAFBFF66", 0x33CC, "#EAFBFF66" }, angle = 45 },
+      -- active_border = {
+      --   colors = { '#EAFBFF66', 0x33CC, '#EAFBFF66' },
+      --   angle = 45,
+      -- },
+      -- inactive_border = { colors = { '#00000000' } },
     },
     resize_on_border = true,
     allow_tearing = false,
@@ -91,8 +86,8 @@ hl.config {
   },
 
   decoration = {
-    rounding = 45,
-    rounding_power = 1,
+    -- rounding = 45,
+    -- rounding_power = 1,
     active_opacity = 1,
     inactive_opacity = 1,
 
