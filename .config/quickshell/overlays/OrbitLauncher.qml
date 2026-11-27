@@ -263,7 +263,7 @@ PanelWindow {
                     height: width
                     radius: width / 2
                     color: Qt.alpha(Theme.accent, 0.1 * planet.nearness)
-                    border.width: 1
+                    border.width: 0
                     border.color: Qt.alpha(Theme.accent, 0.8 * planet.nearness)
                     layer.enabled: planet.nearness > 0.5
                     layer.effect: NeonGlow {
